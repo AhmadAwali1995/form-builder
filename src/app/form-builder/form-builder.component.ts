@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
 
 export interface itemProp {
@@ -14,6 +14,7 @@ export interface itemProp {
   imports: [],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class FormBuilderComponent implements AfterViewInit {
   grid!: GridStack;
@@ -36,13 +37,9 @@ export class FormBuilderComponent implements AfterViewInit {
       el: HTMLElement;
     } | null = null;
 
-    this.grid.on('dragstart', (event, el) => {
-      
-    });
+    this.grid.on('dragstart', (event, el) => {});
 
-    this.grid.on('dragstop', (event, el) => {
-      
-    });
+    this.grid.on('dragstop', (event, el) => {});
   }
 
   addItem1() {
@@ -112,7 +109,7 @@ export class FormBuilderComponent implements AfterViewInit {
     fieldItem1.setAttribute('gs-x', '0');
     fieldItem1.setAttribute('gs-y', '0');
     fieldItem1.setAttribute('gs-w', '18');
-    fieldItem1.setAttribute('gs-h', '4');
+    fieldItem1.setAttribute('gs-h', '1');
 
     const fieldContentItem1 = document.createElement('div');
     fieldContentItem1.classList.add('inner-grid-stack-item-content');
@@ -219,7 +216,7 @@ export class FormBuilderComponent implements AfterViewInit {
     </div>`;
     fieldItem1.setAttribute('gs-x', '0');
     fieldItem1.setAttribute('gs-y', '0');
-    fieldItem1.setAttribute('gs-w', '18');
+    fieldItem1.setAttribute('gs-w', '17');
     fieldItem1.setAttribute('gs-h', '4');
 
     const fieldContentItem1 = document.createElement('div');
