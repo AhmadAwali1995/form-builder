@@ -32,7 +32,8 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/gridstack/dist/gridstack.min.css"
             ],
             "scripts": []
           },
@@ -91,12 +92,16 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/gridstack/dist/gridstack.min.css"
             ],
             "scripts": []
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "cce0939e-c2dd-4c4e-b1b2-1104ebf9a861"
   }
 }
