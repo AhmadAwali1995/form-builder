@@ -19,6 +19,7 @@ export class FormBuilderComponent implements AfterViewInit {
   grid!: GridStack;
   itemCount = 0;
   columnNum = 36;
+  innerGrids: Map<string, GridStack> = new Map();
 
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
@@ -26,6 +27,7 @@ export class FormBuilderComponent implements AfterViewInit {
       row: 36,
       cellHeight: 100,
       margin: 5,
+      float: false,
     });
 
     let lastWidgetState: {
@@ -36,13 +38,9 @@ export class FormBuilderComponent implements AfterViewInit {
       el: HTMLElement;
     } | null = null;
 
-    this.grid.on('dragstart', (event, el) => {
-      
-    });
+    this.grid.on('dragstart', (event, el) => {});
 
-    this.grid.on('dragstop', (event, el) => {
-      
-    });
+    this.grid.on('dragstop', (event, el) => {});
   }
 
   addItem1() {
@@ -165,6 +163,8 @@ export class FormBuilderComponent implements AfterViewInit {
       return Math.max(max, y);
     }, 0);
 
+    const innerGridId = `inner-grid-${this.itemCount}`;
+
     // Outer section item
     const item = document.createElement('div');
     item.classList.add('grid-stack-item');
@@ -172,6 +172,7 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-y', lastY.toString());
     item.setAttribute('gs-w', w.toString());
     item.setAttribute('gs-h', h.toString());
+    item.setAttribute('id', innerGridId);
 
     // Outer content wrapper
     const content = document.createElement('div');
@@ -202,50 +203,20 @@ export class FormBuilderComponent implements AfterViewInit {
     const sectionHeaderContentItem1 = document.createElement('div');
     sectionHeaderContentItem1.classList.add('inner-grid-stack-item-content');
     sectionHeaderContentItem1.innerHTML = `<label>Section Header</label>`;
+    sectionHeaderContentItem1.addEventListener('click', () => {
+      this.addTextFieldToSection(innerGridId);
+    });
     sectionHeader.appendChild(sectionHeaderContentItem1);
     innerGrid.appendChild(sectionHeader);
 
-    // field item1 (textbox)
-    const fieldItem1 = document.createElement('div');
-    fieldItem1.classList.add('grid-stack-item');
-    fieldItem1.classList.add('field-grid-stack-item');
-    fieldItem1.innerHTML = `
-        <div class="field-options-box">
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    </div>`;
-    fieldItem1.setAttribute('gs-x', '0');
-    fieldItem1.setAttribute('gs-y', '0');
-    fieldItem1.setAttribute('gs-w', '18');
-    fieldItem1.setAttribute('gs-h', '4');
-
-    const fieldContentItem1 = document.createElement('div');
-    fieldContentItem1.classList.add('inner-grid-stack-item-content');
-    fieldContentItem1.innerHTML =
-      `
-    <label class="inner-grid-label" for="text1">Text Field` +
-      this.itemCount +
-      `</label>
-    <input id="text` +
-      this.itemCount +
-      `" type="text" placeholder="Text Field" class="inner-grid-textbox">
-    `;
-
-    fieldItem1.appendChild(fieldContentItem1);
-    innerGrid.appendChild(fieldItem1);
     content.appendChild(innerGrid);
-    item.appendChild(content);
+    item.appendChild(content); //for header
 
-    // Add the section to the main grid
-    //this.grid.addWidget(item);
     this.grid.el.appendChild(item);
     this.grid.makeWidget(item);
 
     // Initialize the nested grid
-    GridStack.init(
+    const grid = GridStack.init(
       {
         column: this.columnNum,
         cellHeight: 20,
@@ -259,5 +230,41 @@ export class FormBuilderComponent implements AfterViewInit {
       },
       innerGrid
     );
+    this.innerGrids.set(innerGridId, grid);
+  }
+
+  addTextFieldToSection(innerGridId: string): void {
+    const innerGrid = this.innerGrids.get(innerGridId);
+    if (!innerGrid) {
+      console.warn('No grid found for ID:', innerGridId);
+      return;
+    }
+
+    // field item1 (textbox)
+    const fieldItem = document.createElement('div');
+    fieldItem.classList.add('grid-stack-item', 'field-grid-stack-item');
+    fieldItem.innerHTML = `
+  <div class="field-options-box">
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+  </div>`;
+    fieldItem.setAttribute('gs-x', '0');
+    fieldItem.setAttribute('gs-y', '0');
+    fieldItem.setAttribute('gs-w', '18');
+    fieldItem.setAttribute('gs-h', '4');
+
+    const fieldContentItem1 = document.createElement('div');
+    fieldContentItem1.classList.add('inner-grid-stack-item-content');
+    fieldContentItem1.innerHTML = `
+  <label class="inner-grid-label" for="text1">Text Field ${this.itemCount}</label>
+  <input id="text${this.itemCount}" type="text" placeholder="Text Field" class="inner-grid-textbox">
+  `;
+
+    fieldItem.appendChild(fieldContentItem1);
+    innerGrid.el.appendChild(fieldItem);
+    innerGrid.makeWidget(fieldItem);
   }
 }
