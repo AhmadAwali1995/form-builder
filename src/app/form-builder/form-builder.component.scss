@@ -39,12 +39,39 @@
       flex-direction: column;
       gap: 10px;
 
+      .search-box {
+        display: flex;
+        align-items: center;
+        background-color: #f7f7f7;
+        border: 2px solid rgba(128, 128, 128, 0.2);
+        border-radius: 7px;
+        padding: 6px;
+        transition: border-color 0.3s;
+
+        &:focus-within {
+          border-color: rgba(128, 128, 128, 0.5);
+        }
+
+        input {
+          flex: 1;
+          border: none;
+          outline: none;
+          font-size: 14px;
+          padding: 3px 6px;
+          background: transparent;
+
+          &::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+          }
+        }
+      }
+
       .field-btn {
         display: flex;
         gap: 10px;
         width: 100%;
-        padding: 11px;
-        border: 2px solid rgba(128, 128, 128, 0.25);
+        padding: 8px 10px;
+        border: 2px solid rgba(128, 128, 128, 0.2);
         border-radius: 7px;
         background-color: white;
         cursor: pointer;
@@ -52,7 +79,6 @@
         p {
           margin: 0;
           font-size: 14px;
-
         }
       }
     }
@@ -96,14 +122,11 @@
       .grid-stack-item-content {
         background: #ffffff;
         border-radius: 10px;
-        // text-align: center;
-        // line-height: 100px;
-        // font-size: 1.2rem;
+        padding: 10px;
         font-weight: bold;
         border: 1px solid #e0e0e0;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         transition: box-shadow 0.2s ease;
-        // overflow: visible !important;
       }
     }
 
@@ -113,16 +136,12 @@
 
     .field-grid-stack-fixed-header {
       position: relative;
-      padding: 10px !important;
       background-color: transparent;
       border: none;
       box-shadow: none;
     }
 
     .field-grid-stack-item {
-      // position: relative;
-      padding: 10px !important;
-      // max-width: 620px;
       background-color: transparent;
       border: none;
       box-shadow: none;
@@ -140,7 +159,7 @@
       }
 
       .inner-grid-stack-item-content {
-        position: relative;
+        padding: 10px;
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -161,8 +180,8 @@
 
       .field-options-box {
         position: absolute;
-        right: 0;
-        bottom: 0;
+        right: 10px;
+        bottom: -20px;
         z-index: 100;
         width: fit-content;
         display: none;

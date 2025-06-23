@@ -217,7 +217,7 @@ export class FormBuilderComponent implements AfterViewInit {
     fieldItem1.setAttribute('gs-x', '0');
     fieldItem1.setAttribute('gs-y', '0');
     fieldItem1.setAttribute('gs-w', '17');
-    fieldItem1.setAttribute('gs-h', '4');
+    fieldItem1.setAttribute('gs-h', '5');
 
     const fieldContentItem1 = document.createElement('div');
     fieldContentItem1.classList.add('inner-grid-stack-item-content');
