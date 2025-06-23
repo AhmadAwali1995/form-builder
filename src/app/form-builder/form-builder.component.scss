@@ -1,17 +1,10 @@
 .form-builder-container {
   display: grid;
-  grid-template-columns: 250px 1fr 300px;
+  grid-template-columns: 280px 1fr 280px;
   height: 100vh;
 
   .left-panel,
-  .canvas,
   .right-panel {
-    // border: 1px solid #ccc;
-    padding: 10px;
-    overflow: auto;
-  }
-
-  .left-panel {
     background: #fff;
     scrollbar-width: thin;
     scrollbar-color: #aaadaf #f1f1f1;
@@ -33,7 +26,16 @@
     &::-webkit-scrollbar-thumb:hover {
       background: #aaadaf;
     }
+  }
 
+  .left-panel,
+  .canvas,
+  .right-panel {
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  .left-panel {
     .buttons-group {
       display: flex;
       flex-direction: column;
@@ -89,10 +91,6 @@
     }
   }
 
-  .right-panel {
-    background: #fff;
-  }
-
   .canvas {
     background: #f2f2f4;
     position: relative;
@@ -146,13 +144,17 @@
       border: none;
       box-shadow: none;
 
+      &.active,
       &:hover {
-        background-color: #ffffff;
-        border-radius: 10px;
+        background-color: #fbf4f1;
+        border-radius: 0px;
         border: 1px solid #e0e0e0;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         z-index: 1000;
 
+      }
+
+      &.active {
         .field-options-box {
           display: flex;
         }
@@ -165,6 +167,7 @@
         gap: 10px;
 
         .inner-grid-label {
+          width: fit-content;
           font-size: 18px;
           font-weight: 500;
         }
@@ -192,6 +195,70 @@
         border: 1px solid #e0e0e0;
         font-size: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+    }
+  }
+
+  .right-panel {
+    overflow-x: hidden;
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-bottom: 30px;
+
+      .settings-items-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .setting-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+          font-weight: 500;
+          font-size: 14px;
+          color: #333;
+        }
+
+        input[type="number"] {
+          appearance: textfield;
+          -webkit-appearance: none;
+          -moz-appearance: textfield;
+          width: 100%;
+        }
+
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+          padding: 8px 10px;
+          font-size: 14px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+          background-color: #fff;
+          transition: border-color 0.3s ease;
+
+          &:focus {
+            border-color: #007bff;
+            outline: none;
+          }
+        }
+
+        input[type="checkbox"] {
+          width: 16px;
+          height: 16px;
+          cursor: pointer;
+        }
       }
     }
   }

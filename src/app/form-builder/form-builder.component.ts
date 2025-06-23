@@ -37,7 +37,13 @@ export class FormBuilderComponent implements AfterViewInit {
       el: HTMLElement;
     } | null = null;
 
-    this.grid.on('dragstart', (event, el) => {});
+    this.grid.on('dragstart', (event, el) => {
+      //remove active class from all items on drag start
+      const activeItems = this.grid.el.querySelectorAll(
+        '.field-grid-stack-item.active'
+      );
+      activeItems.forEach((item) => item.classList.remove('active'));
+    });
 
     this.grid.on('dragstop', (event, el) => {});
   }
@@ -206,21 +212,53 @@ export class FormBuilderComponent implements AfterViewInit {
     const fieldItem1 = document.createElement('div');
     fieldItem1.classList.add('grid-stack-item');
     fieldItem1.classList.add('field-grid-stack-item');
-    fieldItem1.innerHTML = `
-        <div class="field-options-box">
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    </div>`;
     fieldItem1.setAttribute('gs-x', '0');
     fieldItem1.setAttribute('gs-y', '0');
     fieldItem1.setAttribute('gs-w', '17');
     fieldItem1.setAttribute('gs-h', '5');
 
+    // Add click event listener to toggle active class
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Check if click is inside any .field-grid-stack-item
+      const isInsideFieldItem = target.closest('.field-grid-stack-item');
+
+      if (!isInsideFieldItem) {
+        // Remove active class from all field-grid-stack-item elements
+        const activeItems = this.grid.el.querySelectorAll(
+          '.field-grid-stack-item.active'
+        );
+        activeItems.forEach((item) => item.classList.remove('active'));
+      }
+    });
+
+    fieldItem1.addEventListener('click', () => {
+      // Remove 'active' from any previously active items
+      const allItems = this.grid.el.querySelectorAll(
+        '.field-grid-stack-item.active'
+      );
+      allItems.forEach((item) => item.classList.remove('active'));
+
+      // Add 'active' to the clicked item
+      fieldItem1.classList.add('active');
+    });
+
+    // Options box for the field item
+    // This box will be shown when the field item is clicked
+    const fieldBoxOptions = document.createElement('div');
+    fieldBoxOptions.classList.add('field-options-box');
+    fieldBoxOptions.classList.add('data-gs-cancel');
+    fieldBoxOptions.innerHTML = `
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>`;
+
     const fieldContentItem1 = document.createElement('div');
     fieldContentItem1.classList.add('inner-grid-stack-item-content');
+    fieldContentItem1.classList.add('data-gs-handle');
     fieldContentItem1.innerHTML =
       `
     <label class="inner-grid-label" for="text1">Text Field` +
@@ -232,6 +270,7 @@ export class FormBuilderComponent implements AfterViewInit {
     `;
 
     fieldItem1.appendChild(fieldContentItem1);
+    fieldItem1.appendChild(fieldBoxOptions);
     innerGrid.appendChild(fieldItem1);
     content.appendChild(innerGrid);
     item.appendChild(content);
@@ -257,4 +296,7 @@ export class FormBuilderComponent implements AfterViewInit {
       innerGrid
     );
   }
+
+  saveForm() {}
+  resetForm() {}
 }

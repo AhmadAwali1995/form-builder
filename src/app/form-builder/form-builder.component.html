@@ -83,6 +83,85 @@
   <div class="right-panel">
     <!-- Field Settings -->
     <h4>Field Settings</h4>
-    <!-- Show selected field settings here -->
+    <div class="setting-group">
+      <div class="setting-item">
+        <label for="field-name">Field Name</label>
+        <input type="text" id="field-name" placeholder="Enter field name" />
+      </div>
+      <div class="settings-items-row">
+        <div class="setting-item">
+          <label for="field-type">Field Type</label>
+          <select id="field-type">
+            <option value="text">Text</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="image">Image Upload</option>
+            <option value="attachment">Attachment</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <label for="field-size">Field Size</label>
+          <select id="field-size">
+            <option value="small">Small</option>
+            <option value="normal">Normal</option>
+            <option value="large">Large</option>
+            <option value="extra">Extra Large</option>
+          </select>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label for="description">Description</label>
+        <input
+          type="text"
+          id="description"
+          placeholder="Add a brief description"
+        />
+      </div>
+      <div class="setting-item">
+        <label for="placeholder_text">Placeholder Text</label>
+        <input
+          type="text"
+          id="placeholder_text"
+          placeholder="Enter Placeholder Text"
+        />
+      </div>
+
+      <div class="setting-item">
+        <label for="default_value">Default Value</label>
+        <input
+          type="text"
+          id="default_value"
+          placeholder="Enter Default Value"
+        />
+      </div>
+
+      <div class="setting-item">
+        <label for="min_range">Min & Max Range Characters</label>
+        <div class="settings-items-row">
+          <input type="number" id="min_range" placeholder="Min" />
+          -
+          <input type="number" id="max_range" placeholder="Max" />
+        </div>
+      </div>
+
+      <div class="setting-item">
+        <label for="help_text">Help Text</label>
+        <input type="text" id="help_text" placeholder="Enter Help Text" />
+      </div>
+
+      <div class="setting-item">
+        <label for="custom_css">Custom CSS Class</label>
+        <input
+          type="text"
+          id="custom_css"
+          placeholder="Enter Custom CSS Class"
+        />
+      </div>
+
+      <div class="setting-item">
+        <label for="required-field">Required Field</label>
+        <input type="checkbox" id="required-field" />
+      </div>
+    </div>
   </div>
 </div>
