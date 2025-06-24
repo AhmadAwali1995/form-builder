@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
 
 export interface itemProp {
@@ -14,6 +14,7 @@ export interface itemProp {
   imports: [],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class FormBuilderComponent implements AfterViewInit {
   grid!: GridStack;
@@ -38,7 +39,27 @@ export class FormBuilderComponent implements AfterViewInit {
       el: HTMLElement;
     } | null = null;
 
-    this.grid.on('dragstart', (event, el) => {});
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Check if click is inside any .field-grid-stack-item
+      const isInsideFieldItem = target.closest('.field-grid-stack-item');
+
+      if (!isInsideFieldItem) {
+        // Remove active class from all field-grid-stack-item elements
+        const activeItems = this.grid.el.querySelectorAll(
+          '.field-grid-stack-item.active'
+        );
+        activeItems.forEach((item) => item.classList.remove('active'));
+      }
+    });
+
+    this.grid.on('dragstart', (event, el) => {
+      const activeItems = this.grid.el.querySelectorAll(
+        '.field-grid-stack-item.active'
+      );
+      activeItems.forEach((item) => item.classList.remove('active'));
+    });
 
     this.grid.on('dragstop', (event, el) => {});
   }
@@ -99,18 +120,33 @@ export class FormBuilderComponent implements AfterViewInit {
     const fieldItem1 = document.createElement('div');
     fieldItem1.classList.add('grid-stack-item');
     fieldItem1.classList.add('field-grid-stack-item');
-    fieldItem1.innerHTML = `
-        <div class="field-options-box">
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    </div>`;
     fieldItem1.setAttribute('gs-x', '0');
     fieldItem1.setAttribute('gs-y', '0');
-    fieldItem1.setAttribute('gs-w', '18');
-    fieldItem1.setAttribute('gs-h', '4');
+    fieldItem1.setAttribute('gs-w', '17.8');
+    fieldItem1.setAttribute('gs-h', '5');
+
+    fieldItem1.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent document click handler from firing
+
+      // Remove active from others
+      const allItems = this.grid.el.querySelectorAll(
+        '.field-grid-stack-item.active'
+      );
+      allItems.forEach((item) => item.classList.remove('active'));
+
+      // Add active to this
+      fieldItem1.classList.add('active');
+    });
+
+    const fieldOptionsBox = document.createElement('div');
+    fieldOptionsBox.classList.add('field-options-box');
+    fieldOptionsBox.classList.add('data-gs-cancel');
+    fieldOptionsBox.innerHTML = `
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>
+    <p>X</p>`;
 
     const fieldContentItem1 = document.createElement('div');
     fieldContentItem1.classList.add('inner-grid-stack-item-content');
@@ -121,9 +157,9 @@ export class FormBuilderComponent implements AfterViewInit {
       `</label>
     <input id="text` +
       this.itemCount +
-      `" type="text" placeholder="Text Field" class="inner-grid-textbox">
+      `" type="text" placeholder="Text Field" class="inner-grid-textbox" >
     `;
-
+    fieldContentItem1.appendChild(fieldOptionsBox);
     fieldItem1.appendChild(fieldContentItem1);
     innerGrid.appendChild(fieldItem1);
     content.appendChild(innerGrid);
@@ -240,29 +276,71 @@ export class FormBuilderComponent implements AfterViewInit {
       return;
     }
 
+    const fieldWidth = 17.8; // GridStack columns per field (adjust to fit your layout)
+    const columnCount = this.columnNum;
+    const existingNodes = innerGrid.engine.nodes || [];
+
+    let nextX = 0;
+    let nextY = 1; // Start after header row (row 0 is header)
+
+    if (existingNodes.length > 0) {
+      const last = existingNodes[existingNodes.length - 1];
+
+      const lastX = last.x ?? 0;
+      const lastY = last.y ?? 0;
+      const lastW = last.w ?? fieldWidth;
+
+      // Calculate next position
+      if (lastX + lastW + fieldWidth > columnCount) {
+        // Wrap to next row
+        nextX = 0;
+        nextY = lastY + (last.h ?? 1);
+      } else {
+        nextX = lastX + lastW;
+        nextY = lastY;
+      }
+    }
+
     // field item1 (textbox)
     const fieldItem = document.createElement('div');
     fieldItem.classList.add('grid-stack-item', 'field-grid-stack-item');
-    fieldItem.innerHTML = `
-  <div class="field-options-box">
+    fieldItem.setAttribute('gs-x', nextX.toString());
+    fieldItem.setAttribute('gs-y', nextY.toString());
+    fieldItem.setAttribute('gs-w', fieldWidth.toString());
+    fieldItem.setAttribute('gs-h', '5');
+
+    // Add click event to field item This will make it active when clicked
+    fieldItem.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent document click handler from firing
+
+      // Remove active from others
+      const allItems = this.grid.el.querySelectorAll(
+        '.field-grid-stack-item.active'
+      );
+      allItems.forEach((item) => item.classList.remove('active'));
+
+      // Add active to this
+      fieldItem.classList.add('active');
+    });
+
+    // Create options box for field item, this will be shown when the field item is clicked
+    const fieldOptionsBox = document.createElement('div');
+    fieldOptionsBox.classList.add('field-options-box');
+    fieldOptionsBox.classList.add('data-gs-cancel');
+    fieldOptionsBox.innerHTML = `
     <p>X</p>
     <p>X</p>
     <p>X</p>
     <p>X</p>
-    <p>X</p>
-  </div>`;
-    fieldItem.setAttribute('gs-x', '0');
-    fieldItem.setAttribute('gs-y', '0');
-    fieldItem.setAttribute('gs-w', '18');
-    fieldItem.setAttribute('gs-h', '4');
+    <p>X</p>`;
 
     const fieldContentItem1 = document.createElement('div');
     fieldContentItem1.classList.add('inner-grid-stack-item-content');
     fieldContentItem1.innerHTML = `
   <label class="inner-grid-label" for="text1">Text Field ${this.itemCount}</label>
-  <input id="text${this.itemCount}" type="text" placeholder="Text Field" class="inner-grid-textbox">
+  <input id="text${this.itemCount}" type="text" placeholder="Text Field" class="inner-grid-textbox" >
   `;
-
+    fieldContentItem1.appendChild(fieldOptionsBox);
     fieldItem.appendChild(fieldContentItem1);
     innerGrid.el.appendChild(fieldItem);
     innerGrid.makeWidget(fieldItem);
