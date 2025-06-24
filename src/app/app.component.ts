@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { FormBuilderComponent } from "./form-builder/form-builder.component";
+import { FormPreviewComponent } from "./form-preview/form-preview.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FormBuilderComponent],
+  imports: [FormBuilderComponent, FormPreviewComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
