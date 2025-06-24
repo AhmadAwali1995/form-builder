@@ -1,84 +1,91 @@
 /* You can add global styles to this file, and also import other style files */
-.grid-stack-item {
-    background-color: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.2s ease;
-    overflow: visible !important;
+
+* {
+    font-family: Arial,
+        Helvetica,
+        sans-serif !important;
 }
 
-.field-grid-stack-item {
-    position: relative;
-    padding: 10px !important;
-    max-width: 620px;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-
-
-    &:hover {
-        background-color: #ffffff;
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-
-        .field-options-box {
-            display: flex;
-        }
-    }
+html,
+body {
+    padding: 0;
+    margin: 0;
 }
 
-.field-grid-stack-fixed-header {
-    position: relative;
-    padding: 10px !important;
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-}
+// .grid-stack-item {
+//     background-color: #ffffff;
+//     border-radius: 10px;
+//     border: 1px solid #e0e0e0;
+//     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+//     transition: box-shadow 0.2s ease;
+//     overflow: visible !important;
+// }
 
-.inner-grid-stack-item-content {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+// .field-grid-stack-item {
+//     position: relative;
+//     padding: 10px !important;
+//     max-width: 620px;
+//     background-color: transparent;
+//     border: none;
+//     box-shadow: none;
 
-.field-options-box {
-    position: absolute;
-    right: 20px;
-    bottom: -15px;
-    z-index: 100;
-    width: fit-content;
-    display: none;
-    gap: 15px;
-    padding: 0 10px;
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #e0e0e0;
-    font-size: 10px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
+//     &:hover {
+//         background-color: #ffffff;
+//         border-radius: 10px;
+//         border: 1px solid #e0e0e0;
+//         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+//         z-index: 1000;
 
-.inner-grid-label {
-    font-size: 18px;
-    font-weight: 500;
-}
+//         .field-options-box {
+//             display: flex;
+//         }
+//     }
+// }
 
-.inner-grid-textbox {
-    min-height: 1dvh;
-    border-radius: 5px;
-    border: none;
-    box-shadow: 0 0 1px 2px rgba(128, 128, 128, 0.2);
-    padding: 10px;
-}
+// .field-grid-stack-fixed-header {
+//     position: relative;
+//     padding: 10px !important;
+//     background-color: transparent;
+//     border: none;
+//     box-shadow: none;
+// }
 
-.fix-content {
-    background-color: red !important;
-}
+// .inner-grid-stack-item-content {
+//     position: relative;
+//     display: flex;
+//     flex-direction: column;
+//     gap: 10px;
 
+//     .inner-grid-label {
+//         font-size: 18px;
+//         font-weight: 500;
+//     }
 
-.grid-stack-item[gs-no-move="true"] {
-    cursor: default !important;
-}
+//     .inner-grid-textbox {
+//         min-height: 1dvh;
+//         border-radius: 5px;
+//         border: none;
+//         box-shadow: 0 0 1px 2px rgba(128, 128, 128, 0.2);
+//         padding: 10px;
+//     }
+// }
+
+// .field-options-box {
+//     position: absolute;
+//     right: 20px;
+//     bottom: -15px;
+//     z-index: 100;
+//     width: fit-content;
+//     display: none;
+//     gap: 15px;
+//     padding: 0 10px;
+//     background: #ffffff;
+//     border-radius: 10px;
+//     border: 1px solid #e0e0e0;
+//     font-size: 10px;
+//     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+// }
+
+// .grid-stack-item[gs-no-move="true"] {
+//     cursor: default !important;
+// }
