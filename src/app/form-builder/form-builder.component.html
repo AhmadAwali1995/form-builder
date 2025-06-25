@@ -4,7 +4,6 @@
       <h4>Fields</h4>
       <div class="buttons-group">
         <button class="field-btn" (click)="addItem()">Add Section1</button>
-        <button class="field-btn" (click)="addItem1()">Add Section2</button>
       </div>
       <h4>Search Field</h4>
       <div class="buttons-group">
@@ -46,14 +45,18 @@
           <p>X</p>
           <p>Toggle Switch</p>
         </button>
-        <button class="field-btn">
+        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Dropdown')">
           <p>X</p>
           <p>Dropdown Menu</p>
         </button>
-        <button class="field-btn">
+        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Checkbox')">
           <p>X</p>
           <p>Single Checkbox</p>
         </button>
+              <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
+        <p>X</p>
+        <p>Radio Group</p>
+      </button>
         <button class="field-btn">
           <p>X</p>
           <p>Checklist Group</p>
