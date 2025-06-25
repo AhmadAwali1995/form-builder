@@ -1,6 +1,9 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
-import { FieldServicesService, ActionTypes } from '../services/field-services.service';
+import {
+  FieldServicesService,
+  ActionTypes,
+} from '../services/field-services.service';
 
 export interface sectionCorners {
   sectionId: string;
@@ -250,13 +253,16 @@ export class FormBuilderComponent implements AfterViewInit {
       }
     }
 
-    const fieldItem = this.fieldService.fieldCreationGateway({
-      x: nextX,
-      y: nextY,
-      w: fieldWidth,
-      h: 5,
-      count: this.itemCount,
-    },ActionTypes.dropDownList);
+    const fieldItem = this.fieldService.fieldCreationGateway(
+      {
+        x: nextX,
+        y: nextY,
+        w: fieldWidth,
+        h: 5,
+        count: this.itemCount,
+      },
+      ActionTypes.dropDownList
+    );
     // Add click event to field item This will make it active when clicked
     fieldItem.addEventListener('click', (event) => {
       event.stopPropagation(); // Prevent document click handler from firing
@@ -326,7 +332,7 @@ export class FormBuilderComponent implements AfterViewInit {
     actionType: string,
     mouseUpDirection: { x: number; y: number }
   ): void {
-    debugger;
+    // debugger;
     const sections: sectionCorners[] = [];
     this.innerGrids.forEach((grid, sectionId) => {
       const sectionEl = document.getElementById(sectionId);
