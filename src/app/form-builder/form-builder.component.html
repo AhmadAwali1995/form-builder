@@ -13,7 +13,10 @@
       </div>
       <h4>Text & Input</h4>
       <div class="buttons-group">
-        <button class="field-btn">
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'ShortText')"
+        >
           <p>X</p>
           <p>Short Text</p>
         </button>
@@ -45,18 +48,24 @@
           <p>X</p>
           <p>Toggle Switch</p>
         </button>
-        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Dropdown')">
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'Dropdown')"
+        >
           <p>X</p>
           <p>Dropdown Menu</p>
         </button>
-        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Checkbox')">
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'Checkbox')"
+        >
           <p>X</p>
           <p>Single Checkbox</p>
         </button>
-              <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
-        <p>X</p>
-        <p>Radio Group</p>
-      </button>
+        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
+          <p>X</p>
+          <p>Radio Group</p>
+        </button>
         <button class="field-btn">
           <p>X</p>
           <p>Checklist Group</p>
