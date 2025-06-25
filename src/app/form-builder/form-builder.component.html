@@ -1,166 +1,220 @@
-<div class="form-builder-container">
-  <div class="left-panel">
-    <h4>Fields</h4>
-    <div class="buttons-group">
-      <button class="field-btn" (click)="addItem()">Add Section1</button>
-    </div>
-    <h4>Search Field</h4>
-    <div class="buttons-group">
-      <div class="search-box">
-        <input type="text" placeholder="Search field..." />
+<div class="test">
+  <div class="form-builder-container">
+    <div class="left-panel">
+      <h4>Fields</h4>
+      <div class="buttons-group">
+        <button class="field-btn" (click)="addItem()">Add Section1</button>
       </div>
-    </div>
-    <h4>Text & Input</h4>
-    <div class="buttons-group">
-      <button class="field-btn" (mousedown)="startGhostDrag($event, 'ShortText')">
-        <p>X</p>
-        <p>Short Text</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Paragraph</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Numeric Input</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Date Picker</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Image Upload</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Attachment</p>
-      </button>
-    </div>
-    <hr />
-    <h4>Selection & Choices</h4>
-    <div class="buttons-group">
-      <button class="field-btn">
-        <p>X</p>
-        <p>Toggle Switch</p>
-      </button>
-      <button class="field-btn" (mousedown)="startGhostDrag($event, 'Dropdown')">
-        <p>X</p>
-        <p>Dropdown Menu</p>
-      </button>
-      <button class="field-btn" (mousedown)="startGhostDrag($event, 'Checkbox')">
-        <p>X</p>
-        <p>Single Checkbox</p>
-      </button>
-      <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
-        <p>X</p>
-        <p>Radio Group</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Range Slider</p>
-      </button>
-    </div>
-    <hr />
-
-    <h4>Layout & Structure</h4>
-    <div class="buttons-group">
-      <button class="field-btn">
-        <p>X</p>
-        <p>Section Break</p>
-      </button>
-      <button class="field-btn">
-        <p>X</p>
-        <p>Data Table</p>
-      </button>
-    </div>
-  </div>
-
-  <div class="canvas">
-    <div class="grid-stack" id="main-canvas"></div>
-  </div>
-
-  <div class="right-panel">
-    <!-- Field Settings -->
-    <h4>Field Settings</h4>
-    <div class="setting-group">
-      <div class="setting-item">
-        <label for="field-name">Field Name</label>
-        <input type="text" id="field-name" placeholder="Enter field name" />
-      </div>
-      <div class="settings-items-row">
-        <div class="setting-item">
-          <label for="field-type">Field Type</label>
-          <select id="field-type">
-            <option value="text">Text</option>
-            <option value="number">Number</option>
-            <option value="date">Date</option>
-            <option value="image">Image Upload</option>
-            <option value="attachment">Attachment</option>
-          </select>
-        </div>
-        <div class="setting-item">
-          <label for="field-size">Field Size</label>
-          <select id="field-size">
-            <option value="small">Small</option>
-            <option value="normal">Normal</option>
-            <option value="large">Large</option>
-            <option value="extra">Extra Large</option>
-          </select>
+      <h4>Search Field</h4>
+      <div class="buttons-group">
+        <div class="search-box">
+          <input type="text" placeholder="Search field..." />
         </div>
       </div>
-      <div class="setting-item">
-        <label for="description">Description</label>
-        <input
-          type="text"
-          id="description"
-          placeholder="Add a brief description"
-        />
+      <h4>Text & Input</h4>
+      <div class="buttons-group">
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'ShortText')"
+        >
+          <p>X</p>
+          <p>Short Text</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Paragraph</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Numeric Input</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Date Picker</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Image Upload</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Attachment</p>
+        </button>
       </div>
-      <div class="setting-item">
-        <label for="placeholder_text">Placeholder Text</label>
-        <input
-          type="text"
-          id="placeholder_text"
-          placeholder="Enter Placeholder Text"
-        />
+      <hr />
+      <h4>Selection & Choices</h4>
+      <div class="buttons-group">
+        <button class="field-btn">
+          <p>X</p>
+          <p>Toggle Switch</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'Dropdown')"
+        >
+          <p>X</p>
+          <p>Dropdown Menu</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, 'Checkbox')"
+        >
+          <p>X</p>
+          <p>Single Checkbox</p>
+        </button>
+        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
+          <p>X</p>
+          <p>Radio Group</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Checklist Group</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Range Slider</p>
+        </button>
       </div>
+      <hr />
 
-      <div class="setting-item">
-        <label for="default_value">Default Value</label>
-        <input
-          type="text"
-          id="default_value"
-          placeholder="Enter Default Value"
-        />
+      <h4>Layout & Structure</h4>
+      <div class="buttons-group">
+        <button class="field-btn">
+          <p>X</p>
+          <p>Section Break</p>
+        </button>
+        <button class="field-btn">
+          <p>X</p>
+          <p>Data Table</p>
+        </button>
       </div>
-
-      <div class="setting-item">
-        <label for="min_range">Min & Max Range Characters</label>
-        <div class="settings-items-row">
-          <input type="number" id="min_range" placeholder="Min" />
-          -
-          <input type="number" id="max_range" placeholder="Max" />
+    </div>
+    <div class="outer-box">
+      <div class="header">
+        <div class="build-section">
+          <button class="white-btn">
+            <p>build</p>
+          </button>
+          <button class="white-btn">
+            <p>Template</p>
+          </button>
+          <hr class="vertical-line" />
+          <div class="share-link">
+            <p class="gray-text">Link :</p>
+            <a
+              class="link-text"
+              href="https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0"
+              >https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0</a
+            >
+          </div>
+        </div>
+        <div class="buttons-section">
+          <button class="white-btn">
+            <p>X</p>
+            <p>Edit</p>
+          </button>
+          <a class="white-btn">
+            <p>X</p>
+            <p>Preview</p>
+          </a>
+          <button class="colored-btn">
+            <p>Save & Publish</p>
+          </button>
         </div>
       </div>
+      <div class="inner-box">
+        <div class="canvas">
+          <div class="grid-stack"></div>
+        </div>
 
-      <div class="setting-item">
-        <label for="help_text">Help Text</label>
-        <input type="text" id="help_text" placeholder="Enter Help Text" />
-      </div>
+        <div class="right-panel">
+          <!-- Field Settings -->
+          <h4>Field Settings</h4>
+          <div class="setting-group">
+            <div class="setting-item">
+              <label for="field-name">Field Name</label>
+              <input
+                type="text"
+                id="field-name"
+                placeholder="Enter field name"
+              />
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <label for="field-type">Field Type</label>
+                <select id="field-type">
+                  <option value="text">Text</option>
+                  <option value="number">Number</option>
+                  <option value="date">Date</option>
+                  <option value="image">Image Upload</option>
+                  <option value="attachment">Attachment</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label for="field-size">Field Size</label>
+                <select id="field-size">
+                  <option value="small">Small</option>
+                  <option value="normal">Normal</option>
+                  <option value="large">Large</option>
+                  <option value="extra">Extra Large</option>
+                </select>
+              </div>
+            </div>
+            <div class="setting-item">
+              <label for="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                placeholder="Add a brief description"
+              />
+            </div>
+            <div class="setting-item">
+              <label for="placeholder_text">Placeholder Text</label>
+              <input
+                type="text"
+                id="placeholder_text"
+                placeholder="Enter Placeholder Text"
+              />
+            </div>
 
-      <div class="setting-item">
-        <label for="custom_css">Custom CSS Class</label>
-        <input
-          type="text"
-          id="custom_css"
-          placeholder="Enter Custom CSS Class"
-        />
-      </div>
+            <div class="setting-item">
+              <label for="default_value">Default Value</label>
+              <input
+                type="text"
+                id="default_value"
+                placeholder="Enter Default Value"
+              />
+            </div>
 
-      <div class="setting-item">
-        <label for="required-field">Required Field</label>
-        <input type="checkbox" id="required-field" />
+            <div class="setting-item">
+              <label for="min_range">Min & Max Range Characters</label>
+              <div class="settings-items-row">
+                <input type="number" id="min_range" placeholder="Min" />
+                -
+                <input type="number" id="max_range" placeholder="Max" />
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <label for="help_text">Help Text</label>
+              <input type="text" id="help_text" placeholder="Enter Help Text" />
+            </div>
+
+            <div class="setting-item">
+              <label for="custom_css">Custom CSS Class</label>
+              <input
+                type="text"
+                id="custom_css"
+                placeholder="Enter Custom CSS Class"
+              />
+            </div>
+
+            <div class="setting-item">
+              <label for="required-field">Required Field</label>
+              <input type="checkbox" id="required-field" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
