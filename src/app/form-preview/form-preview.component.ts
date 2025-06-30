@@ -36,8 +36,30 @@ export class FormPreviewComponent implements OnInit {
     const controls: Record<string, any> = {};
 
     for (const field of fields) {
-      const validators = field.required ? [Validators.required] : [];
-      const defaultValue = field.type === 'checkbox' ? false : '';
+      const validators = [];
+
+      if (field.required) {
+        validators.push(Validators.required);
+      }
+
+      // TEXT field character length validators
+      if (field.type === 'text') {
+        if (typeof field.minValue === 'number' && field.minValue > 0) {
+          validators.push(Validators.minLength(field.minValue));
+        }
+
+        if (typeof field.maxValue === 'number' && field.maxValue > 0) {
+          validators.push(Validators.maxLength(field.maxValue));
+        }
+
+        if (field.name === 'email') {
+          validators.push(Validators.email);
+        }
+      }
+
+      const defaultValue =
+        field.defaultValue ?? (field.type === 'checkbox' ? false : '');
+
       controls[field.name] = [defaultValue, validators];
     }
 

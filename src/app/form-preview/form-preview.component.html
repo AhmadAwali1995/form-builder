@@ -12,14 +12,29 @@
                 {{ field.label }}
                 <span *ngIf="field.required" class="required-star">*</span>
               </label>
-              <input type="text" [formControlName]="field.name" />
+              <input
+                type="text"
+                [formControlName]="field.name"
+                [placeholder]="field.placeholder || ''"
+              />
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.name)?.invalid && form.get(field.name)?.touched
+                  form.get(field.name)?.touched && form.get(field.name)?.errors
                 "
               >
-                This field is required
+                <div *ngIf="form.get(field.name)?.hasError('required')">
+                  This field is required.
+                </div>
+                <div *ngIf="form.get(field.name)?.hasError('email')">
+                  Please enter a valid email address.
+                </div>
+                <div *ngIf="form.get(field.name)?.hasError('minlength')">
+                  Minimum {{ field.minValue }} characters required.
+                </div>
+                <div *ngIf="form.get(field.name)?.hasError('maxlength')">
+                  Maximum {{ field.maxValue }} characters allowed.
+                </div>
               </div>
             </ng-container>
 
@@ -38,10 +53,12 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.name)?.invalid && form.get(field.name)?.touched
+                  form.get(field.name)?.touched && form.get(field.name)?.errors
                 "
               >
-                This field is required
+                <div *ngIf="form.get(field.name)?.hasError('required')">
+                  This field is required.
+                </div>
               </div>
             </ng-container>
 
@@ -66,14 +83,15 @@
                   {{ opt }}
                 </label>
               </div>
-
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.name)?.invalid && form.get(field.name)?.touched
+                  form.get(field.name)?.touched && form.get(field.name)?.errors
                 "
               >
-                This field is required
+                <div *ngIf="form.get(field.name)?.hasError('required')">
+                  This field is required.
+                </div>
               </div>
             </ng-container>
 
@@ -87,10 +105,12 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.name)?.invalid && form.get(field.name)?.touched
+                  form.get(field.name)?.touched && form.get(field.name)?.errors
                 "
               >
-                This field is required
+                <div *ngIf="form.get(field.name)?.hasError('required')">
+                  This field is required.
+                </div>
               </div>
             </ng-container>
           </div>

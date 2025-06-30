@@ -1,13 +1,19 @@
 <div class="app-field-settings">
   <div class="setting-group">
     <div class="setting-item">
-      <label for="field-name">Field Label</label>
-      <input type="text" id="field-label" placeholder="Enter field label" />
+      <label for="field-label">Field Label</label>
+      <input
+        type="text"
+        id="field-label"
+        [(ngModel)]="fieldLabel"
+        (input)="emitChange()"
+      />
     </div>
+
     <div class="settings-items-row">
       <div class="setting-item">
         <label for="field-type">Field Type</label>
-        <select id="field-type">
+        <select id="field-type" [(ngModel)]="fieldType" (change)="emitChange()">
           <option value="text">Text</option>
           <option value="number">Number</option>
           <option value="date">Date</option>
@@ -17,7 +23,7 @@
       </div>
       <div class="setting-item">
         <label for="field-size">Field Size</label>
-        <select id="field-size">
+        <select id="field-size" [(ngModel)]="fieldSize" (change)="emitChange()">
           <option value="small">Small</option>
           <option value="normal">Normal</option>
           <option value="large">Large</option>
@@ -25,34 +31,56 @@
         </select>
       </div>
     </div>
+
     <div class="setting-item">
       <label for="placeholder_text">Placeholder Text</label>
       <input
         type="text"
         id="placeholder_text"
-        placeholder="Enter Placeholder Text"
+        [(ngModel)]="fieldPlaceholder"
+        (input)="emitChange()"
       />
     </div>
+
     <div class="setting-item">
       <label for="default_value">Default Value</label>
-      <input type="text" id="default_value" placeholder="Enter Default Value" />
+      <input
+        type="text"
+        id="default_value"
+        [(ngModel)]="fieldDefultValue"
+        (input)="emitChange()"
+      />
     </div>
+
     <div class="setting-item">
       <label for="min_range">Min & Max Range Characters</label>
       <div class="settings-items-row">
-        <input type="number" id="min_range" placeholder="Min" />
+        <input
+          type="number"
+          id="min_range"
+          [(ngModel)]="fieldMinValue"
+          (input)="emitChange()"
+          placeholder="Min"
+        />
         -
-        <input type="number" id="max_range" placeholder="Max" />
+        <input
+          type="number"
+          id="max_range"
+          [(ngModel)]="fieldMaxValue"
+          (input)="emitChange()"
+          placeholder="Max"
+        />
       </div>
     </div>
 
-    <!-- <div class="setting-item">
-      <label for="custom_css">Custom CSS Class</label>
-      <input type="text" id="custom_css" placeholder="Enter Custom CSS Class" />
-    </div> -->
     <div class="settings-items-row">
       <label for="required-field">Required Field</label>
-      <input type="checkbox" id="required-field" />
+      <input
+        type="checkbox"
+        id="required-field"
+        [(ngModel)]="isfieldRequired"
+        (change)="emitChange()"
+      />
     </div>
   </div>
 </div>

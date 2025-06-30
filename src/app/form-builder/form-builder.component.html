@@ -268,9 +268,22 @@
 
             }
           </div>
-          @if (fieldId) {
+          @if (fieldId && fieldConfigs.has(fieldId)) {
 
-          <app-field-settings [fieldId]="fieldId"></app-field-settings>
+          <ng-container>
+            <app-field-settings
+              [fieldId]="fieldConfigs.get(fieldId)?.fieldId!"
+              [fieldType]="fieldConfigs.get(fieldId)?.fieldType!"
+              [fieldLabel]="fieldConfigs.get(fieldId)?.fieldLabel!"
+              [fieldSize]="fieldConfigs.get(fieldId)?.fieldSize!"
+              [fieldPlaceholder]="fieldConfigs.get(fieldId)?.fieldPlaceholder!"
+              [fieldDefultValue]="fieldConfigs.get(fieldId)?.fieldDefultValue!"
+              [fieldMinValue]="fieldConfigs.get(fieldId)?.fieldMinValue!"
+              [fieldMaxValue]="fieldConfigs.get(fieldId)?.fieldMaxValue!"
+              [isfieldRequired]="fieldConfigs.get(fieldId)?.isfieldRequired!"
+              (fieldUpdated)="onFieldSettingsUpdated($event)"
+            />
+          </ng-container>
           }
         </div>
       </div>

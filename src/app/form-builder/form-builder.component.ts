@@ -16,15 +16,16 @@ export interface sectionCorners {
 }
 
 interface FieldConfig {
-  id: string;
-  type: ActionTypes;
-  label: string;
-  placeholder: string;
-  size: number;
-  options?: string[];
-  minRange?: number;
-  maxRange?: number;
-  required: boolean;
+  fieldId: string;
+  fieldType: string;
+  fieldLabel: string;
+  fieldSize: string;
+  fieldPlaceholder: string;
+  fieldDefultValue: string;
+  fieldOptions: string[];
+  fieldMinValue: number;
+  fieldMaxValue: number;
+  isfieldRequired: boolean;
 }
 
 @Component({
@@ -48,6 +49,7 @@ export class FormBuilderComponent implements AfterViewInit {
   currentPage: number = 1;
   rowsPerPage: number = 5;
   // activeFieldId: string | null = null;
+  fieldConfigs = new Map<string, FieldConfig>();
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -169,6 +171,7 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
+    console.log(this.fieldConfigs);
     const innerGrid = this.innerGrids.get(innerGridId);
     if (!innerGrid) {
       console.warn('No grid found for ID:', innerGridId);
@@ -238,6 +241,19 @@ export class FormBuilderComponent implements AfterViewInit {
 
       this.fieldId = fieldElement!.id;
       this.fieldType = fieldType!;
+
+      this.fieldConfigs.set(this.fieldId, {
+        fieldId: this.fieldId,
+        fieldType: this.fieldType,
+        fieldLabel: 'Text Field',
+        fieldSize: 'small',
+        fieldPlaceholder: '',
+        fieldDefultValue: '',
+        fieldOptions: [],
+        fieldMinValue: 0,
+        fieldMaxValue: 0,
+        isfieldRequired: false,
+      });
     });
 
     innerGrid.el.appendChild(fieldItem);
@@ -255,6 +271,25 @@ export class FormBuilderComponent implements AfterViewInit {
         innerGrid.update(fieldItem, { h: newH });
       }
     }, 0);
+  }
+
+  onFieldSettingsUpdated(data: any) {
+    this.fieldConfigs.set(data.fieldId, data);
+
+    const fieldEl = document.getElementById(data.fieldId);
+    if (fieldEl) {
+      if (fieldEl instanceof HTMLInputElement) {
+        fieldEl.placeholder = data.fieldPlaceholder || '';
+        fieldEl.value = data.fieldDefultValue || '';
+      }
+
+      const label = fieldEl
+        .closest('.inner-grid-stack-item-content')
+        ?.querySelector('label');
+      if (label) {
+        label.textContent = data.fieldLabel || 'Field';
+      }
+    }
   }
 
   ghostElement: HTMLElement | null = null;

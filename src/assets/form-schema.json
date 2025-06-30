@@ -6,47 +6,68 @@
             "label": "First Name",
             "name": "firstName",
             "required": true,
-            "size": "small"
+            "size": "small",
+            "placeholder": "Enter your first name",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 10
         },
         {
             "type": "text",
             "label": "Last Name",
             "name": "lastName",
             "required": true,
-            "size": "small"
+            "size": "small",
+            "placeholder": "Enter your last name",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "text",
             "label": "Email Address",
             "name": "email",
             "required": true,
-            "size": "small"
+            "size": "small",
+            "placeholder": "Enter your email",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "text",
             "label": "Phone Number",
             "name": "phone",
             "required": true,
-            "size": "small"
+            "size": "small",
+            "placeholder": "Enter your phone number",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "select",
             "label": "Country",
             "name": "country",
             "required": true,
+            "size": "medium",
             "options": [
                 "Saudi Arabia",
                 "Jordan",
                 "Egypt"
             ],
-            "size": "medium"
+            "defaultValue": ""
         },
         {
             "type": "text",
             "label": "City",
             "name": "city",
             "required": false,
-            "size": "medium"
+            "size": "medium",
+            "placeholder": "Enter your city",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "radio",
@@ -54,72 +75,96 @@
             "name": "gender",
             "direction": "horizontal",
             "required": true,
+            "size": "medium",
             "options": [
                 "Male",
                 "Female"
             ],
-            "size": "medium"
+            "defaultValue": ""
         },
         {
             "type": "text",
             "label": "Nationality",
             "name": "nationality",
             "required": false,
-            "size": "medium"
+            "size": "medium",
+            "placeholder": "Enter your nationality",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "text",
             "label": "LinkedIn Profile",
             "name": "linkedin",
             "required": false,
-            "size": "full"
+            "size": "full",
+            "placeholder": "Paste your LinkedIn URL",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "text",
             "label": "Current Job Title",
             "name": "jobTitle",
             "required": false,
-            "size": "medium"
+            "size": "medium",
+            "placeholder": "Enter your job title",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
         },
         {
             "type": "text",
             "label": "Years of Experience",
             "name": "experience",
             "required": false,
-            "size": "small"
+            "size": "small",
+            "placeholder": "e.g. 5",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 50
         },
         {
             "type": "select",
             "label": "Preferred Language",
             "name": "language",
             "required": true,
+            "size": "small",
             "options": [
                 "Arabic",
                 "English",
                 "French"
             ],
-            "size": "small"
+            "defaultValue": ""
         },
         {
             "type": "text",
             "label": "Expected Salary",
             "name": "salary",
             "required": false,
-            "size": "small"
+            "size": "small",
+            "placeholder": "Enter expected salary",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 1000000
         },
         {
             "type": "checkbox",
             "label": "Open to Relocation",
             "name": "relocate",
             "required": false,
-            "size": "small"
+            "size": "small",
+            "defaultValue": ""
         },
         {
             "type": "checkbox",
             "label": "I agree to the Terms and Conditions",
             "name": "agree",
             "required": true,
-            "size": "full"
+            "size": "full",
+            "defaultValue": ""
         }
     ]
 }
