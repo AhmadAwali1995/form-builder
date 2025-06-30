@@ -1,6 +1,10 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
-import { FieldServicesService, ActionTypes } from '../services/field-services.service';
+import { FormsModule } from '@angular/forms';
+import {
+  FieldServicesService,
+  ActionTypes,
+} from '../services/field-services.service';
 
 export interface sectionCorners {
   sectionId: string;
@@ -13,7 +17,7 @@ export interface sectionCorners {
 @Component({
   selector: 'app-form-builder',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -23,6 +27,13 @@ export class FormBuilderComponent implements AfterViewInit {
   itemCount = 0;
   columnNum = 36;
   innerGrids: Map<string, GridStack> = new Map();
+  ddlURL: string = '';
+  tableURL: string = '';
+  fieldId: string = '';
+  fieldType: string = '';
+  ActionTypes = ActionTypes;
+  currentPage: number = 1;
+  rowsPerPage: number = 5;
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -34,21 +45,24 @@ export class FormBuilderComponent implements AfterViewInit {
       float: false,
     });
 
-    document.addEventListener('click', (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
+    const canvas = document.querySelector('.canvas');
 
-      // Check if click is inside any .field-grid-stack-item
-      const isInsideFieldItem = target.closest('.field-grid-stack-item');
+    if (canvas) {
+      canvas.addEventListener('click', (event) => {
+        const mouseEvent = event as MouseEvent;
+        const target = mouseEvent.target as HTMLElement;
 
-      if (!isInsideFieldItem) {
-        // Remove active class from all field-grid-stack-item elements
-        const activeItems = this.grid.el.querySelectorAll(
-          '.field-grid-stack-item.active'
-        );
-        activeItems.forEach((item) => item.classList.remove('active'));
-      }
-    });
+        const isInsideFieldItem = target.closest('.field-grid-stack-item');
 
+        if (!isInsideFieldItem) {
+          const activeItems = canvas.querySelectorAll(
+            '.field-grid-stack-item.active'
+          );
+          activeItems.forEach((item) => item.classList.remove('active'));
+          this.fieldId = '';
+        }
+      });
+    }
     this.grid.on('dragstart', (event, el) => {
       const activeItems = this.grid.el.querySelectorAll(
         '.field-grid-stack-item.active'
@@ -111,9 +125,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const sectionHeaderContentItem1 = document.createElement('div');
     sectionHeaderContentItem1.classList.add('inner-grid-stack-item-content');
     sectionHeaderContentItem1.innerHTML = `<label>Section Header</label>`;
-    sectionHeaderContentItem1.addEventListener('click', () => {
-      this.addTextFieldToSection(innerGridId);
-    });
+
     sectionHeader.appendChild(sectionHeaderContentItem1);
     innerGrid.appendChild(sectionHeader);
 
@@ -141,84 +153,7 @@ export class FormBuilderComponent implements AfterViewInit {
     this.innerGrids.set(innerGridId, grid);
   }
 
-  addTextFieldToSection1(innerGridId: string): void {
-    const innerGrid = this.innerGrids.get(innerGridId);
-    if (!innerGrid) {
-      console.warn('No grid found for ID:', innerGridId);
-      return;
-    }
-
-    const fieldWidth = 17.8; // GridStack columns per field (adjust to fit your layout)
-    const columnCount = this.columnNum;
-    const existingNodes = innerGrid.engine.nodes || [];
-
-    let nextX = 0;
-    let nextY = 1; // Start after header row (row 0 is header)
-
-    if (existingNodes.length > 0) {
-      const last = existingNodes[existingNodes.length - 1];
-
-      const lastX = last.x ?? 0;
-      const lastY = last.y ?? 0;
-      const lastW = last.w ?? fieldWidth;
-
-      // Calculate next position
-      if (lastX + lastW + fieldWidth > columnCount) {
-        // Wrap to next row
-        nextX = 0;
-        nextY = lastY + (last.h ?? 1);
-      } else {
-        nextX = lastX + lastW;
-        nextY = lastY;
-      }
-    }
-
-    // field item1 (textbox)
-    const fieldItem = document.createElement('div');
-    fieldItem.classList.add('grid-stack-item', 'field-grid-stack-item');
-    fieldItem.setAttribute('gs-x', nextX.toString());
-    fieldItem.setAttribute('gs-y', nextY.toString());
-    fieldItem.setAttribute('gs-w', fieldWidth.toString());
-    fieldItem.setAttribute('gs-h', '5');
-
-    // Add click event to field item This will make it active when clicked
-    fieldItem.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevent document click handler from firing
-
-      // Remove active from others
-      const allItems = this.grid.el.querySelectorAll(
-        '.field-grid-stack-item.active'
-      );
-      allItems.forEach((item) => item.classList.remove('active'));
-
-      // Add active to this
-      fieldItem.classList.add('active');
-    });
-
-    // Create options box for field item, this will be shown when the field item is clicked
-    const fieldOptionsBox = document.createElement('div');
-    fieldOptionsBox.classList.add('field-options-box');
-    fieldOptionsBox.classList.add('data-gs-cancel');
-    fieldOptionsBox.innerHTML = `
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>
-    <p>X</p>`;
-
-    const fieldContentItem1 = document.createElement('div');
-    fieldContentItem1.classList.add('inner-grid-stack-item-content');
-    fieldContentItem1.innerHTML = `
-  <label class="inner-grid-label" for="text1">Text Field</label>
-  <input id="text${this.itemCount}" type="text" placeholder="Text Field" class="inner-grid-textbox" >
-  `;
-    fieldContentItem1.appendChild(fieldOptionsBox);
-    fieldItem.appendChild(fieldContentItem1);
-    innerGrid.el.appendChild(fieldItem);
-    innerGrid.makeWidget(fieldItem);
-  }
-
-  addTextFieldToSection(innerGridId: string): void {
+  addTextFieldToSection(innerGridId: string, actionType: ActionTypes): void {
     const innerGrid = this.innerGrids.get(innerGridId);
     if (!innerGrid) {
       console.warn('No grid found for ID:', innerGridId);
@@ -250,13 +185,26 @@ export class FormBuilderComponent implements AfterViewInit {
       }
     }
 
-    const fieldItem = this.fieldService.fieldCreationGateway({
-      x: nextX,
-      y: nextY,
-      w: fieldWidth,
-      h: 5,
-      count: this.itemCount,
-    },ActionTypes.dropDownList);
+    const fieldItem = this.fieldService.fieldCreationGateway(
+      {
+        x: nextX,
+        y: nextY,
+        w: fieldWidth,
+        h: 5,
+        count: this.itemCount,
+      },
+      actionType
+    );
+
+    //add box of settings
+    const box = document.createElement('div');
+    box.classList.add('field-options-box', 'data-gs-cancel');
+    box.innerHTML = `<p class="delete-btn">X</p><p>X</p><p>X</p><p>X</p>`;
+    box.querySelector('.delete-btn')?.addEventListener('click', () => {
+      fieldItem.remove(); // Just call the passed function
+    });
+    fieldItem.appendChild(box);
+
     // Add click event to field item This will make it active when clicked
     fieldItem.addEventListener('click', (event) => {
       event.stopPropagation(); // Prevent document click handler from firing
@@ -269,10 +217,29 @@ export class FormBuilderComponent implements AfterViewInit {
 
       // Add active to this
       fieldItem.classList.add('active');
+
+      const fieldElement = fieldItem.querySelector('[data-field-type]');
+      const fieldType = fieldElement!.getAttribute('data-field-type');
+
+      this.fieldId = fieldElement!.id;
+      this.fieldType = fieldType!;
     });
 
     innerGrid.el.appendChild(fieldItem);
     innerGrid.makeWidget(fieldItem);
+
+    setTimeout(() => {
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+
+      if (contentElement) {
+        const contentHeight = contentElement.offsetHeight;
+        const cellHeight = innerGrid.getCellHeight(true);
+        const newH = Math.ceil(contentHeight / cellHeight);
+        innerGrid.update(fieldItem, { h: newH });
+      }
+    }, 0);
   }
 
   ghostElement: HTMLElement | null = null;
@@ -326,7 +293,6 @@ export class FormBuilderComponent implements AfterViewInit {
     actionType: string,
     mouseUpDirection: { x: number; y: number }
   ): void {
-    debugger;
     const sections: sectionCorners[] = [];
     this.innerGrids.forEach((grid, sectionId) => {
       const sectionEl = document.getElementById(sectionId);
@@ -357,8 +323,284 @@ export class FormBuilderComponent implements AfterViewInit {
       );
     });
 
-    if (droppedInSection)
-      this.addTextFieldToSection(droppedInSection.sectionId);
+    if (droppedInSection) {
+      switch (actionType) {
+        case ActionTypes.shortText.toString():
+          this.addTextFieldToSection(
+            droppedInSection.sectionId,
+            ActionTypes.shortText
+          );
+          break;
+        case ActionTypes.radioGroup.toString():
+          this.addTextFieldToSection(
+            droppedInSection.sectionId,
+            ActionTypes.radioGroup
+          );
+          break;
+        case ActionTypes.dropDownList.toString():
+          this.addTextFieldToSection(
+            droppedInSection.sectionId,
+            ActionTypes.dropDownList
+          );
+          break;
+        case ActionTypes.checkbox.toString():
+          this.addTextFieldToSection(
+            droppedInSection.sectionId,
+            ActionTypes.checkbox
+          );
+          break;
+        case ActionTypes.table.toString():
+          this.addTextFieldToSection(
+            droppedInSection.sectionId,
+            ActionTypes.table
+          );
+          break;
+      }
+    }
     console.log('Section corners:', sections);
+  }
+
+  getDataDDL() {
+    fetch(this.ddlURL)
+      .then((res) => res.json())
+      .then((data) => {
+        const ddl = document.getElementById('ddl1') as HTMLSelectElement;
+        if (ddl) {
+          ddl.innerHTML = '';
+          data.forEach((item: any) => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.text = item.label;
+            ddl.appendChild(option);
+          });
+        }
+      })
+      .catch((err) => console.error('Error:', err));
+  }
+
+  ddlData: any = [];
+  keyValue: { key: string; value: string } = { key: '', value: '' };
+  testDDLURL() {
+    fetch(this.ddlURL)
+      .then((res) => res.json())
+      .then((data) => {
+        const keys: string[] = Object.keys(data[0]);
+        const ddlKeys = document.getElementById(
+          'ddl-keys'
+        ) as HTMLSelectElement;
+        const ddlValues = document.getElementById(
+          'ddl-values'
+        ) as HTMLSelectElement;
+        ddlKeys.innerHTML = '';
+        ddlValues.innerHTML = '';
+        ddlKeys.appendChild(
+          Object.assign(document.createElement('option'), {
+            text: 'select key',
+            disabled: true,
+            selected: true,
+          })
+        );
+        ddlValues.appendChild(
+          Object.assign(document.createElement('option'), {
+            text: 'select value',
+            disabled: true,
+            selected: true,
+          })
+        );
+        keys.forEach((item: string) => {
+          const option1 = document.createElement('option');
+          const option2 = document.createElement('option');
+          option1.value = item;
+          option1.text = item;
+          option2.value = item;
+          option2.text = item;
+          ddlKeys.appendChild(option1);
+          ddlValues.appendChild(option2);
+          this.ddlData = data;
+        });
+
+        ddlKeys.onchange = (e) => {
+          const selectedKey = (e.target as HTMLSelectElement).value;
+          this.keyValue.key = selectedKey;
+        };
+
+        ddlValues.onchange = (e) => {
+          const selectedValue = (e.target as HTMLSelectElement).value;
+          this.keyValue.value = selectedValue;
+        };
+      })
+      .catch((err) => console.error('Error:', err));
+  }
+
+  tableData: any = [];
+  tableKeys: string[] = [];
+  testTableURL() {
+    fetch(this.tableURL)
+      .then((res) => res.json())
+      .then((data) => {
+        this.tableData = data;
+        const keys: string[] = Object.keys(data[0]);
+        this.tableKeys = keys;
+      })
+      .catch((err) => console.error('Error:', err));
+  }
+
+  previewData() {
+    const ddl = document.getElementById('ddl-preview') as HTMLSelectElement;
+    if (ddl) {
+      ddl.innerHTML = '';
+      this.ddlData.forEach((item: any) => {
+        const option = document.createElement('option');
+        option.value = item[this.keyValue.key.toString()];
+        option.text = item[this.keyValue.value.toString()];
+        ddl.appendChild(option);
+      });
+    }
+  }
+
+  saveDDL() {
+    const ddl = document.getElementById(this.fieldId) as HTMLSelectElement;
+    if (ddl) {
+      ddl.innerHTML = '';
+      this.ddlData.forEach((item: any) => {
+        const option = document.createElement('option');
+        option.value = item[this.keyValue.key.toString()];
+        option.text = item[this.keyValue.value.toString()];
+        ddl.appendChild(option);
+      });
+    }
+  }
+
+  saveTable() {
+    const table = document.getElementById(this.fieldId) as HTMLTableElement;
+    if (!table) return;
+
+    // Remove old thead and tbody
+    const oldThead = table.querySelector('thead');
+    const oldTbody = table.querySelector('tbody');
+    if (oldThead) table.removeChild(oldThead);
+    if (oldTbody) table.removeChild(oldTbody);
+
+    // Remove old pagination container (if any)
+    const oldPagination = table.parentElement?.querySelector(
+      '.pagination-container'
+    );
+    if (oldPagination) oldPagination.remove();
+
+    // Get selected columns from dropdowns
+    const selectedColumns: string[] = [];
+    const selects = document.querySelectorAll(
+      'select[id^="table-ddl-column-"]'
+    );
+    selects.forEach((select) => {
+      selectedColumns.push((select as HTMLSelectElement).value);
+    });
+
+    this.createTableHeader(table, selectedColumns);
+    this.renderTableBody(table, selectedColumns, this.currentPage);
+
+    // find pagination container
+    let pagination = table.parentElement?.parentElement?.querySelector('.pagination') as HTMLElement;
+
+    this.renderPagination(selectedColumns, pagination);
+
+    this.resizeFieldItem(this.fieldId);
+  }
+
+  createTableHeader(table: HTMLTableElement, selectedColumns: string[]) {
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    for (const col of selectedColumns) {
+      const th = document.createElement('th');
+      th.textContent = col;
+      headerRow.appendChild(th);
+    }
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+  }
+
+  renderTableBody(
+    table: HTMLTableElement,
+    selectedColumns: string[],
+    page: number
+  ) {
+    const oldTbody = table.querySelector('tbody');
+    if (oldTbody) table.removeChild(oldTbody);
+
+    const tbody = document.createElement('tbody');
+    const start = (page - 1) * this.rowsPerPage;
+    const end = start + this.rowsPerPage;
+    const pageData = this.tableData.slice(start, end);
+
+    for (const row of pageData) {
+      const tr = document.createElement('tr');
+      for (const col of selectedColumns) {
+        const td = document.createElement('td');
+        td.textContent = row[col];
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+
+    table.appendChild(tbody);
+  }
+
+  renderPagination(selectedColumns: string[], paginationDiv: HTMLElement) {
+    paginationDiv.innerHTML = ''; // Clear old buttons
+
+    const totalPages = Math.ceil(this.tableData.length / this.rowsPerPage);
+
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i.toString();
+      btn.classList.toggle('active', i === this.currentPage);
+
+      btn.addEventListener('click', () => {
+        this.currentPage = i;
+
+        const table = document.getElementById(this.fieldId) as HTMLTableElement;
+        if (!table) return;
+
+        this.renderTableBody(table, selectedColumns, i);
+        this.renderPagination(selectedColumns, paginationDiv);
+        this.resizeFieldItem(this.fieldId);
+      });
+
+      paginationDiv.appendChild(btn);
+    }
+  }
+
+  resizeFieldItem(fieldId: string): void {
+    setTimeout(() => {
+      const fieldItem = document
+        .getElementById(fieldId)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!fieldItem) return;
+
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+      if (!contentElement) return;
+
+      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+      if (!innerGridEl) return;
+
+      // Get GridStack instance dynamically
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      if (!innerGrid) {
+        console.warn('GridStack instance not found for inner grid element');
+        return;
+      }
+
+      const contentHeight = contentElement.offsetHeight;
+      const cellHeight = innerGrid.getCellHeight(true);
+      const newH = Math.ceil(contentHeight / cellHeight);
+
+      innerGrid.update(fieldItem, { h: newH });
+    }, 0);
+  }
+
+  deleteField() {
+    debugger;
   }
 }

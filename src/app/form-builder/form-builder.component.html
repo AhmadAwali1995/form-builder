@@ -3,14 +3,55 @@
     <div class="left-panel">
       <h4>Fields</h4>
       <div class="buttons-group">
-        <button class="field-btn" (click)="addItem()">Add Section1</button>
+        <button class="field-btn" (click)="addItem()">Add Section</button>
+        <button class="field-btn" (click)="getDataDDL()">test api</button>
       </div>
       <h4>Search Field</h4>
       <div class="buttons-group">
         <div class="search-box">
           <input type="text" placeholder="Search field..." />
         </div>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.shortText.toString())"
+        >
+          <p>X</p>
+          <p>Short Text</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="
+            startGhostDrag($event, ActionTypes.dropDownList.toString())
+          "
+        >
+          <p>X</p>
+          <p>Dropdown Menu</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.checkbox.toString())"
+        >
+          <p>X</p>
+          <p>Single Checkbox</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="
+            startGhostDrag($event, ActionTypes.radioGroup.toString())
+          "
+        >
+          <p>X</p>
+          <p>Radio Group</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.table.toString())"
+        >
+          <p>X</p>
+          <p>Table</p>
+        </button>
       </div>
+      <!-- 
       <h4>Text & Input</h4>
       <div class="buttons-group">
         <button
@@ -88,6 +129,7 @@
           <p>Data Table</p>
         </button>
       </div>
+ -->
     </div>
     <div class="outer-box">
       <div class="header">
@@ -131,6 +173,100 @@
           <!-- Field Settings -->
           <h4>Field Settings</h4>
           <div class="setting-group">
+            @if(fieldId){
+
+            <!-- dropDownList datasource settings -->
+
+            @if(this.fieldType == ActionTypes.dropDownList.toString()){
+            <div class="setting-item">
+              <label for="field-name">Source URL</label>
+              <input
+                [(ngModel)]="ddlURL"
+                type="text"
+                id="source-url"
+                placeholder="Enter field name"
+              />
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="testDDLURL()">
+                  Test URL
+                </button>
+              </div>
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <label for="ddl-keys">Key</label>
+                <select id="ddl-keys"></select>
+              </div>
+              <div class="setting-item">
+                <label for="ddl-values">Value</label>
+                <select id="ddl-values"></select>
+              </div>
+            </div>
+
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="previewData()">
+                  Preview
+                </button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <label for="ddl-preview">test</label>
+              <select id="ddl-preview"></select>
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="saveDDL()">Save</button>
+              </div>
+            </div>
+            }
+
+            <!-- table datasource settings -->
+
+            @if(this.fieldType == ActionTypes.table.toString()){
+            <div class="setting-item">
+              <label for="field-name">Source URL</label>
+              <input
+                [(ngModel)]="tableURL"
+                type="text"
+                id="source-url"
+                placeholder="Enter field name"
+              />
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="testTableURL()">
+                  Test URL
+                </button>
+              </div>
+            </div>
+            <div class="table-grid">
+              @for (key of tableKeys; let i = $index; track key) {
+              <div class="setting-item">
+                <label for="table-ddl-column-{{ i + 1 }}">column{{ i + 1 }}</label>
+                <select id="table-ddl-column-{{ i + 1 }}">
+                  @for (key of tableKeys; track key)
+                  { 
+                    <option value="{{key}}">{{key}}</option>
+                  }
+                </select>
+              </div>
+              }
+            </div>
+
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="saveTable()">Save</button>
+              </div>
+            </div>
+            }
+
+            <!-- end of settings -->
+
+            }
+
             <div class="setting-item">
               <label for="field-name">Field Name</label>
               <input
