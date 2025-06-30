@@ -5,6 +5,7 @@ import {
   FieldServicesService,
   ActionTypes,
 } from '../services/field-services.service';
+import { FieldSettingsComponent } from '../field-settings/field-settings.component';
 
 export interface sectionCorners {
   sectionId: string;
@@ -14,10 +15,22 @@ export interface sectionCorners {
   bottomLeft: { x: number; y: number };
 }
 
+interface FieldConfig {
+  id: string;
+  type: ActionTypes;
+  label: string;
+  placeholder: string;
+  size: number;
+  options?: string[];
+  minRange?: number;
+  maxRange?: number;
+  required: boolean;
+}
+
 @Component({
   selector: 'app-form-builder',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, FieldSettingsComponent],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -34,6 +47,7 @@ export class FormBuilderComponent implements AfterViewInit {
   ActionTypes = ActionTypes;
   currentPage: number = 1;
   rowsPerPage: number = 5;
+  // activeFieldId: string | null = null;
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -67,6 +81,7 @@ export class FormBuilderComponent implements AfterViewInit {
       const activeItems = this.grid.el.querySelectorAll(
         '.field-grid-stack-item.active'
       );
+
       activeItems.forEach((item) => item.classList.remove('active'));
     });
 
@@ -153,7 +168,7 @@ export class FormBuilderComponent implements AfterViewInit {
     this.innerGrids.set(innerGridId, grid);
   }
 
-  addTextFieldToSection(innerGridId: string, actionType: ActionTypes): void {
+  addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
     const innerGrid = this.innerGrids.get(innerGridId);
     if (!innerGrid) {
       console.warn('No grid found for ID:', innerGridId);
@@ -326,34 +341,31 @@ export class FormBuilderComponent implements AfterViewInit {
     if (droppedInSection) {
       switch (actionType) {
         case ActionTypes.shortText.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.shortText
           );
           break;
         case ActionTypes.radioGroup.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.radioGroup
           );
           break;
         case ActionTypes.dropDownList.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.dropDownList
           );
           break;
         case ActionTypes.checkbox.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.checkbox
           );
           break;
         case ActionTypes.table.toString():
-          this.addTextFieldToSection(
-            droppedInSection.sectionId,
-            ActionTypes.table
-          );
+          this.addFieldToSection(droppedInSection.sectionId, ActionTypes.table);
           break;
       }
     }
@@ -500,7 +512,9 @@ export class FormBuilderComponent implements AfterViewInit {
     this.renderTableBody(table, selectedColumns, this.currentPage);
 
     // find pagination container
-    let pagination = table.parentElement?.parentElement?.querySelector('.pagination') as HTMLElement;
+    let pagination = table.parentElement?.parentElement?.querySelector(
+      '.pagination'
+    ) as HTMLElement;
 
     this.renderPagination(selectedColumns, pagination);
 

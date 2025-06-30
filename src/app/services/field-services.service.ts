@@ -57,6 +57,7 @@ export class FieldServicesService {
   createShortText(parameters: fieldParameters) {
     const fieldItem = this.createFieldContainer(parameters);
     // const fieldOptionsBox = this.createFieldOptionsBox();
+    fieldItem.setAttribute('gs-no-resize', 'true');
 
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');

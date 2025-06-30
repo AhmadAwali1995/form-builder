@@ -1,0 +1,48 @@
+{
+    "fields": [
+        {
+            "type": "text",
+            "label": "First Name",
+            "name": "firstName",
+            "required": true,
+            "size": "small",
+            "placeholder": "Enter your first name",
+            "defaultValue": "",
+            "minValue": 0,
+            "maxValue": 0
+        },
+        {
+            "type": "select",
+            "label": "Country",
+            "name": "country",
+            "required": true,
+            "size": "medium",
+            "placeholder": "",
+            "defaultValue": "",
+            "options": [
+                "Saudi Arabia",
+                "Jordan",
+                "Egypt"
+            ]
+        },
+        {
+            "type": "radio",
+            "label": "Gender",
+            "name": "gender",
+            "required": true,
+            "size": "large",
+            "direction": "horizontal",
+            "options": [
+                "Male",
+                "Female"
+            ]
+        },
+        {
+            "type": "checkbox",
+            "label": "I agree to the Terms and Conditions",
+            "name": "agree",
+            "required": true,
+            "size": "full"
+        }
+    ]
+}
