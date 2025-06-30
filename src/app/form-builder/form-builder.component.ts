@@ -647,9 +647,8 @@ export class FormBuilderComponent implements AfterViewInit {
 
     console.log('✅ Exported sections:', sections);
 
-    this.router.navigate(['/preview'], {
-      state: { sections },
-    });
+    localStorage.setItem('form-sections', JSON.stringify(sections));
+    window.open('/preview', '_blank');
   }
 
   parseFieldHtml(html: string): any {
@@ -669,6 +668,9 @@ export class FormBuilderComponent implements AfterViewInit {
 
     const type = typeAttr || tagName;
 
+    const groupLabel =
+    tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
+
     const json: any = {
       type:
         tagName === 'select'
@@ -678,13 +680,13 @@ export class FormBuilderComponent implements AfterViewInit {
           : typeAttr === 'checkbox'
           ? 'checkbox'
           : 'text',
-      label: label?.textContent?.trim() || '',
+      label: groupLabel || '',
       name: label?.textContent?.trim() || '',
       id: input.id,
       required: input.hasAttribute('required'),
       size: 'medium', // placeholder, you can infer from layout later
       placeholder: input.getAttribute('placeholder') || '',
-      defaultValue: (input as HTMLInputElement).value || '',
+      defaultValue: (input as HTMLInputElement).value || ''
     };
 
     if (json.type === 'text') {

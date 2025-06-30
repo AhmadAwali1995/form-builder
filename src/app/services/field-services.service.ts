@@ -116,9 +116,7 @@ export class FieldServicesService {
           .map(
             (label, i) => `
           <div class="radio-option">
-            <input type="radio" id="${radioGroupName}-${
-              i + 1
-            }" name="${radioGroupName}" class="styled-radio" />
+            <input type="radio" id="${radioGroupName}-${i + 1}" name="${radioGroupName}" class="styled-radio" value="${i + 1}" />
             <label for="${radioGroupName}-${i + 1}">${label}</label>
           </div>
         `
@@ -151,7 +149,7 @@ export class FieldServicesService {
       const wrapper = document.createElement('div');
       wrapper.classList.add('checkbox-wrapper');
       wrapper.innerHTML = `
-        <input type="checkbox" id="${checkboxId}" class="styled-checkbox" />
+        <input type="checkbox" id="${checkboxId}" class="styled-checkbox" value="${index + 1}" />
         <label for="${checkboxId}" class="inner-grid-label">${label}</label>
       `;
       checkboxGroup.appendChild(wrapper);

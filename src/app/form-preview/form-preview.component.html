@@ -1,5 +1,5 @@
 <div class="app-form-preview">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="schema">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="sections">
  
     <div class="form-row">
       <ng-container *ngFor="let field of sections[0].fields">
@@ -45,8 +45,8 @@
               </label>
               <select [formControlName]="field.json.name">
                 <option value="">-- Select --</option>
-                <option *ngFor="let opt of field.json.options" [value]="opt">
-                  {{ opt }}
+                <option *ngFor="let opt of field.json.options" [value]="opt.value">
+                  {{ opt.label }}
                 </option>
               </select>
               <div
@@ -67,19 +67,19 @@
                 {{ field.json.label }}
                 <span *ngIf="field.json.required" class="required-star">*</span>
               </label>
+              <!-- field.json.direction === 'horizontal' ? 'horizontal' : 'vertical' -->
               <div
                 [ngClass]="[
-                  'radio-group',
-                  field.json.direction === 'horizontal' ? 'horizontal' : 'vertical'
+                  'radio-group vertical',
                 ]"
               >
                 <label *ngFor="let opt of field.json.options">
                   <input
                     type="radio"
-                    [value]="opt"
+                    [value]="opt.value"
                     [formControlName]="field.json.name"
                   />
-                  {{ opt }}
+                  {{ opt.label }}
                 </label>
               </div>
               <div
@@ -96,21 +96,28 @@
  
             <!-- CHECKBOX -->
             <ng-container *ngSwitchCase="'checkbox'">
-              <label>
-                <input type="checkbox" [formControlName]="field.json.name" />
-                {{ field.json.label }}
-                <span *ngIf="field.json.required" class="required-star">*</span>
-              </label>
-              <div
+              <div class="checkbox-vertical">
+                {{field.json.label}}
+
+                @for (option of field.json.options; track option._id) {
+                  <label>
+                    
+                    <input type="checkbox" [formControlName]="field.json.name" />
+                    {{ option.label }}
+                    <!-- <span *ngIf="field.json.required" class="required-star">*</span> -->
+                  </label>
+                }
+                <div
                 class="error-msg"
                 *ngIf="
                   form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
-                "
+                  "
               >
-                <div *ngIf="form.get(field.json.name)?.hasError('required')">
-                  This field is required.
-                </div>
+              <div *ngIf="form.get(field.json.name)?.hasError('required')">
+                This field is required.
               </div>
+            </div>
+          </div>
             </ng-container>
           </div>
         </div>

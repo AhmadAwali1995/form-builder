@@ -1,5 +1,5 @@
 .app-form-preview {
-    display: flex;
+    // display: flex;
     width: 70%;
     padding: 24px 32px;
     margin: 50px auto;
@@ -16,17 +16,16 @@
  
     form {
  
+        .checkbox-vertical{
+            display: flex;
+            flex-direction: column;
+        }
         .form-row {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: 16px;
  
-            div {
-                // display: flex;
-                // flex-direction: column;
-                // gap: 8px;
-            }
- 
+      
             .field-size-small {
                 grid-column: span 3; // 3/12 = 25%
             }

@@ -23,18 +23,28 @@ export class FormPreviewComponent implements OnInit {
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
-  
-  ngOnInit(): void {
-    const navigation = window.history.state;
-    this.sections = navigation.sections || [];
-    console.log(this.sections);
+
+  async ngOnInit(): Promise<void> {
+    const raw = localStorage.getItem('form-sections');
+    if (raw) {
+      this.sections = JSON.parse(raw);
+      const allFields = this.sections.flatMap((s) =>
+        s.fields.map((f) => f.json)
+      );
+      await this.buildForm(allFields);
+      debugger;
+    }
+
+    // const navigation = window.history.state;
+    // this.sections = navigation.sections || [];
+    // console.log(this.sections);
     // this.http.get('/form-schema.json').subscribe((data) => {
     //   this.schema = data;
     //   this.buildForm(this.schema.fields);
     // });
   }
 
-  buildForm(fields: any[]) {
+  async buildForm(fields: any[]) {
     const controls: Record<string, any> = {};
 
     for (const field of fields) {
