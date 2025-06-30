@@ -5,7 +5,7 @@ import {
   FieldServicesService,
   ActionTypes,
 } from '../services/field-services.service';
-
+import { Router, RouterModule } from '@angular/router';
 export interface sectionCorners {
   sectionId: string;
   topRight: { x: number; y: number };
@@ -17,7 +17,7 @@ export interface sectionCorners {
 @Component({
   selector: 'app-form-builder',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterModule],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -34,8 +34,10 @@ export class FormBuilderComponent implements AfterViewInit {
   ActionTypes = ActionTypes;
   currentPage: number = 1;
   rowsPerPage: number = 5;
-
-  constructor(private fieldService: FieldServicesService) {}
+  constructor(
+    private fieldService: FieldServicesService,
+    private router: Router
+  ) {}
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
       column: this.columnNum,
@@ -95,6 +97,7 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-w', w.toString());
     item.setAttribute('gs-h', h.toString());
     item.setAttribute('id', innerGridId);
+    item.setAttribute('gs-id', innerGridId);
 
     // Outer content wrapper
     const content = document.createElement('div');
@@ -153,7 +156,7 @@ export class FormBuilderComponent implements AfterViewInit {
     this.innerGrids.set(innerGridId, grid);
   }
 
-  addTextFieldToSection(innerGridId: string, actionType: ActionTypes): void {
+  addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
     const innerGrid = this.innerGrids.get(innerGridId);
     if (!innerGrid) {
       console.warn('No grid found for ID:', innerGridId);
@@ -326,34 +329,31 @@ export class FormBuilderComponent implements AfterViewInit {
     if (droppedInSection) {
       switch (actionType) {
         case ActionTypes.shortText.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.shortText
           );
           break;
         case ActionTypes.radioGroup.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.radioGroup
           );
           break;
         case ActionTypes.dropDownList.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.dropDownList
           );
           break;
         case ActionTypes.checkbox.toString():
-          this.addTextFieldToSection(
+          this.addFieldToSection(
             droppedInSection.sectionId,
             ActionTypes.checkbox
           );
           break;
         case ActionTypes.table.toString():
-          this.addTextFieldToSection(
-            droppedInSection.sectionId,
-            ActionTypes.table
-          );
+          this.addFieldToSection(droppedInSection.sectionId, ActionTypes.table);
           break;
       }
     }
@@ -500,7 +500,9 @@ export class FormBuilderComponent implements AfterViewInit {
     this.renderTableBody(table, selectedColumns, this.currentPage);
 
     // find pagination container
-    let pagination = table.parentElement?.parentElement?.querySelector('.pagination') as HTMLElement;
+    let pagination = table.parentElement?.parentElement?.querySelector(
+      '.pagination'
+    ) as HTMLElement;
 
     this.renderPagination(selectedColumns, pagination);
 
@@ -600,7 +602,122 @@ export class FormBuilderComponent implements AfterViewInit {
     }, 0);
   }
 
-  deleteField() {
-    debugger;
+  previewJson() {
+    const sections: { id: string; fields: { id: string; json: JSON }[] }[] = [];
+
+    const outerNodes = this.grid.save();
+    if (!Array.isArray(outerNodes)) return;
+
+    outerNodes.forEach((outerNode) => {
+      const sectionId = outerNode.id;
+      if (!sectionId) return;
+
+      const sectionEl = document.querySelector(`[gs-id="${sectionId}"]`);
+      if (!sectionEl) return;
+
+      const sectionGridEl = sectionEl.querySelector('.grid-stack');
+      if (!sectionGridEl) return;
+
+      const innerGrid = this.innerGrids.get(sectionId);
+      if (!innerGrid) return;
+
+      const fields: { id: string; json: JSON }[] = [];
+
+      const innerNodes = innerGrid.save();
+      if (Array.isArray(innerNodes)) {
+        innerNodes.forEach((node) => {
+          const fieldId = node.id;
+          if (!fieldId) return;
+
+          const fieldEl = sectionGridEl.querySelector(`[gs-id="${fieldId}"]`);
+          if (!fieldEl) return;
+
+          fields.push({
+            id: fieldId,
+            json: this.parseFieldHtml(fieldEl.innerHTML.trim()),
+          });
+        });
+      }
+
+      sections.push({
+        id: sectionId,
+        fields,
+      });
+    });
+
+    console.log('✅ Exported sections:', sections);
+
+    this.router.navigate(['/preview'], {
+      state: { sections },
+    });
+  }
+
+  parseFieldHtml(html: string): any {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    const input = tempDiv.querySelector('input, select, textarea') as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | HTMLTextAreaElement;
+    const label = tempDiv.querySelector('label');
+
+    if (!input) return null;
+
+    const typeAttr = input.getAttribute('type');
+    const tagName = input.tagName.toLowerCase();
+
+    const type = typeAttr || tagName;
+
+    const json: any = {
+      type:
+        tagName === 'select'
+          ? 'select'
+          : typeAttr === 'radio'
+          ? 'radio'
+          : typeAttr === 'checkbox'
+          ? 'checkbox'
+          : 'text',
+      label: label?.textContent?.trim() || '',
+      name: label?.textContent?.trim() || '',
+      id: input.id,
+      required: input.hasAttribute('required'),
+      size: 'medium', // placeholder, you can infer from layout later
+      placeholder: input.getAttribute('placeholder') || '',
+      defaultValue: (input as HTMLInputElement).value || '',
+    };
+
+    if (json.type === 'text') {
+      json.minValue = Number(input.getAttribute('min') || 0);
+      json.maxValue = Number(input.getAttribute('max') || 0);
+    }
+
+    if (json.type === 'select') {
+      json.options = [];
+      tempDiv.querySelectorAll('option').forEach((opt) => {
+        const option = opt as HTMLOptionElement;
+        json.options.push({
+          value: option.value,
+          label: option.textContent?.trim() || '',
+        });
+      });
+    }
+
+    if (json.type === 'radio' || json.type === 'checkbox') {
+      json.options = [];
+      tempDiv
+        .querySelectorAll('input[type="radio"], input[type="checkbox"]')
+        .forEach((opt) => {
+          const input = opt as HTMLInputElement;
+          const optLabel = tempDiv.querySelector(`label[for="${input.id}"]`);
+          json.options.push({
+            value: input.value || input.id,
+            label: optLabel?.textContent?.trim() || '',
+          });
+        });
+      if (json.type === 'radio') json.direction = 'horizontal';
+    }
+
+    return json;
   }
 }

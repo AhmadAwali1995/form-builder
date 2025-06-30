@@ -44,6 +44,11 @@ export class FieldServicesService {
     fieldItem.setAttribute('gs-y', parameters.y.toString());
     fieldItem.setAttribute('gs-w', parameters.w.toString());
     fieldItem.setAttribute('gs-h', parameters.h?.toString() || '5');
+
+    const id = `field-${this.guid()}`;
+    fieldItem.setAttribute('id', id);
+    fieldItem.setAttribute('gs-id', id);
+    
     return fieldItem;
   }
 
