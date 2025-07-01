@@ -181,11 +181,10 @@ export class FieldServicesService {
     table.appendChild(tbody);
     tableWrapper.appendChild(table);
 
-    // Sample data > 5 rows
-    const totalData = Array.from({ length: 12 }, (_, i) => ({
-      a: `Row ${i + 1} A`,
-      b: `Row ${i + 1} B`,
-      c: `Row ${i + 1} C`,
+    const totalData = Array.from({ length: 1 }, (_, i) => ({
+      a: `---`,
+      b: `---`,
+      c: `---`,
     }));
 
     const rowsPerPage = 5;
