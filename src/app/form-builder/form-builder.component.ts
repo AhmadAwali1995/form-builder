@@ -1,23 +1,16 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
 import { FormsModule } from '@angular/forms';
-import {
-  FieldServicesService,
-  ActionTypes,
-} from '../services/field-services.service';
+import { FieldServicesService } from '../services/field-services.service';
 import { Router, RouterModule } from '@angular/router';
-export interface sectionCorners {
-  sectionId: string;
-  topRight: { x: number; y: number };
-  topLeft: { x: number; y: number };
-  bottomRight: { x: number; y: number };
-  bottomLeft: { x: number; y: number };
-}
+import { SettingsComponentComponent } from '../settings-component/settings-component.component';
+import { sectionCorners } from '../shared/interfaces/section-corners';
+import { ActionTypes } from '../shared/enums/action-types';
 
 @Component({
   selector: 'app-form-builder',
   standalone: true,
-  imports: [FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule, SettingsComponentComponent],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -645,7 +638,7 @@ export class FormBuilderComponent implements AfterViewInit {
       });
     });
 
-    console.log('✅ Exported sections:', sections);
+    // console.log('✅ Exported sections:', sections);
 
     localStorage.setItem('form-sections', JSON.stringify(sections));
     window.open('/preview', '_blank');
@@ -669,7 +662,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const type = typeAttr || tagName;
 
     const groupLabel =
-    tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
+      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
 
     const json: any = {
       type:
@@ -686,7 +679,7 @@ export class FormBuilderComponent implements AfterViewInit {
       required: input.hasAttribute('required'),
       size: 'medium', // placeholder, you can infer from layout later
       placeholder: input.getAttribute('placeholder') || '',
-      defaultValue: (input as HTMLInputElement).value || ''
+      defaultValue: (input as HTMLInputElement).value || '',
     };
 
     if (json.type === 'text') {

@@ -19,6 +19,7 @@ export class FormPreviewComponent implements OnInit {
   form: FormGroup;
   schema: any;
   sections: { id: string; fields: { id: string; json: any }[] }[] = [];
+  currentSectionIndex = 0;
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
@@ -31,8 +32,8 @@ export class FormPreviewComponent implements OnInit {
       const allFields = this.sections.flatMap((s) =>
         s.fields.map((f) => f.json)
       );
+
       await this.buildForm(allFields);
-      debugger;
     }
 
     // const navigation = window.history.state;
@@ -78,7 +79,20 @@ export class FormPreviewComponent implements OnInit {
     this.form = this.fb.group(controls);
   }
 
+  nextSection(): void {
+    if (this.currentSectionIndex < this.sections.length - 1) {
+      this.currentSectionIndex++;
+    }
+  }
+
+  prevSection(): void {
+    if (this.currentSectionIndex > 0) {
+      this.currentSectionIndex--;
+    }
+  }
+
   onSubmit() {
+    console.log('Form sections', this.sections);
     if (this.form.valid) {
       console.log('Form Value:', this.form.value);
     } else {

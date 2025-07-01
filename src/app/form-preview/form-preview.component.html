@@ -1,131 +1,131 @@
 <div class="app-form-preview">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="sections">
- 
+  @if (sections.length > 0) {
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- CURRENT SECTION ONLY -->
+    @if (sections[currentSectionIndex]) { @let section =
+    sections[currentSectionIndex];
     <div class="form-row">
-      <ng-container *ngFor="let field of sections[0].fields">
-        <div [ngClass]="'field-size-' + (field.json.size || 'full')">
-          <div [ngSwitch]="field.json.type">
-            <!-- TEXT -->
-            <ng-container *ngSwitchCase="'text'">
-              <label>
-                {{ field.json.label }}
-                <span *ngIf="field.json.required" class="required-star">*</span>
-              </label>
-              <input
-                type="text"
-                [formControlName]="field.json.name"
-                [placeholder]="field.json.placeholder || ''"
-              />
-              <div
-                class="error-msg"
-                *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
-                "
-              >
-                <div *ngIf="form.get(field.json.name)?.hasError('required')">
-                  This field is required.
-                </div>
-                <div *ngIf="form.get(field.json.name)?.hasError('email')">
-                  Please enter a valid email address.
-                </div>
-                <div *ngIf="form.get(field.json.name)?.hasError('minlength')">
-                  Minimum {{ field.json.minValue }} characters required.
-                </div>
-                <div *ngIf="form.get(field.json.name)?.hasError('maxlength')">
-                  Maximum {{ field.json.maxValue }} characters allowed.
-                </div>
-              </div>
-            </ng-container>
- 
-            <!-- SELECT -->
-            <ng-container *ngSwitchCase="'select'">
-              <label>
-                {{ field.json.label }}
-                <span *ngIf="field.json.required" class="required-star">*</span>
-              </label>
-              <select [formControlName]="field.json.name">
-                <option value="">-- Select --</option>
-                <option *ngFor="let opt of field.json.options" [value]="opt.value">
-                  {{ opt.label }}
-                </option>
-              </select>
-              <div
-                class="error-msg"
-                *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
-                "
-              >
-                <div *ngIf="form.get(field.json.name)?.hasError('required')">
-                  This field is required.
-                </div>
-              </div>
-            </ng-container>
- 
-            <!-- RADIO -->
-            <ng-container *ngSwitchCase="'radio'">
-              <label>
-                {{ field.json.label }}
-                <span *ngIf="field.json.required" class="required-star">*</span>
-              </label>
-              <!-- field.json.direction === 'horizontal' ? 'horizontal' : 'vertical' -->
-              <div
-                [ngClass]="[
-                  'radio-group vertical',
-                ]"
-              >
-                <label *ngFor="let opt of field.json.options">
-                  <input
-                    type="radio"
-                    [value]="opt.value"
-                    [formControlName]="field.json.name"
-                  />
-                  {{ opt.label }}
-                </label>
-              </div>
-              <div
-                class="error-msg"
-                *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
-                "
-              >
-                <div *ngIf="form.get(field.json.name)?.hasError('required')">
-                  This field is required.
-                </div>
-              </div>
-            </ng-container>
- 
-            <!-- CHECKBOX -->
-            <ng-container *ngSwitchCase="'checkbox'">
-              <div class="checkbox-vertical">
-                {{field.json.label}}
+      @for (field of section.fields; track $index) {
+      <div [ngClass]="'field-size-' + (field.json.size || 'full')">
+        <div [ngSwitch]="field.json.type">
+          <!-- TEXT FIELD -->
+          @if (field.json.type === 'text') {
+          <label>
+            {{ field.json.label }}
+            @if (field.json.required) {
+            <span class="required-star">*</span>
+            }
+          </label>
+          <input
+            type="text"
+            [formControlName]="field.json.name"
+            [placeholder]="field.json.placeholder || ''"
+          />
+          @if (form.get(field.json.name)?.touched &&
+          form.get(field.json.name)?.errors) {
+          <div class="error-msg">
+            @if (form.get(field.json.name)?.hasError('required')) {
+            <div>This field is required.</div>
+            } @if (form.get(field.json.name)?.hasError('email')) {
+            <div>Please enter a valid email address.</div>
+            } @if (form.get(field.json.name)?.hasError('minlength')) {
+            <div>Minimum {{ field.json.minValue }} characters required.</div>
+            } @if (form.get(field.json.name)?.hasError('maxlength')) {
+            <div>Maximum {{ field.json.maxValue }} characters allowed.</div>
+            }
+          </div>
+          } }
 
-                @for (option of field.json.options; track option._id) {
-                  <label>
-                    
-                    <input type="checkbox" [formControlName]="field.json.name" />
-                    {{ option.label }}
-                    <!-- <span *ngIf="field.json.required" class="required-star">*</span> -->
-                  </label>
-                }
-                <div
-                class="error-msg"
-                *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
-                  "
-              >
-              <div *ngIf="form.get(field.json.name)?.hasError('required')">
-                This field is required.
-              </div>
+          <!-- SELECT -->
+          @if (field.json.type === 'select') {
+          <label>
+            {{ field.json.label }}
+            @if (field.json.required) {
+            <span class="required-star">*</span>
+            }
+          </label>
+          <select [formControlName]="field.json.name">
+            <option value="">-- Select --</option>
+            @for (opt of field.json.options; track $index) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          @if (form.get(field.json.name)?.touched &&
+          form.get(field.json.name)?.errors) {
+          <div class="error-msg">
+            @if (form.get(field.json.name)?.hasError('required')) {
+            <div>This field is required.</div>
+            }
+          </div>
+          } }
+
+          <!-- RADIO -->
+          @if (field.json.type === 'radio') {
+          <label>
+            {{ field.json.label }}
+            @if (field.json.required) {
+            <span class="required-star">*</span>
+            }
+          </label>
+          <div [ngClass]="['radio-group vertical']">
+            <!-- field.json.direction === 'horizontal' ? 'horizontal' : 'vertical' -->
+            @for (opt of field.json.options; track $index) {
+            <label>
+              <input
+                type="radio"
+                [value]="opt.value"
+                [formControlName]="field.json.name"
+              />
+              {{ opt.label }}
+            </label>
+            }
+          </div>
+          @if (form.get(field.json.name)?.touched &&
+          form.get(field.json.name)?.errors) {
+          <div class="error-msg">
+            @if (form.get(field.json.name)?.hasError('required')) {
+            <div>This field is required.</div>
+            }
+          </div>
+          } }
+
+          <!-- CHECKBOX -->
+          @if (field.json.type === 'checkbox') {
+          <div class="checkbox-vertical">
+            {{ field.json.label }}
+            @for (option of field.json.options; track option._id) {
+            <label>
+              <input type="checkbox" [formControlName]="field.json.name" />
+              {{ option.label }}
+            </label>
+            } @if (form.get(field.json.name)?.touched &&
+            form.get(field.json.name)?.errors) {
+            <div class="error-msg">
+              @if (form.get(field.json.name)?.hasError('required')) {
+              <div>This field is required.</div>
+              }
             </div>
+            }
           </div>
-            </ng-container>
-          </div>
+          }
         </div>
-      </ng-container>
+      </div>
+      }
     </div>
- 
-    <button type="submit">Submit</button>
+    }
+
+    <!-- NAVIGATION BUTTONS -->
+    <div class="form-navigation">
+      @if (currentSectionIndex !== 0) {
+      <button type="button" (click)="prevSection()">Previous</button>
+      } @if (currentSectionIndex < sections.length - 1) {
+      <button type="button" (click)="nextSection()" class="next-btn">
+        Next
+      </button>
+      } @else {
+      <button type="submit" class="next-btn">Submit</button>
+      }
+    </div>
   </form>
+  }
 </div>
- 
- 

@@ -1,20 +1,6 @@
 import { Injectable } from '@angular/core';
-
-export interface fieldParameters {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  count: number;
-}
-
-export enum ActionTypes {
-  shortText = 'ShortText',
-  dropDownList = 'dropDownList',
-  checkbox = 'checkbox',
-  radioGroup = 'radioGroup',
-  table = 'table',
-}
+import { fieldParameters } from '../shared/interfaces/field-parameters';
+import { ActionTypes } from '../shared/enums/action-types';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +34,7 @@ export class FieldServicesService {
     const id = `field-${this.guid()}`;
     fieldItem.setAttribute('id', id);
     fieldItem.setAttribute('gs-id', id);
-    
+
     return fieldItem;
   }
 
@@ -116,7 +102,9 @@ export class FieldServicesService {
           .map(
             (label, i) => `
           <div class="radio-option">
-            <input type="radio" id="${radioGroupName}-${i + 1}" name="${radioGroupName}" class="styled-radio" value="${i + 1}" />
+            <input type="radio" id="${radioGroupName}-${
+              i + 1
+            }" name="${radioGroupName}" class="styled-radio" value="${i + 1}" />
             <label for="${radioGroupName}-${i + 1}">${label}</label>
           </div>
         `
@@ -149,7 +137,9 @@ export class FieldServicesService {
       const wrapper = document.createElement('div');
       wrapper.classList.add('checkbox-wrapper');
       wrapper.innerHTML = `
-        <input type="checkbox" id="${checkboxId}" class="styled-checkbox" value="${index + 1}" />
+        <input type="checkbox" id="${checkboxId}" class="styled-checkbox" value="${
+        index + 1
+      }" />
         <label for="${checkboxId}" class="inner-grid-label">${label}</label>
       `;
       checkboxGroup.appendChild(wrapper);
