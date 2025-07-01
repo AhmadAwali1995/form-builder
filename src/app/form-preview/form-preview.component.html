@@ -1,6 +1,9 @@
 <div class="app-form-preview">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="schema">
- 
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    *ngIf="form && sections.length > 0"
+  >
     <div class="form-row">
       <ng-container *ngFor="let field of sections[0].fields">
         <div [ngClass]="'field-size-' + (field.json.size || 'full')">
@@ -19,7 +22,8 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
+                  form.get(field.json.name)?.touched &&
+                  form.get(field.json.name)?.errors
                 "
               >
                 <div *ngIf="form.get(field.json.name)?.hasError('required')">
@@ -36,7 +40,7 @@
                 </div>
               </div>
             </ng-container>
- 
+
             <!-- SELECT -->
             <ng-container *ngSwitchCase="'select'">
               <label>
@@ -52,7 +56,8 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
+                  form.get(field.json.name)?.touched &&
+                  form.get(field.json.name)?.errors
                 "
               >
                 <div *ngIf="form.get(field.json.name)?.hasError('required')">
@@ -60,7 +65,7 @@
                 </div>
               </div>
             </ng-container>
- 
+
             <!-- RADIO -->
             <ng-container *ngSwitchCase="'radio'">
               <label>
@@ -70,7 +75,9 @@
               <div
                 [ngClass]="[
                   'radio-group',
-                  field.json.direction === 'horizontal' ? 'horizontal' : 'vertical'
+                  field.json.direction === 'horizontal'
+                    ? 'horizontal'
+                    : 'vertical'
                 ]"
               >
                 <label *ngFor="let opt of field.json.options">
@@ -85,7 +92,8 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
+                  form.get(field.json.name)?.touched &&
+                  form.get(field.json.name)?.errors
                 "
               >
                 <div *ngIf="form.get(field.json.name)?.hasError('required')">
@@ -93,7 +101,7 @@
                 </div>
               </div>
             </ng-container>
- 
+
             <!-- CHECKBOX -->
             <ng-container *ngSwitchCase="'checkbox'">
               <label>
@@ -104,7 +112,8 @@
               <div
                 class="error-msg"
                 *ngIf="
-                  form.get(field.json.name)?.touched && form.get(field.json.name)?.errors
+                  form.get(field.json.name)?.touched &&
+                  form.get(field.json.name)?.errors
                 "
               >
                 <div *ngIf="form.get(field.json.name)?.hasError('required')">
@@ -116,9 +125,7 @@
         </div>
       </ng-container>
     </div>
- 
+
     <button type="submit">Submit</button>
   </form>
 </div>
- 
- 

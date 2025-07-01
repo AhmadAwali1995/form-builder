@@ -647,9 +647,12 @@ export class FormBuilderComponent implements AfterViewInit {
 
     console.log('✅ Exported sections:', sections);
 
-    this.router.navigate(['/preview'], {
-      state: { sections },
-    });
+    // this.router.navigate(['/preview'], {
+    //   state: { sections },
+    // });
+
+    sessionStorage.setItem('form_sections', JSON.stringify(sections));
+    window.open('/preview', '_blank');
   }
 
   parseFieldHtml(html: string): any {

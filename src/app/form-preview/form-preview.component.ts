@@ -17,21 +17,20 @@ import { RouterModule } from '@angular/router';
 })
 export class FormPreviewComponent implements OnInit {
   form: FormGroup;
-  schema: any;
   sections: { id: string; fields: { id: string; json: any }[] }[] = [];
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
-  
+
   ngOnInit(): void {
-    const navigation = window.history.state;
-    this.sections = navigation.sections || [];
-    console.log(this.sections);
-    // this.http.get('/form-schema.json').subscribe((data) => {
-    //   this.schema = data;
-    //   this.buildForm(this.schema.fields);
-    // });
+    const stored = sessionStorage.getItem('form_sections');
+    if (stored) {
+      this.sections = JSON.parse(stored);
+      if (this.sections.length > 0 && this.sections[0].fields?.length > 0) {
+        this.buildForm(this.sections[0].fields);
+      }
+    }
   }
 
   buildForm(fields: any[]) {
