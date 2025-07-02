@@ -81,19 +81,19 @@ export class FormPreviewComponent implements OnInit {
     this.form = this.fb.group(controls);
   }
 
-  nextSection(): void {
+  async nextSection() {
     if (this.currentSectionIndex < this.sections.length - 1) {
       this.currentSectionIndex++;
     }
   }
 
-  prevSection(): void {
+  async prevSection() {
     if (this.currentSectionIndex > 0) {
       this.currentSectionIndex--;
     }
   }
 
-  onSubmit() {
+  async onSubmit() {
     console.log('Form sections', this.sections);
     if (this.form.valid) {
       console.log('Form Value:', this.form.value);
