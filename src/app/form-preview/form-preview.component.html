@@ -6,64 +6,64 @@
     sections[currentSectionIndex];
     <div class="form-row">
       @for (field of section.fields; track $index) {
-      <div [ngClass]="'field-size-' + (field.json.size || 'full')">
-        <div [ngSwitch]="field.json.type">
+      <div [ngClass]="'field-size-' + (field.json.fieldSize || 'full')">
+        <div [ngSwitch]="field.json.fieldType">
           <!-- TEXT FIELD -->
-          @if (field.json.type === 'text') {
+          @if (field.json.fieldType === 'text') {
           <label>
-            {{ field.json.label }}
-            @if (field.json.required) {
+            {{ field.json.fieldLabel }}
+            @if (field.json.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
           <input
             type="text"
-            [formControlName]="field.json.name"
-            [placeholder]="field.json.placeholder || ''"
+            [formControlName]="field.json.fieldName"
+            [placeholder]="field.json.placeholderText || ''"
           />
-          @if (form.get(field.json.name)?.touched &&
-          form.get(field.json.name)?.errors) {
+          @if (form.get(field.json.fieldName)?.touched &&
+          form.get(field.json.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.name)?.hasError('required')) {
+            @if (form.get(field.json.fieldName)?.hasError('required')) {
             <div>This field is required.</div>
-            } @if (form.get(field.json.name)?.hasError('email')) {
+            } @if (form.get(field.json.fieldName)?.hasError('email')) {
             <div>Please enter a valid email address.</div>
-            } @if (form.get(field.json.name)?.hasError('minlength')) {
-            <div>Minimum {{ field.json.minValue }} characters required.</div>
-            } @if (form.get(field.json.name)?.hasError('maxlength')) {
-            <div>Maximum {{ field.json.maxValue }} characters allowed.</div>
+            } @if (form.get(field.json.fieldName)?.hasError('minlength')) {
+            <div>Minimum {{ field.json.minRange }} characters required.</div>
+            } @if (form.get(field.json.fieldName)?.hasError('maxlength')) {
+            <div>Maximum {{ field.json.maxRange }} characters allowed.</div>
             }
           </div>
           } }
 
           <!-- SELECT -->
-          @if (field.json.type === 'select') {
+          @if (field.json.fieldType === 'select') {
           <label>
-            {{ field.json.label }}
-            @if (field.json.required) {
+            {{ field.json.fieldLabel }}
+            @if (field.json.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
-          <select [formControlName]="field.json.name">
+          <select [formControlName]="field.json.fieldName">
             <option value="">-- Select --</option>
             @for (opt of field.json.options; track $index) {
             <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
-          @if (form.get(field.json.name)?.touched &&
-          form.get(field.json.name)?.errors) {
+          @if (form.get(field.json.fieldName)?.touched &&
+          form.get(field.json.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.name)?.hasError('required')) {
+            @if (form.get(field.json.fieldName)?.hasError('required')) {
             <div>This field is required.</div>
             }
           </div>
           } }
 
           <!-- RADIO -->
-          @if (field.json.type === 'radio') {
+          @if (field.json.fieldType === 'radio') {
           <label>
-            {{ field.json.label }}
-            @if (field.json.required) {
+            {{ field.json.fieldLabel }}
+            @if (field.json.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
@@ -74,34 +74,34 @@
               <input
                 type="radio"
                 [value]="opt.value"
-                [formControlName]="field.json.name"
+                [formControlName]="field.json.fieldName"
               />
               {{ opt.label }}
             </label>
             }
           </div>
-          @if (form.get(field.json.name)?.touched &&
-          form.get(field.json.name)?.errors) {
+          @if (form.get(field.json.fieldName)?.touched &&
+          form.get(field.json.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.name)?.hasError('required')) {
+            @if (form.get(field.json.fieldName)?.hasError('required')) {
             <div>This field is required.</div>
             }
           </div>
           } }
 
           <!-- CHECKBOX -->
-          @if (field.json.type === 'checkbox') {
+          @if (field.json.fieldType === 'checkbox') {
           <div class="checkbox-vertical">
-            {{ field.json.label }}
-            @for (option of field.json.options; track option._id) {
+            {{ field.json.fieldLabel }}
+            @for (option of field.json.options; track $index) {
             <label>
-              <input type="checkbox" [formControlName]="field.json.name" />
+              <input type="checkbox" [formControlName]="field.json.fieldName" />
               {{ option.label }}
             </label>
-            } @if (form.get(field.json.name)?.touched &&
-            form.get(field.json.name)?.errors) {
+            } @if (form.get(field.json.fieldName)?.touched &&
+            form.get(field.json.fieldName)?.errors) {
             <div class="error-msg">
-              @if (form.get(field.json.name)?.hasError('required')) {
+              @if (form.get(field.json.fieldName)?.hasError('required')) {
               <div>This field is required.</div>
               }
             </div>

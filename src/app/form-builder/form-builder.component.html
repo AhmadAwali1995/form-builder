@@ -151,7 +151,7 @@
           </div>
         </div>
         <div class="buttons-section">
-          <button class="white-btn">
+          <button (click)="checkSettings()" class="white-btn">
             <p>X</p>
             <p>Edit</p>
           </button>
@@ -266,8 +266,15 @@
 
             <!-- end of settings -->
 
+            } @if (fieldId) {
+            <app-settings-component
+              [fieldId]="fieldId"
+              [fieldType]="fieldType"
+              [fieldSettings]="selectedFieldSettings"
+              (fieldUpdated)="onFieldUpdated($event)"
+            ></app-settings-component>
+
             }
-            <app-settings-component></app-settings-component>
           </div>
         </div>
       </div>

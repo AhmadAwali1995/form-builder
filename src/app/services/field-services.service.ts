@@ -34,7 +34,6 @@ export class FieldServicesService {
     const id = `field-${this.guid()}`;
     fieldItem.setAttribute('id', id);
     fieldItem.setAttribute('gs-id', id);
-
     return fieldItem;
   }
 
@@ -46,17 +45,16 @@ export class FieldServicesService {
   // }
 
   createShortText(parameters: fieldParameters) {
+    const ddlId = `shorttext-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
-    // const fieldOptionsBox = this.createFieldOptionsBox();
 
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
     fieldContentItem.innerHTML = `
-      <label class="inner-grid-label" for="text${parameters.count}">Text Field</label>
-      <input id="text${parameters.count}" type="text" placeholder="Text Field" class="inner-grid-textbox" >
+      <label class="inner-grid-label" for="${ddlId}">Text Field</label>
+      <input id="${ddlId}" data-field-type="${ActionTypes.shortText}" type="text" placeholder="Text Field" class="inner-grid-textbox" >
     `;
 
-    // fieldContentItem.appendChild(fieldOptionsBox);
     fieldItem.appendChild(fieldContentItem);
 
     return fieldItem;
@@ -88,16 +86,18 @@ export class FieldServicesService {
   }
 
   createRadioGroup(parameters: fieldParameters) {
+    const ddlId = `radiogroup-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
-    // const fieldOptionsBox = this.createFieldOptionsBox();
 
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
 
     const radioGroupName = `radio-group-${parameters.count}`;
     fieldContentItem.innerHTML = `
-      <label class="inner-grid-label">Select an Option</label>
-      <div class="radio-group-wrapper">
+      <label for="${ddlId}" class="inner-grid-label">Select an Option</label>
+      <div id="${ddlId}" data-field-type="${
+      ActionTypes.radioGroup
+    }" class="radio-group-wrapper">
         ${['Option 1', 'Option 2', 'Option 3']
           .map(
             (label, i) => `
@@ -120,8 +120,8 @@ export class FieldServicesService {
   }
 
   createCheckBox(parameters: fieldParameters) {
+    const ddlId = `checkbox-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
-    // const fieldOptionsBox = this.createFieldOptionsBox();
 
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
@@ -130,6 +130,11 @@ export class FieldServicesService {
 
     const checkboxGroup = document.createElement('div');
     checkboxGroup.classList.add('checkbox-group-wrapper');
+    checkboxGroup.setAttribute(
+      'data-field-type',
+      ActionTypes.checkbox.toString()
+    );
+    checkboxGroup.setAttribute('id', ddlId);
     checkboxGroup.innerHTML = `<p class="inner-grid-label">Select Options</p>`;
 
     staticOptions.forEach((label, index) => {

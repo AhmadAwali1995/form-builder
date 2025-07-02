@@ -36,7 +36,8 @@
 
     input[type="text"],
     input[type="number"],
-    select {
+    select,
+    textarea {
       padding: 8px 10px;
       font-size: 14px;
       border-radius: 6px;
@@ -51,6 +52,9 @@
       }
     }
 
+    textarea {
+      resize: vertical;
+    }
   }
 
   .setting-item-checkbox {
@@ -64,5 +68,133 @@
       cursor: pointer;
     }
   }
+
+  .open-options-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+
+  .options-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    .options-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .options-modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 90%;
+      max-width: 500px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      z-index: 1001;
+
+      .modal-title {
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .option-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+
+        input {
+          flex: 1;
+          padding: 8px 10px;
+          font-size: 14px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+
+          &:focus {
+            border-color: #007bff;
+            outline: none;
+          }
+        }
+
+        .delete-btn {
+          background: #e74c3c;
+          color: white;
+          border: none;
+          padding: 6px 10px;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: #c0392b;
+          }
+        }
+      }
+
+      .add-btn {
+        background: #28a745;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        margin-top: 10px;
+
+        &:hover {
+          background-color: #218838;
+        }
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+        gap: 10px;
+
+        .cancel-btn,
+        .save-btn {
+          padding: 8px 16px;
+          font-size: 14px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+
+        .cancel-btn {
+          background-color: #ccc;
+
+          &:hover {
+            background-color: #bbb;
+          }
+        }
+
+        .save-btn {
+          background-color: #007bff;
+          color: #fff;
+
+          &:hover {
+            background-color: #0056b3;
+          }
+        }
+      }
+    }
+  }
+
 
 }

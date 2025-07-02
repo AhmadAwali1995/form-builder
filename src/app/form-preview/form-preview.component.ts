@@ -7,6 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { FieldSettings } from '../shared/interfaces/field-settings';
 @Component({
   selector: 'app-form-preview',
   standalone: true,
@@ -18,7 +19,8 @@ import { RouterModule } from '@angular/router';
 export class FormPreviewComponent implements OnInit {
   form: FormGroup;
   schema: any;
-  sections: { id: string; fields: { id: string; json: any }[] }[] = [];
+  sections: { id: string; fields: { id: string; json: FieldSettings }[] }[] =
+    [];
   currentSectionIndex = 0;
 
   constructor(private fb: FormBuilder) {

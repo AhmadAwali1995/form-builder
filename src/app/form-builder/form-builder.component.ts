@@ -2,10 +2,11 @@ import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { GridStack } from 'gridstack';
 import { FormsModule } from '@angular/forms';
 import { FieldServicesService } from '../services/field-services.service';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { SettingsComponentComponent } from '../settings-component/settings-component.component';
 import { sectionCorners } from '../shared/interfaces/section-corners';
 import { ActionTypes } from '../shared/enums/action-types';
+import { FieldSettings } from '../shared/interfaces/field-settings';
 
 @Component({
   selector: 'app-form-builder',
@@ -27,10 +28,11 @@ export class FormBuilderComponent implements AfterViewInit {
   ActionTypes = ActionTypes;
   currentPage: number = 1;
   rowsPerPage: number = 5;
-  constructor(
-    private fieldService: FieldServicesService,
-    private router: Router
-  ) {}
+
+  selectedFieldId: string | null = null;
+  selectedFieldType: string | null = null;
+
+  constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
       column: this.columnNum,
@@ -215,10 +217,49 @@ export class FormBuilderComponent implements AfterViewInit {
       fieldItem.classList.add('active');
 
       const fieldElement = fieldItem.querySelector('[data-field-type]');
-      const fieldType = fieldElement!.getAttribute('data-field-type');
+      const fieldType = fieldElement?.getAttribute('data-field-type') || '';
 
       this.fieldId = fieldElement!.id;
-      this.fieldType = fieldType!;
+      this.fieldType = fieldType;
+      //----------------------feras update----------------------
+      this.selectedFieldId = fieldElement!.id;
+      this.selectedFieldType = fieldType!;
+
+      const defaultSettings: FieldSettings = {
+        fieldId: fieldElement!.id,
+        fieldType: actionType,
+        fieldName: 'New Field',
+        fieldLabel: 'New Field',
+        fieldSize: 'medium',
+        placeholderText: '',
+        defaultValue: '',
+        minRange: 0,
+        maxRange: 0,
+        cssClass: '',
+        isRequired: false,
+        options: [], // or initial options for dropdowns if needed
+      };
+
+      this.fieldSettingsList.push(defaultSettings);
+
+      if (fieldElement) {
+        this.selectedFieldSettings = {
+          fieldLabel: fieldElement.getAttribute('data-label') || '',
+          fieldSize: fieldElement.getAttribute('data-size') || 'medium',
+          placeholderText: fieldElement.getAttribute('data-placeholder') || '',
+          defaultValue: fieldElement.getAttribute('data-default') || '',
+          minRange: +(fieldElement.getAttribute('data-min') || '') || undefined,
+          maxRange: +(fieldElement.getAttribute('data-max') || '') || undefined,
+          cssClass: fieldElement.getAttribute('data-css') || '',
+          isRequired: fieldElement.getAttribute('data-required') === 'true',
+          options: JSON.parse(
+            fieldElement.getAttribute('data-options') || '[]'
+          ),
+        };
+      } else {
+        this.selectedFieldSettings = {};
+      }
+      //----------------------feras update----------------------
     });
 
     innerGrid.el.appendChild(fieldItem);
@@ -350,7 +391,7 @@ export class FormBuilderComponent implements AfterViewInit {
           break;
       }
     }
-    console.log('Section corners:', sections);
+    // console.log('Section corners:', sections);
   }
 
   getDataDDL() {
@@ -596,7 +637,10 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   previewJson() {
-    const sections: { id: string; fields: { id: string; json: JSON }[] }[] = [];
+    const sections: {
+      id: string;
+      fields: { id: string; json: FieldSettings }[];
+    }[] = [];
 
     const outerNodes = this.grid.save();
     if (!Array.isArray(outerNodes)) return;
@@ -614,7 +658,7 @@ export class FormBuilderComponent implements AfterViewInit {
       const innerGrid = this.innerGrids.get(sectionId);
       if (!innerGrid) return;
 
-      const fields: { id: string; json: JSON }[] = [];
+      const fields: { id: string; json: FieldSettings }[] = [];
 
       const innerNodes = innerGrid.save();
       if (Array.isArray(innerNodes)) {
@@ -638,10 +682,9 @@ export class FormBuilderComponent implements AfterViewInit {
       });
     });
 
-    // console.log('✅ Exported sections:', sections);
-
     localStorage.setItem('form-sections', JSON.stringify(sections));
     window.open('/preview', '_blank');
+    console.log('sections', sections);
   }
 
   parseFieldHtml(html: string): any {
@@ -664,8 +707,8 @@ export class FormBuilderComponent implements AfterViewInit {
     const groupLabel =
       tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
 
-    const json: any = {
-      type:
+    const json: FieldSettings = {
+      fieldType:
         tagName === 'select'
           ? 'select'
           : typeAttr === 'radio'
@@ -673,46 +716,84 @@ export class FormBuilderComponent implements AfterViewInit {
           : typeAttr === 'checkbox'
           ? 'checkbox'
           : 'text',
-      label: groupLabel || '',
-      name: label?.textContent?.trim() || '',
-      id: input.id,
-      required: input.hasAttribute('required'),
-      size: 'medium', // placeholder, you can infer from layout later
-      placeholder: input.getAttribute('placeholder') || '',
+      fieldLabel: groupLabel || '',
+      fieldName: label?.textContent?.trim() || '',
+      fieldId: input.id,
+      isRequired: input.hasAttribute('required'),
+      fieldSize: 'medium',
+      placeholderText: input.getAttribute('placeholder') || '',
       defaultValue: (input as HTMLInputElement).value || '',
     };
 
-    if (json.type === 'text') {
-      json.minValue = Number(input.getAttribute('min') || 0);
-      json.maxValue = Number(input.getAttribute('max') || 0);
+    if (json.fieldType === 'text') {
+      json.minRange = Number(input.getAttribute('min') || 0);
+      json.maxRange = Number(input.getAttribute('max') || 0);
     }
 
-    if (json.type === 'select') {
+    if (json.fieldType === 'select') {
       json.options = [];
       tempDiv.querySelectorAll('option').forEach((opt) => {
         const option = opt as HTMLOptionElement;
-        json.options.push({
+        (json.options ??= []).push({
           value: option.value,
           label: option.textContent?.trim() || '',
         });
       });
     }
 
-    if (json.type === 'radio' || json.type === 'checkbox') {
+    if (json.fieldType === 'radio' || json.fieldType === 'checkbox') {
       json.options = [];
       tempDiv
         .querySelectorAll('input[type="radio"], input[type="checkbox"]')
         .forEach((opt) => {
           const input = opt as HTMLInputElement;
           const optLabel = tempDiv.querySelector(`label[for="${input.id}"]`);
-          json.options.push({
+          (json.options ??= []).push({
             value: input.value || input.id,
             label: optLabel?.textContent?.trim() || '',
           });
         });
-      if (json.type === 'radio') json.direction = 'horizontal';
+      if (json.fieldType === 'radio') json.direction = 'horizontal';
     }
 
     return json;
+  }
+
+  //----------------------feras update----------------------
+
+  selectedFieldSettings: any = {};
+  fieldSettingsList: FieldSettings[] = [];
+
+  onFieldUpdated(event: FieldSettings) {
+    const el = document.getElementById(event.fieldId);
+    if (!el) return;
+
+    el.setAttribute('data-label', event.fieldLabel ?? '');
+    el.setAttribute('data-size', event.fieldSize ?? '');
+    el.setAttribute('data-placeholder', event.placeholderText ?? '');
+    el.setAttribute('data-default', event.defaultValue ?? '');
+    el.setAttribute('data-min', event.minRange?.toString() || '');
+    el.setAttribute('data-max', event.maxRange?.toString() || '');
+    el.setAttribute('data-css', event.cssClass ?? '');
+    el.setAttribute('data-required', event.isRequired?.toString() || 'false');
+    el.setAttribute('data-options', JSON.stringify(event.options || []));
+
+    const index = this.fieldSettingsList.findIndex(
+      (f) => f.fieldId === event.fieldId
+    );
+
+    if (index !== -1) {
+      this.fieldSettingsList[index] = { ...event };
+    } else {
+      this.fieldSettingsList.push({ ...event });
+    }
+
+    if (this.selectedFieldSettings?.fieldId === event.fieldId) {
+      this.selectedFieldSettings = { ...event };
+    }
+  }
+
+  checkSettings() {
+    console.log('settings', this.fieldSettingsList);
   }
 }
