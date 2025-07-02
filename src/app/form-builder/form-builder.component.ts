@@ -34,8 +34,8 @@ export class FormBuilderComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
       column: this.columnNum,
-      row: 36,
-      cellHeight: 100,
+      row: 3600,
+      cellHeight: 20,
       margin: 5,
       float: false,
     });
@@ -147,6 +147,7 @@ export class FormBuilderComponent implements AfterViewInit {
       innerGrid
     );
     this.innerGrids.set(innerGridId, grid);
+    //this.resizeCanvas();
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
@@ -197,7 +198,7 @@ export class FormBuilderComponent implements AfterViewInit {
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn">X</p><p>X</p><p>X</p><p>X</p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      fieldItem.remove(); // Just call the passed function
+      this.grid.removeWidget(fieldItem); // Just call the passed function
     });
     fieldItem.appendChild(box);
 
@@ -224,18 +225,8 @@ export class FormBuilderComponent implements AfterViewInit {
     innerGrid.el.appendChild(fieldItem);
     innerGrid.makeWidget(fieldItem);
 
-    setTimeout(() => {
-      const contentElement = fieldItem.querySelector(
-        '.inner-grid-stack-item-content'
-      ) as HTMLElement;
-
-      if (contentElement) {
-        const contentHeight = contentElement.offsetHeight;
-        const cellHeight = innerGrid.getCellHeight(true);
-        const newH = Math.ceil(contentHeight / cellHeight);
-        innerGrid.update(fieldItem, { h: newH });
-      }
-    }, 0);
+    this.resize(fieldItem.id);
+    this.resizeSection(innerGridId);
   }
 
   ghostElement: HTMLElement | null = null;
@@ -499,7 +490,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.renderPagination(selectedColumns, pagination);
 
-    this.resizeFieldItem(this.fieldId);
+    this.resize(this.fieldId);
   }
 
   createTableHeader(table: HTMLTableElement, selectedColumns: string[]) {
@@ -558,14 +549,14 @@ export class FormBuilderComponent implements AfterViewInit {
 
         this.renderTableBody(table, selectedColumns, i);
         this.renderPagination(selectedColumns, paginationDiv);
-        this.resizeFieldItem(this.fieldId);
+        this.resize(this.fieldId);
       });
 
       paginationDiv.appendChild(btn);
     }
   }
 
-  resizeFieldItem(fieldId: string): void {
+  resize(fieldId: string): void {
     setTimeout(() => {
       const fieldItem = document
         .getElementById(fieldId)
@@ -593,6 +584,74 @@ export class FormBuilderComponent implements AfterViewInit {
 
       innerGrid.update(fieldItem, { h: newH });
     }, 0);
+  }
+
+  resizeSection(sectionId: string): void {
+    setTimeout(() => {
+      const sectionItem = document
+        .getElementById(sectionId)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!sectionItem) return;
+
+      const innerGridEl = sectionItem.querySelector(
+        '.grid-stack'
+      ) as HTMLElement;
+      if (!innerGridEl) return;
+
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      const outerGridEl = sectionItem.closest('.grid-stack') as HTMLElement;
+      const outerGrid =
+        outerGridEl && ((outerGridEl as any).gridstack as GridStack);
+      if (!innerGrid || !outerGrid) return;
+
+      // Optional: get header height in rows
+      const headerEl = sectionItem.querySelector(
+        '.section-header'
+      ) as HTMLElement;
+      const headerPx = headerEl?.offsetHeight ?? 0;
+      const rowHeight = outerGrid.getCellHeight(true);
+      const headerRows = Math.ceil(headerPx / rowHeight);
+
+      // Find bottom-most occupied row (y + h)
+      let maxBottom = 0;
+      for (const node of innerGrid.engine.nodes) {
+        const bottom = (node?.y ?? 0) + (node?.h ?? 0);
+        if (bottom > maxBottom) maxBottom = bottom;
+      }
+
+      const newH = headerRows + maxBottom;
+      outerGrid.update(sectionItem, { h: newH + 2 });
+    }, 0);
+  }
+
+  resizeCanvas(): void {
+    debugger;
+    const canvasGridEl = this.grid.el as HTMLElement;
+    const currentMax = Number(canvasGridEl.getAttribute('gs-max-row')) || 24;
+    const newMax = currentMax + 12;
+
+    canvasGridEl.setAttribute('gs-max-row', newMax.toString());
+
+    // setTimeout(() => {
+    //   if (!this.grid) return;
+
+    //   // Step 1: Get the bottom-most occupied row
+    //   let maxBottom = 0;
+    //   for (const node of this.grid.engine.nodes) {
+    //     const bottom = (node?.y ?? 0) + (node?.h ?? 0);
+    //     if (bottom > maxBottom) maxBottom = bottom;
+    //   }
+
+    //   // Step 2: Calculate required height in pixels
+    //   const rowHeight = this.grid.getCellHeight(true);
+    //   const totalHeight = maxBottom * rowHeight;
+
+    //   // Step 3: Apply height to canvas container
+    //   const canvas = document.querySelector('.canvas') as HTMLElement;
+    //   if (canvas) {
+    //     canvas.style.height = `${totalHeight + 50}px`;
+    //   }
+    // }, 0);
   }
 
   previewJson() {
