@@ -7,6 +7,8 @@ import { SettingsComponentComponent } from '../settings-component/settings-compo
 import { sectionCorners } from '../shared/interfaces/section-corners';
 import { ActionTypes } from '../shared/enums/action-types';
 import { FieldSettings } from '../shared/interfaces/field-settings';
+import { Fields, Sections } from '../shared/interfaces/sections';
+
 
 @Component({
   selector: 'app-form-builder',
@@ -32,6 +34,9 @@ export class FormBuilderComponent implements AfterViewInit {
   isFooterExist: boolean = false;
   readonly cellHeight = 20;
   readonly margin = 5;
+
+  sections:Sections[] = [];
+
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -700,11 +705,11 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   previewJson() {
-    const sections: {
-      id: string;
-      fields: { id: string; json: FieldSettings }[];
-    }[] = [];
-
+    // const sections: {
+    //   id: string;
+    //   fields: { id: string; json: FieldSettings }[];
+    // }[] = [];
+const sections: Sections[] = [];
     const outerNodes = this.grid.save();
     if (!Array.isArray(outerNodes)) return;
 
@@ -721,7 +726,7 @@ export class FormBuilderComponent implements AfterViewInit {
       const innerGrid = this.innerGrids.get(sectionId);
       if (!innerGrid) return;
 
-      const fields: { id: string; json: FieldSettings }[] = [];
+      const fields: Fields[] = [];
 
       const innerNodes = innerGrid.save();
       if (Array.isArray(innerNodes)) {
@@ -744,21 +749,22 @@ export class FormBuilderComponent implements AfterViewInit {
           });
 
           fields.push({
-            id: fieldId,
-            json: fullSettings,
+            fieldId: fieldId,
+            fieldSettings: fullSettings,
           });
         });
       }
 
       sections.push({
-        id: sectionId,
+        sectionId: sectionId,
         fields,
       });
     });
-
+this.sections = sections;
     localStorage.setItem('form-sections', JSON.stringify(sections));
     window.open('/preview', '_blank');
     console.log('sections', sections);
+    console.log('this.sections', this.sections);
   }
 
   parseFieldHtml(html: string): any {
