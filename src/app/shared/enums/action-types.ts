@@ -1,5 +1,5 @@
 export enum ActionTypes {
-  shortText = 'ShortText',
+  shortText = 'shortText',
   dropDownList = 'dropDownList',
   checkbox = 'checkbox',
   radioGroup = 'radioGroup',

@@ -28,16 +28,15 @@ export class FormBuilderComponent implements AfterViewInit {
   ActionTypes = ActionTypes;
   currentPage: number = 1;
   rowsPerPage: number = 5;
-
-  selectedFieldId: string | null = null;
-  selectedFieldType: string | null = null;
+  readonly cellHeight = 20;
+  readonly margin = 5;
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
       column: this.columnNum,
-      cellHeight: 20,
-      margin: 5,
+      cellHeight: this.cellHeight,
+      margin: this.margin,
       float: false,
     });
 
@@ -106,7 +105,9 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-h', h.toString());
     item.setAttribute('id', innerGridId);
     item.setAttribute('gs-id', innerGridId);
-
+    item.innerHTML = `<div class="close-section">
+        <img src="/icons/close.png" alt="close" />
+      </div>`;
     // Outer content wrapper
     const content = document.createElement('div');
     content.classList.add('grid-stack-item-content');
@@ -146,6 +147,9 @@ export class FormBuilderComponent implements AfterViewInit {
     this.grid.el.appendChild(item);
     this.grid.makeWidget(item);
 
+    // ✅ Force height update after adding the widget
+    (this.grid as any)._updateContainerHeight();
+
     // Initialize the nested grid
     const grid = GridStack.init(
       {
@@ -171,23 +175,20 @@ export class FormBuilderComponent implements AfterViewInit {
       return;
     }
 
-    const fieldWidth = 18; // GridStack columns per field (adjust to fit your layout)
+    const fieldWidth = 18;
     const columnCount = this.columnNum;
     const existingNodes = innerGrid.engine.nodes || [];
 
     let nextX = 0;
-    let nextY = 1; // Start after header row (row 0 is header)
+    let nextY = 1;
 
     if (existingNodes.length > 0) {
       const last = existingNodes[existingNodes.length - 1];
-
       const lastX = last.x ?? 0;
       const lastY = last.y ?? 0;
       const lastW = last.w ?? fieldWidth;
 
-      // Calculate next position
       if (lastX + lastW + fieldWidth > columnCount) {
-        // Wrap to next row
         nextX = 0;
         nextY = lastY + (last.h ?? 1);
       } else {
@@ -207,62 +208,64 @@ export class FormBuilderComponent implements AfterViewInit {
       actionType
     );
 
-    //add box of settings
+    // ✅ Add default settings at creation
+    const fieldElement = fieldItem.querySelector('[data-field-type]');
+    const fieldId = fieldElement?.id;
+
+    if (fieldElement && fieldId) {
+      const defaultSettings = this.getDefaultSettingsByType(
+        fieldId,
+        actionType
+      );
+      const exists = this.fieldSettingsList.some((f) => f.fieldId === fieldId);
+      if (!exists) {
+        this.fieldSettingsList.push(defaultSettings);
+      }
+    }
+
+    // Add settings box
     const box = document.createElement('div');
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn">X</p><p>X</p><p>X</p><p>X</p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      this.removeField(innerGridId, fieldItem.id);
+      this.grid.removeWidget(fieldItem);
     });
     fieldItem.appendChild(box);
 
-    // Add click event to field item This will make it active when clicked
+    // Click to activate and load settings
     fieldItem.addEventListener('click', (event) => {
-      event.stopPropagation(); // Prevent document click handler from firing
+      event.stopPropagation();
 
-      // Remove active from others
       const allItems = this.grid.el.querySelectorAll(
         '.field-grid-stack-item.active'
       );
       allItems.forEach((item) => item.classList.remove('active'));
 
-      // Add active to this
       fieldItem.classList.add('active');
 
-      const fieldElement = fieldItem.querySelector('[data-field-type]');
       const fieldType = fieldElement?.getAttribute('data-field-type') || '';
-
       this.fieldId = fieldElement!.id;
       this.fieldType = fieldType;
-      //----------------------feras update----------------------
-      this.selectedFieldId = fieldElement!.id;
-      this.selectedFieldType = fieldType!;
-
-      const defaultSettings: FieldSettings = {
-        fieldId: fieldElement!.id,
-        fieldType: actionType,
-        fieldName: 'New Field',
-        fieldLabel: 'New Field',
-        fieldSize: 'medium',
-        placeholderText: '',
-        defaultValue: '',
-        minRange: 0,
-        maxRange: 0,
-        cssClass: '',
-        isRequired: false,
-        options: [], // or initial options for dropdowns if needed
-      };
-
-      this.fieldSettingsList.push(defaultSettings);
-
+      //defult values on the fields settings
       if (fieldElement) {
         this.selectedFieldSettings = {
+          fieldId: this.fieldId,
+          fieldType: fieldType,
+          fieldName: '',
           fieldLabel: fieldElement.getAttribute('data-label') || '',
-          fieldSize: fieldElement.getAttribute('data-size') || 'medium',
+          fieldSize: ((): 'medium' | 'small' | 'large' | 'full' | undefined => {
+            const size = fieldElement.getAttribute('data-size');
+            return size === 'medium' ||
+              size === 'small' ||
+              size === 'large' ||
+              size === 'full'
+              ? size
+              : 'medium';
+          })(),
           placeholderText: fieldElement.getAttribute('data-placeholder') || '',
           defaultValue: fieldElement.getAttribute('data-default') || '',
-          minRange: +(fieldElement.getAttribute('data-min') || '') || undefined,
-          maxRange: +(fieldElement.getAttribute('data-max') || '') || undefined,
+          minRange: +fieldElement.getAttribute('data-min')! || undefined,
+          maxRange: +fieldElement.getAttribute('data-max')! || undefined,
           cssClass: fieldElement.getAttribute('data-css') || '',
           isRequired: fieldElement.getAttribute('data-required') === 'true',
           options: JSON.parse(
@@ -272,7 +275,6 @@ export class FormBuilderComponent implements AfterViewInit {
       } else {
         this.selectedFieldSettings = {};
       }
-      //----------------------feras update----------------------
     });
 
     innerGrid.el.appendChild(fieldItem);
@@ -280,6 +282,99 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.resizeField(fieldItem.id);
     this.resizeSection(innerGridId);
+  }
+
+  //the defult values that get sent to the preview
+  getDefaultSettingsByType(fieldId: string, type: ActionTypes): FieldSettings {
+    const base: FieldSettings = {
+      fieldId,
+      fieldType: type,
+      fieldName: 'fieldName',
+      fieldLabel: 'Field Label',
+      fieldSize: 'medium',
+      isRequired: false,
+      cssClass: '',
+    };
+
+    switch (type) {
+      case ActionTypes.shortText:
+        return {
+          ...base,
+          placeholderText: 'placeholder',
+          defaultValue: '',
+          minRange: undefined,
+          maxRange: undefined,
+        };
+
+      case ActionTypes.dropDownList:
+      case ActionTypes.checkbox:
+      case ActionTypes.radioGroup:
+        return {
+          ...base,
+          options: [],
+        };
+
+      default:
+        return {
+          fieldId,
+          fieldType: type,
+          fieldName: 'fieldName',
+          fieldLabel: 'Field Label',
+          fieldSize: 'medium',
+          cssClass: '',
+          isRequired: false,
+          defaultValue: '',
+          options: [],
+        };
+    }
+  }
+
+  generateFieldName(label: string): string {
+    if (!label) return 'field';
+    return label
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  getCompleteFieldSettings(field: Partial<FieldSettings>): FieldSettings {
+    const defaults: FieldSettings = {
+      fieldId: field.fieldId || 'unknown-id',
+      fieldLabel: field.fieldLabel || 'Field Label',
+      fieldName: this.generateFieldName(field.fieldLabel || 'fieldName'),
+      fieldType: field.fieldType || ActionTypes.shortText,
+      fieldSize: field.fieldSize || 'medium',
+      cssClass: field.cssClass || '',
+      isRequired: field.isRequired ?? false,
+      defaultValue: '',
+      placeholderText: '',
+      minRange: undefined,
+      maxRange: undefined,
+      options: [],
+    };
+
+    // Merge and override defaults with passed field
+    const merged = { ...defaults, ...field };
+
+    // For shortText, ensure defaultValue, placeholder, min/max are set
+    if (merged.fieldType === ActionTypes.shortText) {
+      merged.defaultValue = field.defaultValue ?? '';
+      merged.placeholderText = field.placeholderText ?? '';
+      merged.minRange = field.minRange;
+      merged.maxRange = field.maxRange;
+    }
+
+    // For dropdown, checkbox, radio, ensure options array
+    if (
+      merged.fieldType === ActionTypes.dropDownList ||
+      merged.fieldType === ActionTypes.checkbox ||
+      merged.fieldType === ActionTypes.radioGroup
+    ) {
+      merged.options = field.options || [];
+    }
+
+    return merged;
   }
 
   ghostElement: HTMLElement | null = null;
@@ -713,9 +808,20 @@ export class FormBuilderComponent implements AfterViewInit {
           const fieldEl = sectionGridEl.querySelector(`[gs-id="${fieldId}"]`);
           if (!fieldEl) return;
 
+          const parsed = this.parseFieldHtml(fieldEl.innerHTML.trim());
+
+          const settings = this.fieldSettingsList.find(
+            (f) => f.fieldId === parsed?.fieldId
+          );
+
+          const fullSettings = this.getCompleteFieldSettings({
+            ...parsed,
+            ...(settings || {}),
+          });
+
           fields.push({
             id: fieldId,
-            json: this.parseFieldHtml(fieldEl.innerHTML.trim()),
+            json: fullSettings,
           });
         });
       }
@@ -746,7 +852,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const typeAttr = input.getAttribute('type');
     const tagName = input.tagName.toLowerCase();
 
-    const type = typeAttr || tagName;
+    // const type = typeAttr || tagName;
 
     const groupLabel =
       tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
@@ -770,8 +876,11 @@ export class FormBuilderComponent implements AfterViewInit {
     };
 
     if (json.fieldType === 'text') {
-      json.minRange = Number(input.getAttribute('min') || 0);
-      json.maxRange = Number(input.getAttribute('max') || 0);
+      const minAttr = input.getAttribute('min');
+      const maxAttr = input.getAttribute('max');
+
+      json.minRange = minAttr ? Number(minAttr) : undefined;
+      json.maxRange = maxAttr ? Number(maxAttr) : undefined;
     }
 
     if (json.fieldType === 'select') {
@@ -797,43 +906,70 @@ export class FormBuilderComponent implements AfterViewInit {
             label: optLabel?.textContent?.trim() || '',
           });
         });
-      if (json.fieldType === 'radio') json.direction = 'horizontal';
+      if (json.fieldType === 'radio') json.direction = 'vertical';
     }
 
     return json;
   }
 
-  //----------------------feras update----------------------
-
-  selectedFieldSettings: any = {};
+  selectedFieldSettings: Partial<FieldSettings> = {};
   fieldSettingsList: FieldSettings[] = [];
 
   onFieldUpdated(event: FieldSettings) {
     const el = document.getElementById(event.fieldId);
     if (!el) return;
 
-    el.setAttribute('data-label', event.fieldLabel ?? '');
-    el.setAttribute('data-size', event.fieldSize ?? '');
-    el.setAttribute('data-placeholder', event.placeholderText ?? '');
-    el.setAttribute('data-default', event.defaultValue ?? '');
-    el.setAttribute('data-min', event.minRange?.toString() || '');
-    el.setAttribute('data-max', event.maxRange?.toString() || '');
-    el.setAttribute('data-css', event.cssClass ?? '');
-    el.setAttribute('data-required', event.isRequired?.toString() || 'false');
-    el.setAttribute('data-options', JSON.stringify(event.options || []));
-
-    const index = this.fieldSettingsList.findIndex(
+    // Find current settings (if exist)
+    const currentIndex = this.fieldSettingsList.findIndex(
       (f) => f.fieldId === event.fieldId
     );
 
-    if (index !== -1) {
-      this.fieldSettingsList[index] = { ...event };
+    const existing =
+      currentIndex !== -1 ? this.fieldSettingsList[currentIndex] : {};
+
+    const updatedField: FieldSettings = {
+      ...existing,
+      ...event,
+    };
+
+    // Update DOM attributes
+    el.setAttribute('data-label', updatedField.fieldLabel ?? 'Field Label');
+    el.setAttribute('data-size', updatedField.fieldSize ?? '');
+    el.setAttribute('data-css', updatedField.cssClass ?? '');
+    el.setAttribute(
+      'data-required',
+      updatedField.isRequired?.toString() || 'false'
+    );
+
+    switch (updatedField.fieldType) {
+      case ActionTypes.shortText:
+        el.setAttribute('data-default', updatedField.defaultValue ?? '');
+        el.setAttribute('data-placeholder', updatedField.placeholderText ?? '');
+        el.setAttribute('data-min', updatedField.minRange?.toString() || '');
+        el.setAttribute('data-max', updatedField.maxRange?.toString() || '');
+        break;
+
+      case ActionTypes.dropDownList:
+      case ActionTypes.checkbox:
+      case ActionTypes.radioGroup:
+        el.setAttribute(
+          'data-options',
+          JSON.stringify(updatedField.options || [])
+        );
+        break;
+
+      default:
+        break;
+    }
+
+    if (currentIndex !== -1) {
+      this.fieldSettingsList[currentIndex] = updatedField;
     } else {
-      this.fieldSettingsList.push({ ...event });
+      this.fieldSettingsList.push(updatedField);
     }
 
     if (this.selectedFieldSettings?.fieldId === event.fieldId) {
-      this.selectedFieldSettings = { ...event };
+      this.selectedFieldSettings = updatedField;
     }
   }
 

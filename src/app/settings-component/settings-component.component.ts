@@ -52,6 +52,9 @@ export class SettingsComponentComponent implements OnInit {
   }
 
   closeOptionsModal() {
+    this.options = this.options.filter(
+      (opt) => opt.label?.trim() && opt.value?.trim()
+    );
     this.showOptionsModal = false;
   }
 
@@ -64,36 +67,87 @@ export class SettingsComponentComponent implements OnInit {
   }
 
   saveOptions() {
+    // Filter out options where label or value is empty (trimmed)
+    this.options = this.options.filter(
+      (opt) => opt.label?.trim() && opt.value?.trim()
+    );
     this.emitUpdate();
     this.closeOptionsModal();
   }
 
+  onSubmit() {
+    // This will only fire if form is valid
+    this.emitUpdate();
+  }
   loadSettingsFromField(settings: FieldSettings) {
     this.fieldLabel = settings.fieldLabel || '';
     this.fieldSize = settings.fieldSize || 'medium';
-    this.placeholderText = settings.placeholderText || '';
-    this.defaultValue = settings.defaultValue || '';
-    this.minRange = settings.minRange || undefined;
-    this.maxRange = settings.maxRange || undefined;
     this.cssClass = settings.cssClass || '';
     this.isRequired = settings.isRequired || false;
-    this.options = settings.options || [];
+
+    switch (settings.fieldType) {
+      case ActionTypes.shortText:
+        this.defaultValue = settings.defaultValue || '';
+        this.placeholderText = settings.placeholderText || '';
+        this.minRange = settings.minRange;
+        this.maxRange = settings.maxRange;
+        break;
+
+      case ActionTypes.dropDownList:
+      case ActionTypes.checkbox:
+      case ActionTypes.radioGroup:
+        this.options = settings.options || [];
+        break;
+
+      default:
+        this.placeholderText = '';
+        this.minRange = settings.minRange;
+        this.maxRange = settings.maxRange;
+        this.options = [];
+        break;
+    }
   }
 
   emitUpdate() {
-    this.fieldUpdated.emit({
+    const baseUpdate = {
       fieldId: this.fieldId,
       fieldLabel: this.fieldLabel,
       fieldType: this.fieldType,
       fieldSize: this.fieldSize,
-      placeholderText: this.placeholderText,
-      defaultValue: this.defaultValue,
-      minRange: this.minRange,
-      maxRange: this.maxRange,
       cssClass: this.cssClass,
       isRequired: this.isRequired,
-      options: this.options, // <--- new structure
-    });
+    };
+
+    switch (this.fieldType) {
+      case ActionTypes.shortText:
+        this.fieldUpdated.emit({
+          ...baseUpdate,
+          defaultValue: this.defaultValue,
+          placeholderText: this.placeholderText,
+          minRange: this.minRange,
+          maxRange: this.maxRange,
+        });
+        break;
+
+      case ActionTypes.dropDownList:
+      case ActionTypes.checkbox:
+      case ActionTypes.radioGroup:
+        this.fieldUpdated.emit({
+          ...baseUpdate,
+          options: this.options,
+        });
+        break;
+
+      default:
+        this.fieldUpdated.emit({
+          ...baseUpdate,
+          placeholderText: '',
+          minRange: undefined,
+          maxRange: undefined,
+          options: [],
+        });
+        break;
+    }
   }
 
   parseDropdownOptions(): string[] {
