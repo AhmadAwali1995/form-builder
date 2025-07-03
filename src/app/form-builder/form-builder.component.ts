@@ -20,7 +20,6 @@ export class FormBuilderComponent implements AfterViewInit {
   grid!: GridStack;
   itemCount = 0;
   columnNum = 36;
-  rowNum = 50;
   innerGrids: Map<string, GridStack> = new Map();
   ddlURL: string = '';
   tableURL: string = '';
@@ -92,7 +91,9 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-h', h.toString());
     item.setAttribute('id', innerGridId);
     item.setAttribute('gs-id', innerGridId);
-
+    item.innerHTML = `<div class="close-section">
+        <img src="/icons/close.png" alt="close" />
+      </div>`;
     // Outer content wrapper
     const content = document.createElement('div');
     content.classList.add('grid-stack-item-content');
@@ -231,7 +232,7 @@ export class FormBuilderComponent implements AfterViewInit {
       const fieldType = fieldElement?.getAttribute('data-field-type') || '';
       this.fieldId = fieldElement!.id;
       this.fieldType = fieldType;
-
+      //defult values on the fields settings
       if (fieldElement) {
         this.selectedFieldSettings = {
           fieldId: this.fieldId,
@@ -249,8 +250,8 @@ export class FormBuilderComponent implements AfterViewInit {
           })(),
           placeholderText: fieldElement.getAttribute('data-placeholder') || '',
           defaultValue: fieldElement.getAttribute('data-default') || '',
-          minRange: +(fieldElement.getAttribute('data-min') || '') || 0,
-          maxRange: +(fieldElement.getAttribute('data-max') || '') || 0,
+          minRange: +fieldElement.getAttribute('data-min')! || undefined,
+          maxRange: +fieldElement.getAttribute('data-max')! || undefined,
           cssClass: fieldElement.getAttribute('data-css') || '',
           isRequired: fieldElement.getAttribute('data-required') === 'true',
           options: JSON.parse(
@@ -269,12 +270,13 @@ export class FormBuilderComponent implements AfterViewInit {
     this.resizeSection(innerGridId);
   }
 
+  //the defult values that get sent to the preview
   getDefaultSettingsByType(fieldId: string, type: ActionTypes): FieldSettings {
     const base: FieldSettings = {
       fieldId,
       fieldType: type,
-      fieldName: 'New Field',
-      fieldLabel: 'New Field',
+      fieldName: 'fieldName',
+      fieldLabel: 'Field Label',
       fieldSize: 'medium',
       isRequired: false,
       cssClass: '',
@@ -284,10 +286,10 @@ export class FormBuilderComponent implements AfterViewInit {
       case ActionTypes.shortText:
         return {
           ...base,
-          placeholderText: '',
+          placeholderText: 'placeholder',
           defaultValue: '',
-          minRange: 0,
-          maxRange: 0,
+          minRange: undefined,
+          maxRange: undefined,
         };
 
       case ActionTypes.dropDownList:
@@ -302,8 +304,8 @@ export class FormBuilderComponent implements AfterViewInit {
         return {
           fieldId,
           fieldType: type,
-          fieldName: 'New Field',
-          fieldLabel: 'New Field',
+          fieldName: 'fieldName',
+          fieldLabel: 'Field Label',
           fieldSize: 'medium',
           cssClass: '',
           isRequired: false,
@@ -311,6 +313,54 @@ export class FormBuilderComponent implements AfterViewInit {
           options: [],
         };
     }
+  }
+
+  generateFieldName(label: string): string {
+    if (!label) return 'field';
+    return label
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  }
+
+  getCompleteFieldSettings(field: Partial<FieldSettings>): FieldSettings {
+    const defaults: FieldSettings = {
+      fieldId: field.fieldId || 'unknown-id',
+      fieldLabel: field.fieldLabel || 'Field Label',
+      fieldName: this.generateFieldName(field.fieldLabel || 'fieldName'),
+      fieldType: field.fieldType || ActionTypes.shortText,
+      fieldSize: field.fieldSize || 'medium',
+      cssClass: field.cssClass || '',
+      isRequired: field.isRequired ?? false,
+      defaultValue: '',
+      placeholderText: '',
+      minRange: undefined,
+      maxRange: undefined,
+      options: [],
+    };
+
+    // Merge and override defaults with passed field
+    const merged = { ...defaults, ...field };
+
+    // For shortText, ensure defaultValue, placeholder, min/max are set
+    if (merged.fieldType === ActionTypes.shortText) {
+      merged.defaultValue = field.defaultValue ?? '';
+      merged.placeholderText = field.placeholderText ?? '';
+      merged.minRange = field.minRange;
+      merged.maxRange = field.maxRange;
+    }
+
+    // For dropdown, checkbox, radio, ensure options array
+    if (
+      merged.fieldType === ActionTypes.dropDownList ||
+      merged.fieldType === ActionTypes.checkbox ||
+      merged.fieldType === ActionTypes.radioGroup
+    ) {
+      merged.options = field.options || [];
+    }
+
+    return merged;
   }
 
   ghostElement: HTMLElement | null = null;
@@ -742,22 +792,20 @@ export class FormBuilderComponent implements AfterViewInit {
           if (!fieldEl) return;
 
           const parsed = this.parseFieldHtml(fieldEl.innerHTML.trim());
+
           const settings = this.fieldSettingsList.find(
             (f) => f.fieldId === parsed?.fieldId
           );
 
-          fields.push({
-            id: fieldId,
-            json: {
-              ...parsed,
-              ...(settings || {}),
-            },
+          const fullSettings = this.getCompleteFieldSettings({
+            ...parsed,
+            ...(settings || {}),
           });
 
-          // fields.push({
-          //   id: fieldId,
-          //   json: this.parseFieldHtml(fieldEl.innerHTML.trim()),
-          // });
+          fields.push({
+            id: fieldId,
+            json: fullSettings,
+          });
         });
       }
 
@@ -787,7 +835,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const typeAttr = input.getAttribute('type');
     const tagName = input.tagName.toLowerCase();
 
-    const type = typeAttr || tagName;
+    // const type = typeAttr || tagName;
 
     const groupLabel =
       tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
@@ -811,8 +859,11 @@ export class FormBuilderComponent implements AfterViewInit {
     };
 
     if (json.fieldType === 'text') {
-      json.minRange = Number(input.getAttribute('min') || 0);
-      json.maxRange = Number(input.getAttribute('max') || 0);
+      const minAttr = input.getAttribute('min');
+      const maxAttr = input.getAttribute('max');
+
+      json.minRange = minAttr ? Number(minAttr) : undefined;
+      json.maxRange = maxAttr ? Number(maxAttr) : undefined;
     }
 
     if (json.fieldType === 'select') {
@@ -844,8 +895,6 @@ export class FormBuilderComponent implements AfterViewInit {
     return json;
   }
 
-  //----------------------feras update----------------------
-
   selectedFieldSettings: Partial<FieldSettings> = {};
   fieldSettingsList: FieldSettings[] = [];
 
@@ -853,46 +902,57 @@ export class FormBuilderComponent implements AfterViewInit {
     const el = document.getElementById(event.fieldId);
     if (!el) return;
 
-    // Always set common attributes
-    el.setAttribute('data-label', event.fieldLabel ?? '');
-    el.setAttribute('data-size', event.fieldSize ?? '');
-    el.setAttribute('data-css', event.cssClass ?? '');
-    el.setAttribute('data-required', event.isRequired?.toString() || 'false');
+    // Find current settings (if exist)
+    const currentIndex = this.fieldSettingsList.findIndex(
+      (f) => f.fieldId === event.fieldId
+    );
 
-    // Set attributes based on field type
-    switch (event.fieldType) {
+    const existing =
+      currentIndex !== -1 ? this.fieldSettingsList[currentIndex] : {};
+
+    const updatedField: FieldSettings = {
+      ...existing,
+      ...event,
+    };
+
+    // Update DOM attributes
+    el.setAttribute('data-label', updatedField.fieldLabel ?? 'Field Label');
+    el.setAttribute('data-size', updatedField.fieldSize ?? '');
+    el.setAttribute('data-css', updatedField.cssClass ?? '');
+    el.setAttribute(
+      'data-required',
+      updatedField.isRequired?.toString() || 'false'
+    );
+
+    switch (updatedField.fieldType) {
       case ActionTypes.shortText:
-        el.setAttribute('data-default', event.defaultValue ?? '');
-        el.setAttribute('data-placeholder', event.placeholderText ?? '');
-        el.setAttribute('data-min', event.minRange?.toString() || '0');
-        el.setAttribute('data-max', event.maxRange?.toString() || '0');
+        el.setAttribute('data-default', updatedField.defaultValue ?? '');
+        el.setAttribute('data-placeholder', updatedField.placeholderText ?? '');
+        el.setAttribute('data-min', updatedField.minRange?.toString() || '');
+        el.setAttribute('data-max', updatedField.maxRange?.toString() || '');
         break;
 
       case ActionTypes.dropDownList:
       case ActionTypes.checkbox:
       case ActionTypes.radioGroup:
-        el.setAttribute('data-options', JSON.stringify(event.options || []));
+        el.setAttribute(
+          'data-options',
+          JSON.stringify(updatedField.options || [])
+        );
         break;
 
       default:
-        // Clear non-applicable attributes (optional)
         break;
     }
 
-    // Update fieldSettingsList
-    const index = this.fieldSettingsList.findIndex(
-      (f) => f.fieldId === event.fieldId
-    );
-
-    if (index !== -1) {
-      this.fieldSettingsList[index] = { ...event };
+    if (currentIndex !== -1) {
+      this.fieldSettingsList[currentIndex] = updatedField;
     } else {
-      this.fieldSettingsList.push({ ...event });
+      this.fieldSettingsList.push(updatedField);
     }
 
-    // Update selectedFieldSettings if matching
     if (this.selectedFieldSettings?.fieldId === event.fieldId) {
-      this.selectedFieldSettings = { ...event };
+      this.selectedFieldSettings = updatedField;
     }
   }
 

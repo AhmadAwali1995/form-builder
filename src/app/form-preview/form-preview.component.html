@@ -1,15 +1,15 @@
 <div class="app-form-preview">
   @if (sections.length > 0) {
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <!-- CURRENT SECTION ONLY -->
     @if (sections[currentSectionIndex]) { @let section =
     sections[currentSectionIndex];
+
     <div class="form-row">
       @for (field of section.fields; track $index) {
       <div [ngClass]="'field-size-' + (field.json.fieldSize || 'full')">
         <div [ngSwitch]="field.json.fieldType">
-          <!-- TEXT FIELD -->
-          @if (field.json.fieldType === 'text') {
+          <!-- Short Text Field -->
+          @if (field.json.fieldType === actionTypes.shortText) {
           <label>
             {{ field.json.fieldLabel }}
             @if (field.json.isRequired) {
@@ -36,8 +36,8 @@
           </div>
           } }
 
-          <!-- SELECT -->
-          @if (field.json.fieldType === 'select') {
+          <!-- Dropdown -->
+          @if (field.json.fieldType === actionTypes.dropDownList) {
           <label>
             {{ field.json.fieldLabel }}
             @if (field.json.isRequired) {
@@ -59,16 +59,39 @@
           </div>
           } }
 
-          <!-- RADIO -->
-          @if (field.json.fieldType === 'radio') {
+          <!-- Checkbox -->
+          @if (field.json.fieldType === actionTypes.checkbox) {
+          <label>{{ field.json.fieldLabel }}</label>
+          <div class="checkbox-vertical">
+            @for (option of field.json.options; track $index) {
+            <label>
+              <input
+                type="checkbox"
+                [formControlName]="field.json.fieldName"
+                [value]="option.value"
+              />
+              {{ option.label }}
+            </label>
+            } @if (form.get(field.json.fieldName)?.touched &&
+            form.get(field.json.fieldName)?.errors) {
+            <div class="error-msg">
+              @if (form.get(field.json.fieldName)?.hasError('required')) {
+              <div>This field is required.</div>
+              }
+            </div>
+            }
+          </div>
+          }
+
+          <!-- Radio Group -->
+          @if (field.json.fieldType === actionTypes.radioGroup) {
           <label>
             {{ field.json.fieldLabel }}
             @if (field.json.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
-          <div [ngClass]="['radio-group vertical']">
-            <!-- field.json.direction === 'horizontal' ? 'horizontal' : 'vertical' -->
+          <div [ngClass]="['radio-group', field.json.direction || 'vertical']">
             @for (opt of field.json.options; track $index) {
             <label>
               <input
@@ -88,33 +111,12 @@
             }
           </div>
           } }
-
-          <!-- CHECKBOX -->
-          @if (field.json.fieldType === 'checkbox') {
-          <div class="checkbox-vertical">
-            {{ field.json.fieldLabel }}
-            @for (option of field.json.options; track $index) {
-            <label>
-              <input type="checkbox" [formControlName]="field.json.fieldName" />
-              {{ option.label }}
-            </label>
-            } @if (form.get(field.json.fieldName)?.touched &&
-            form.get(field.json.fieldName)?.errors) {
-            <div class="error-msg">
-              @if (form.get(field.json.fieldName)?.hasError('required')) {
-              <div>This field is required.</div>
-              }
-            </div>
-            }
-          </div>
-          }
         </div>
       </div>
       }
     </div>
     }
 
-    <!-- NAVIGATION BUTTONS -->
     <div class="form-navigation">
       @if (currentSectionIndex !== 0) {
       <button type="button" (click)="prevSection()">Previous</button>

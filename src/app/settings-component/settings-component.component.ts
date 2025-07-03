@@ -52,6 +52,9 @@ export class SettingsComponentComponent implements OnInit {
   }
 
   closeOptionsModal() {
+    this.options = this.options.filter(
+      (opt) => opt.label?.trim() && opt.value?.trim()
+    );
     this.showOptionsModal = false;
   }
 
@@ -64,10 +67,18 @@ export class SettingsComponentComponent implements OnInit {
   }
 
   saveOptions() {
+    // Filter out options where label or value is empty (trimmed)
+    this.options = this.options.filter(
+      (opt) => opt.label?.trim() && opt.value?.trim()
+    );
     this.emitUpdate();
     this.closeOptionsModal();
   }
 
+  onSubmit() {
+    // This will only fire if form is valid
+    this.emitUpdate();
+  }
   loadSettingsFromField(settings: FieldSettings) {
     this.fieldLabel = settings.fieldLabel || '';
     this.fieldSize = settings.fieldSize || 'medium';
@@ -78,8 +89,8 @@ export class SettingsComponentComponent implements OnInit {
       case ActionTypes.shortText:
         this.defaultValue = settings.defaultValue || '';
         this.placeholderText = settings.placeholderText || '';
-        this.minRange = settings.minRange ?? 0;
-        this.maxRange = settings.maxRange ?? 0;
+        this.minRange = settings.minRange;
+        this.maxRange = settings.maxRange;
         break;
 
       case ActionTypes.dropDownList:
@@ -90,8 +101,8 @@ export class SettingsComponentComponent implements OnInit {
 
       default:
         this.placeholderText = '';
-        this.minRange = undefined;
-        this.maxRange = undefined;
+        this.minRange = settings.minRange;
+        this.maxRange = settings.maxRange;
         this.options = [];
         break;
     }
@@ -131,8 +142,8 @@ export class SettingsComponentComponent implements OnInit {
         this.fieldUpdated.emit({
           ...baseUpdate,
           placeholderText: '',
-          minRange: 0,
-          maxRange: 0,
+          minRange: undefined,
+          maxRange: undefined,
           options: [],
         });
         break;

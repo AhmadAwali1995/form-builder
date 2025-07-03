@@ -10,28 +10,14 @@
     />
   </div>
 
-  <div class="settings-items-row">
-    <!-- <div class="setting-item">
-      <label for="field-type">Field Type</label>
-      <select id="field-type" [(ngModel)]="fieldType" (change)="emitUpdate()">
-        <option value="text">Text</option>
-        <option value="number">Number</option>
-        <option value="date">Date</option>
-        <option value="image">Image Upload</option>
-        <option value="attachment">Attachment</option>
-        <option value="dropdown">Dropdown</option>
-      </select>
-    </div> -->
-
-    <div class="setting-item">
-      <label for="field-size">Field Size</label>
-      <select id="field-size" [(ngModel)]="fieldSize" (change)="emitUpdate()">
-        <option value="small">Small</option>
-        <option value="medium">Medium</option>
-        <option value="large">Large</option>
-        <option value="full">Full</option>
-      </select>
-    </div>
+  <div class="setting-item">
+    <label for="field-size">Field Size</label>
+    <select id="field-size" [(ngModel)]="fieldSize" (change)="emitUpdate()">
+      <option value="small">Small</option>
+      <option value="medium">Medium</option>
+      <option value="large">Large</option>
+      <option value="full">Full</option>
+    </select>
   </div>
 
   <div class="setting-item">
@@ -130,9 +116,6 @@
       </button>
 
       <div class="modal-actions">
-        <button type="button" class="cancel-btn" (click)="closeOptionsModal()">
-          Cancel
-        </button>
         <button type="button" class="save-btn" (click)="saveOptions()">
           Save
         </button>
