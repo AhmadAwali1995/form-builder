@@ -124,7 +124,7 @@ export class FormBuilderComponent implements AfterViewInit {
       {
         x: nextX,
         y: nextY,
-        w: fieldWidth,
+        w: actionType === ActionTypes.label ? fieldWidth * 2 : fieldWidth,
         h: 5,
         count: this.itemCount,
       },
@@ -214,7 +214,7 @@ export class FormBuilderComponent implements AfterViewInit {
       fieldType: type,
       fieldName: 'fieldName',
       fieldLabel: 'Field Label',
-      fieldSize: 'medium',
+      fieldSize: type === ActionTypes.label ? 'full' : 'medium',
       isRequired: false,
       cssClass: '',
     };
@@ -236,18 +236,17 @@ export class FormBuilderComponent implements AfterViewInit {
           ...base,
           options: [],
         };
-
+      case ActionTypes.radioGroup:
+        return {
+          ...base,
+        };
+      case ActionTypes.label:
+        return {
+          ...base,
+        };
       default:
         return {
-          fieldId,
-          fieldType: type,
-          fieldName: 'fieldName',
-          fieldLabel: 'Field Label',
-          fieldSize: 'medium',
-          cssClass: '',
-          isRequired: false,
-          defaultValue: '',
-          options: [],
+          ...base,
         };
     }
   }
@@ -406,6 +405,9 @@ export class FormBuilderComponent implements AfterViewInit {
             droppedInSection.sectionId,
             ActionTypes.checkbox
           );
+          break;
+        case ActionTypes.label.toString():
+          this.addFieldToSection(droppedInSection.sectionId, ActionTypes.label);
           break;
         case ActionTypes.table.toString():
           this.addFieldToSection(droppedInSection.sectionId, ActionTypes.table);

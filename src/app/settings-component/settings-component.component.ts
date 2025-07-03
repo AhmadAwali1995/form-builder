@@ -84,7 +84,9 @@ export class SettingsComponentComponent implements OnInit {
     this.fieldSize = settings.fieldSize || 'medium';
     this.cssClass = settings.cssClass || '';
     this.isRequired = settings.isRequired || false;
-
+    if (settings.fieldType === ActionTypes.label) {
+      this.fieldSize = 'full';
+    }
     switch (settings.fieldType) {
       case ActionTypes.shortText:
         this.defaultValue = settings.defaultValue || '';
@@ -100,10 +102,6 @@ export class SettingsComponentComponent implements OnInit {
         break;
 
       default:
-        this.placeholderText = '';
-        this.minRange = settings.minRange;
-        this.maxRange = settings.maxRange;
-        this.options = [];
         break;
     }
   }

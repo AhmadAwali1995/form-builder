@@ -111,6 +111,11 @@
             }
           </div>
           } }
+
+          <!-- Label -->
+          @if(field.json.fieldType === actionTypes.label){
+          {{ field.json.fieldLabel }}
+          }
         </div>
       </div>
       }

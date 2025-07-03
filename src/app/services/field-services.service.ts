@@ -20,6 +20,8 @@ export class FieldServicesService {
         return this.createDropDown(parameters);
       case ActionTypes.table:
         return this.createTable(parameters);
+      case ActionTypes.label:
+        return this.createLabel(parameters);
     }
   }
 
@@ -37,12 +39,19 @@ export class FieldServicesService {
     return fieldItem;
   }
 
-  // private createFieldOptionsBox(): HTMLElement {
-  //   const box = document.createElement('div');
-  //   box.classList.add('field-options-box', 'data-gs-cancel');
-  //   box.innerHTML = `<p>X</p><p>X</p><p>X</p><p>X</p>`
-  //   return box;
-  // }
+  createLabel(parameters: fieldParameters) {
+    const ddlId = `label-${this.guid()}`;
+    const fieldItem = this.createFieldContainer(parameters);
+
+    const fieldContentItem = document.createElement('div');
+    fieldContentItem.classList.add('inner-grid-stack-item-content');
+    fieldContentItem.innerHTML = `
+      <p id="${ddlId}" data-field-type="${ActionTypes.label}" class="inner-grid-form-label">Text Field</p>`;
+
+    fieldItem.appendChild(fieldContentItem);
+
+    return fieldItem;
+  }
 
   createShortText(parameters: fieldParameters) {
     const ddlId = `shorttext-${this.guid()}`;
