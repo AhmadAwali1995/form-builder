@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
-import { GridStack } from 'gridstack';
+import { GridStack, GridStackElement } from 'gridstack';
 import { FormsModule } from '@angular/forms';
 import { FieldServicesService } from '../services/field-services.service';
 import { RouterModule } from '@angular/router';
@@ -36,7 +36,6 @@ export class FormBuilderComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.grid = GridStack.init({
       column: this.columnNum,
-      row: 3600,
       cellHeight: 20,
       margin: 5,
       float: false,
@@ -60,14 +59,28 @@ export class FormBuilderComponent implements AfterViewInit {
         }
       });
     }
-    this.grid.on('dragstart', (event, el) => {
-      const activeItems = this.grid.el.querySelectorAll(
-        '.field-grid-stack-item.active'
-      );
-      activeItems.forEach((item) => item.classList.remove('active'));
-    });
 
-    this.grid.on('dragstop', (event, el) => {});
+    this.grid.on('change', (event, items) => {
+      items.forEach((item) => {
+        const el = item.el as HTMLElement;
+
+        const gridstackEl = el.parentElement;
+        const gridstack =
+        gridstackEl && ((gridstackEl as any).gridstack as GridStack);
+
+        if(gridstack) gridstack.compact();
+        
+        // Step 1: Check if this item contains a field grid
+        const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
+        if (!innerGridEl) return;
+
+        const sectionItem = document
+        .getElementById(innerGridEl.id)
+        ?.closest('.grid-stack-item') as HTMLElement;
+
+        this.resizeSection(innerGridEl.id);
+      });
+    });
   }
 
   addItem() {
@@ -149,7 +162,6 @@ export class FormBuilderComponent implements AfterViewInit {
       innerGrid
     );
     this.innerGrids.set(innerGridId, grid);
-    //this.resizeCanvas();
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
@@ -200,7 +212,7 @@ export class FormBuilderComponent implements AfterViewInit {
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn">X</p><p>X</p><p>X</p><p>X</p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      this.grid.removeWidget(fieldItem); // Just call the passed function
+      this.removeField(innerGridId, fieldItem.id);
     });
     fieldItem.appendChild(box);
 
@@ -266,7 +278,7 @@ export class FormBuilderComponent implements AfterViewInit {
     innerGrid.el.appendChild(fieldItem);
     innerGrid.makeWidget(fieldItem);
 
-    this.resize(fieldItem.id);
+    this.resizeField(fieldItem.id);
     this.resizeSection(innerGridId);
   }
 
@@ -530,8 +542,9 @@ export class FormBuilderComponent implements AfterViewInit {
     ) as HTMLElement;
 
     this.renderPagination(selectedColumns, pagination);
-
-    this.resize(this.fieldId);
+    this.resizeField(this.fieldId);
+    const ids = this.getGridHierarchyByFieldId(this.fieldId);
+    if (ids.sectionGridId) this.resizeSection(ids.sectionGridId);
   }
 
   createTableHeader(table: HTMLTableElement, selectedColumns: string[]) {
@@ -590,14 +603,14 @@ export class FormBuilderComponent implements AfterViewInit {
 
         this.renderTableBody(table, selectedColumns, i);
         this.renderPagination(selectedColumns, paginationDiv);
-        this.resize(this.fieldId);
+        this.resizeField(this.fieldId);
       });
 
       paginationDiv.appendChild(btn);
     }
   }
 
-  resize(fieldId: string): void {
+  resizeField(fieldId: string): void {
     setTimeout(() => {
       const fieldItem = document
         .getElementById(fieldId)
@@ -661,38 +674,10 @@ export class FormBuilderComponent implements AfterViewInit {
       }
 
       const newH = headerRows + maxBottom;
+      outerGrid.compact();
       outerGrid.update(sectionItem, { h: newH + 2 });
+      
     }, 0);
-  }
-
-  resizeCanvas(): void {
-    debugger;
-    const canvasGridEl = this.grid.el as HTMLElement;
-    const currentMax = Number(canvasGridEl.getAttribute('gs-max-row')) || 24;
-    const newMax = currentMax + 12;
-
-    canvasGridEl.setAttribute('gs-max-row', newMax.toString());
-
-    // setTimeout(() => {
-    //   if (!this.grid) return;
-
-    //   // Step 1: Get the bottom-most occupied row
-    //   let maxBottom = 0;
-    //   for (const node of this.grid.engine.nodes) {
-    //     const bottom = (node?.y ?? 0) + (node?.h ?? 0);
-    //     if (bottom > maxBottom) maxBottom = bottom;
-    //   }
-
-    //   // Step 2: Calculate required height in pixels
-    //   const rowHeight = this.grid.getCellHeight(true);
-    //   const totalHeight = maxBottom * rowHeight;
-
-    //   // Step 3: Apply height to canvas container
-    //   const canvas = document.querySelector('.canvas') as HTMLElement;
-    //   if (canvas) {
-    //     canvas.style.height = `${totalHeight + 50}px`;
-    //   }
-    // }, 0);
   }
 
   previewJson() {
@@ -854,5 +839,52 @@ export class FormBuilderComponent implements AfterViewInit {
 
   checkSettings() {
     console.log('settings', this.fieldSettingsList);
+  }
+
+  removeField(innerGridId: string, fieldId: string) {
+    const fieldItem = document
+      .getElementById(fieldId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
+
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
+
+    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
+
+    // Get GridStack instance dynamically
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    if (!innerGrid) {
+      console.warn('GridStack instance not found for inner grid element');
+      return;
+    }
+
+    // Remove widget and compact layout
+    innerGrid.removeWidget(fieldItem);
+    innerGrid.compact();
+    this.resizeSection(innerGridId);
+  }
+
+  getGridHierarchyByFieldId(fieldId: string): {
+    fieldGridId: string | null;
+    sectionGridId: string | null;
+  } {
+    const fieldEl = document.getElementById(fieldId);
+    if (!fieldEl) return { fieldGridId: null, sectionGridId: null };
+
+    const fieldItem = fieldEl.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return { fieldGridId: null, sectionGridId: null };
+
+    //const test = fieldItem.parentElement.parentElement.parentElement.id
+    const fieldGridId = fieldItem.id;
+    const sectionGridId =
+      fieldItem.parentElement?.parentElement?.parentElement?.id;
+    if (!sectionGridId)
+      return { fieldGridId: fieldGridId, sectionGridId: null };
+
+    return { fieldGridId, sectionGridId };
   }
 }
