@@ -831,27 +831,16 @@ export class FormBuilderComponent implements AfterViewInit {
       | HTMLSelectElement
       | HTMLTextAreaElement;
     const label = tempDiv.querySelector('label');
-    const paragraph = tempDiv.querySelector('p');
 
-    const groupLabel =
-      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
-
-    // Support <p> as static label field
-    if (paragraph) {
-      return {
-        fieldType: 'label',
-        fieldLabel: groupLabel || '',
-        fieldName: '',
-        fieldId: paragraph.id,
-        fieldSize: 'full',
-      };
-    }
-
-    // Fallback to input/select/textarea parsing
     if (!input) return null;
 
     const typeAttr = input.getAttribute('type');
     const tagName = input.tagName.toLowerCase();
+
+    // const type = typeAttr || tagName;
+
+    const groupLabel =
+      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
 
     const json: FieldSettings = {
       fieldType:
