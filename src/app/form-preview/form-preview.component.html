@@ -1,9 +1,7 @@
 <div class="app-form-preview">
   @if (sections.length > 0) {
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    @if (sections[currentSectionIndex]) { @let section =
-    sections[currentSectionIndex];
-
+    @for (section of sections; track $index) {
     <div class="form-row">
       @for (field of section.fields; track $index) {
       <div [ngClass]="'field-size-' + (field.json.fieldSize || 'full')">
@@ -113,8 +111,8 @@
           } }
 
           <!-- Label -->
-          @if(field.json.fieldType === actionTypes.label){
-          {{ field.json.fieldLabel }}
+          @if (field.json.fieldType === actionTypes.label) {
+          <p class="static-label">{{ field.json.defaultValue }}</p>
           }
         </div>
       </div>
@@ -122,16 +120,8 @@
     </div>
     }
 
-    <div class="form-navigation">
-      @if (currentSectionIndex !== 0) {
-      <button type="button" (click)="prevSection()">Previous</button>
-      } @if (currentSectionIndex < sections.length - 1) {
-      <button type="button" (click)="nextSection()" class="next-btn">
-        Next
-      </button>
-      } @else {
-      <button type="submit" class="next-btn">Submit</button>
-      }
+    <div class="form-actions">
+      <button type="submit" class="submit-btn">Submit</button>
     </div>
   </form>
   }
