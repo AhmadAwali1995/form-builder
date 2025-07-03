@@ -1,5 +1,5 @@
 import { Component, AfterViewInit, ViewEncapsulation } from '@angular/core';
-import { GridStack } from 'gridstack';
+import { GridStack, GridStackElement } from 'gridstack';
 import { FormsModule } from '@angular/forms';
 import { FieldServicesService } from '../services/field-services.service';
 import { RouterModule } from '@angular/router';
@@ -28,6 +28,8 @@ export class FormBuilderComponent implements AfterViewInit {
   ActionTypes = ActionTypes;
   currentPage: number = 1;
   rowsPerPage: number = 5;
+  isHeaderExist: boolean = false;
+  isFooterExist: boolean = false;
   readonly cellHeight = 20;
   readonly margin = 5;
 
@@ -58,100 +60,35 @@ export class FormBuilderComponent implements AfterViewInit {
         }
       });
     }
-    this.grid.on('dragstart', (event, el) => {
-      const activeItems = this.grid.el.querySelectorAll(
-        '.field-grid-stack-item.active'
-      );
-      activeItems.forEach((item) => item.classList.remove('active'));
+
+    this.grid.on('added', (event, items) => {
+      // Triggered when a new widget is added
+      this.repositionFooter();
     });
 
-    this.grid.on('dragstop', (event, el) => {});
-  }
+    this.grid.on('change', (event, items) => {
+      items.forEach((item) => {
+        const el = item.el as HTMLElement;
 
-  addItem() {
-    this.itemCount++;
+        const gridstackEl = el.parentElement;
+        const gridstack =
+          gridstackEl && ((gridstackEl as any).gridstack as GridStack);
 
-    const w = this.columnNum;
-    const h = 8;
+        if (gridstack) gridstack.compact();
 
-    const nodes = this.grid.engine.nodes;
-    const lastY = nodes.reduce((max, node) => {
-      const y = (node.y ?? 0) + (node.h ?? 0);
-      return Math.max(max, y);
-    }, 0);
+        // Step 1: Check if this item contains a field grid
+        const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
+        if (!innerGridEl) return;
 
-    const innerGridId = `inner-grid-${this.itemCount}`;
+        const sectionItem = document
+          .getElementById(innerGridEl.id)
+          ?.closest('.grid-stack-item') as HTMLElement;
 
-    // Outer section item
-    const item = document.createElement('div');
-    item.classList.add('grid-stack-item');
-    item.setAttribute('gs-x', '0');
-    item.setAttribute('gs-y', lastY.toString());
-    item.setAttribute('gs-w', w.toString());
-    item.setAttribute('gs-h', h.toString());
-    item.setAttribute('id', innerGridId);
-    item.setAttribute('gs-id', innerGridId);
-    item.innerHTML = `<div class="close-section">
-        <img src="/icons/close.png" alt="close" />
-      </div>`;
-    // Outer content wrapper
-    const content = document.createElement('div');
-    content.classList.add('grid-stack-item-content');
+        this.resizeSection(innerGridEl.id);
+      });
 
-    // Inner nested grid for fields
-    const innerGrid = document.createElement('div');
-    innerGrid.classList.add('grid-stack');
-    innerGrid.setAttribute('data-gs-nested', 'true');
-
-    // header item (fixed)
-    const sectionHeader = document.createElement('div');
-    sectionHeader.classList.add(
-      'grid-stack-item',
-      'field-grid-stack-fixed-header'
-    );
-    sectionHeader.innerHTML = ``;
-    sectionHeader.setAttribute('gs-x', '0');
-    sectionHeader.setAttribute('gs-y', '0');
-    sectionHeader.setAttribute('gs-w', (this.columnNum - 1).toString());
-    sectionHeader.setAttribute('gs-h', '1'); // give it height 1 so it's visible
-
-    // disable drag + resize
-    sectionHeader.setAttribute('gs-no-move', 'true');
-    sectionHeader.setAttribute('gs-no-resize', 'true');
-    sectionHeader.setAttribute('gs-locked', 'true');
-
-    const sectionHeaderContentItem1 = document.createElement('div');
-    sectionHeaderContentItem1.classList.add('inner-grid-stack-item-content');
-    sectionHeaderContentItem1.innerHTML = `<label>Section Header</label>`;
-
-    sectionHeader.appendChild(sectionHeaderContentItem1);
-    innerGrid.appendChild(sectionHeader);
-
-    content.appendChild(innerGrid);
-    item.appendChild(content); //for header
-
-    this.grid.el.appendChild(item);
-    this.grid.makeWidget(item);
-
-    // ✅ Force height update after adding the widget
-    (this.grid as any)._updateContainerHeight();
-
-    // Initialize the nested grid
-    const grid = GridStack.init(
-      {
-        column: this.columnNum,
-        cellHeight: 20,
-        margin: 5,
-        disableDrag: false,
-        disableResize: false,
-        removable: false,
-        acceptWidgets: (el) => {
-          return el.classList.contains('field-grid-stack-item');
-        },
-      },
-      innerGrid
-    );
-    this.innerGrids.set(innerGridId, grid);
+      this.repositionFooter();
+    });
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
@@ -625,8 +562,9 @@ export class FormBuilderComponent implements AfterViewInit {
     ) as HTMLElement;
 
     this.renderPagination(selectedColumns, pagination);
-
     this.resizeField(this.fieldId);
+    const ids = this.getGridHierarchyByFieldId(this.fieldId);
+    if (ids.sectionGridId) this.resizeSection(ids.sectionGridId);
   }
 
   createTableHeader(table: HTMLTableElement, selectedColumns: string[]) {
@@ -756,6 +694,7 @@ export class FormBuilderComponent implements AfterViewInit {
       }
 
       const newH = headerRows + maxBottom;
+      outerGrid.compact();
       outerGrid.update(sectionItem, { h: newH + 2 });
     }, 0);
   }
@@ -899,7 +838,6 @@ export class FormBuilderComponent implements AfterViewInit {
 
   selectedFieldSettings: Partial<FieldSettings> = {};
   fieldSettingsList: FieldSettings[] = [];
-
   onFieldUpdated(event: FieldSettings) {
     const el = document.getElementById(event.fieldId);
     if (!el) return;
@@ -960,5 +898,378 @@ export class FormBuilderComponent implements AfterViewInit {
 
   checkSettings() {
     console.log('settings', this.fieldSettingsList);
+  }
+
+  removeField(innerGridId: string, fieldId: string) {
+    const fieldItem = document
+      .getElementById(fieldId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
+
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
+
+    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
+
+    // Get GridStack instance dynamically
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    if (!innerGrid) {
+      console.warn('GridStack instance not found for inner grid element');
+      return;
+    }
+
+    // Remove widget and compact layout
+    innerGrid.removeWidget(fieldItem);
+    innerGrid.compact();
+    this.resizeSection(innerGridId);
+  }
+
+  removeSection(sectionId: string) {
+    const sectionItem = document
+      .getElementById(sectionId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!sectionItem) return;
+
+    this.grid.removeWidget(sectionItem);
+  }
+
+  getGridHierarchyByFieldId(fieldId: string): {
+    fieldGridId: string | null;
+    sectionGridId: string | null;
+  } {
+    const fieldEl = document.getElementById(fieldId);
+    if (!fieldEl) return { fieldGridId: null, sectionGridId: null };
+
+    const fieldItem = fieldEl.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return { fieldGridId: null, sectionGridId: null };
+
+    //const test = fieldItem.parentElement.parentElement.parentElement.id
+    const fieldGridId = fieldItem.id;
+    const sectionGridId =
+      fieldItem.parentElement?.parentElement?.parentElement?.id;
+    if (!sectionGridId)
+      return { fieldGridId: fieldGridId, sectionGridId: null };
+
+    return { fieldGridId, sectionGridId };
+  }
+
+  addSection() {
+    this.itemCount++;
+
+    const w = this.columnNum;
+    const h = 8;
+
+    const nodes = this.grid.engine.nodes;
+    const lastYTest = nodes.reduce((max, node) => {
+      const y = (node.y ?? 0) + (node.h ?? 0);
+      return Math.max(max, y);
+    }, 0);
+
+    const lastY = nodes
+      .filter((node) => node.id !== 'footer-grid')
+      .reduce((max, node) => {
+        const y = (node.y ?? 0) + (node.h ?? 0);
+        return Math.max(max, y);
+      }, 0);
+
+    const innerGridId = `inner-grid-${this.itemCount}`;
+
+    // Outer section item
+    const item = document.createElement('div');
+    item.classList.add('grid-stack-item');
+    item.setAttribute('gs-x', '0');
+    item.setAttribute('gs-y', lastY.toString());
+    item.setAttribute('gs-w', w.toString());
+    item.setAttribute('gs-h', h.toString());
+    item.setAttribute('id', innerGridId);
+    item.setAttribute('gs-id', innerGridId);
+    item.innerHTML = `<div class="close-section">
+        <img src="/icons/close.png" class="btn-close-section" alt="close" />
+      </div>`;
+
+    item.querySelector('.btn-close-section')?.addEventListener('click', () => {
+      this.removeSection(innerGridId);
+    });
+
+    // Outer content wrapper
+    const content = document.createElement('div');
+    content.classList.add('grid-stack-item-content');
+
+    // Inner nested grid for fields
+    const innerGrid = document.createElement('div');
+    innerGrid.classList.add('grid-stack');
+    innerGrid.setAttribute('data-gs-nested', 'true');
+
+    // header item (fixed)
+    const sectionHeader = document.createElement('div');
+    sectionHeader.classList.add(
+      'grid-stack-item',
+      'field-grid-stack-fixed-header'
+    );
+    sectionHeader.innerHTML = ``;
+    sectionHeader.setAttribute('gs-x', '0');
+    sectionHeader.setAttribute('gs-y', '0');
+    sectionHeader.setAttribute('gs-w', (this.columnNum - 1).toString());
+    sectionHeader.setAttribute('gs-h', '1'); // give it height 1 so it's visible
+
+    // disable drag + resize
+    sectionHeader.setAttribute('gs-no-move', 'true');
+    sectionHeader.setAttribute('gs-no-resize', 'true');
+    sectionHeader.setAttribute('gs-locked', 'true');
+
+    const sectionHeaderContentItem = document.createElement('div');
+    sectionHeaderContentItem.classList.add('inner-grid-stack-item-content');
+    sectionHeaderContentItem.innerHTML = `<label>Section</label>`;
+
+    sectionHeader.appendChild(sectionHeaderContentItem);
+    innerGrid.appendChild(sectionHeader);
+
+    content.appendChild(innerGrid);
+    item.appendChild(content); //for header
+
+    this.grid.el.appendChild(item);
+    this.grid.makeWidget(item);
+
+    // ✅ Force height update after adding the widget
+    (this.grid as any)._updateContainerHeight();
+
+    // Initialize the nested grid
+    const grid = GridStack.init(
+      {
+        column: this.columnNum,
+        cellHeight: 20,
+        margin: 5,
+        disableDrag: false,
+        disableResize: false,
+        removable: false,
+        acceptWidgets: (el) => {
+          return el.classList.contains('field-grid-stack-item');
+        },
+      },
+      innerGrid
+    );
+    this.innerGrids.set(innerGridId, grid);
+
+    this.repositionFooter();
+  }
+
+  manageHeader() {
+    if (this.isHeaderExist) {
+      this.removeHeader();
+      this.isHeaderExist = false;
+    } else {
+      this.addHeader();
+      this.isHeaderExist = true;
+    }
+  }
+
+  manageFooter() {
+    if (this.isFooterExist) {
+      this.removeFooter();
+      this.isFooterExist = false;
+    } else {
+      this.addFooter();
+      this.isFooterExist = true;
+    }
+  }
+
+  addHeader() {
+    const w = this.columnNum;
+    const h = 8;
+
+    const nodes = this.grid.engine.nodes;
+
+    const innerGridId = `header-grid`;
+
+    // Outer section item
+    const item = document.createElement('div');
+    item.classList.add('grid-stack-item');
+    item.setAttribute('gs-x', '0');
+    item.setAttribute('gs-y', '0');
+    item.setAttribute('gs-w', w.toString());
+    item.setAttribute('gs-h', h.toString());
+    item.setAttribute('id', innerGridId);
+    item.setAttribute('gs-id', innerGridId);
+
+    item.setAttribute('gs-no-move', 'true');
+    item.setAttribute('gs-no-resize', 'true');
+    item.setAttribute('gs-locked', 'true');
+
+    // Outer content wrapper
+    const content = document.createElement('div');
+    content.classList.add('grid-stack-item-content');
+
+    // Inner nested grid for fields
+    const innerGrid = document.createElement('div');
+    innerGrid.classList.add('grid-stack');
+    innerGrid.setAttribute('data-gs-nested', 'true');
+
+    // header item (fixed)
+    const sectionHeader = document.createElement('div');
+    sectionHeader.classList.add(
+      'grid-stack-item',
+      'field-grid-stack-fixed-header'
+    );
+    sectionHeader.innerHTML = ``;
+    sectionHeader.setAttribute('gs-x', '0');
+    sectionHeader.setAttribute('gs-y', '0');
+    sectionHeader.setAttribute('gs-w', (this.columnNum - 1).toString());
+    sectionHeader.setAttribute('gs-h', '1'); // give it height 1 so it's visible
+
+    // disable drag + resize
+    sectionHeader.setAttribute('gs-no-move', 'true');
+    sectionHeader.setAttribute('gs-no-resize', 'true');
+    sectionHeader.setAttribute('gs-locked', 'true');
+
+    const sectionHeaderContentItem = document.createElement('div');
+    sectionHeaderContentItem.classList.add('inner-grid-stack-item-content');
+    sectionHeaderContentItem.innerHTML = `<label>Form Header</label>`;
+
+    sectionHeader.appendChild(sectionHeaderContentItem);
+    innerGrid.appendChild(sectionHeader);
+
+    content.appendChild(innerGrid);
+    item.appendChild(content); //for header
+
+    this.grid.el.appendChild(item);
+    this.grid.makeWidget(item);
+
+    // ✅ Force height update after adding the widget
+    (this.grid as any)._updateContainerHeight();
+
+    // Initialize the nested grid
+    const grid = GridStack.init(
+      {
+        column: this.columnNum,
+        cellHeight: 20,
+        margin: 5,
+        disableDrag: false,
+        disableResize: false,
+        removable: false,
+        acceptWidgets: (el) => {
+          return el.classList.contains('field-grid-stack-item');
+        },
+      },
+      innerGrid
+    );
+    this.innerGrids.set(innerGridId, grid);
+  }
+
+  removeHeader() {
+    this.removeSection('header-grid');
+  }
+
+  addFooter() {
+    const w = this.columnNum;
+    const h = 8;
+
+    const nodes = this.grid.engine.nodes;
+    const lastY = nodes.reduce((max, node) => {
+      const y = (node.y ?? 0) + (node.h ?? 0);
+      return Math.max(max, y);
+    }, 0);
+
+    const innerGridId = `footer-grid`;
+
+    // Outer section item
+    const item = document.createElement('div');
+    item.classList.add('grid-stack-item');
+    item.setAttribute('gs-x', '0');
+    item.setAttribute('gs-y', lastY.toString());
+    item.setAttribute('gs-w', w.toString());
+    item.setAttribute('gs-h', h.toString());
+    item.setAttribute('id', innerGridId);
+    item.setAttribute('gs-id', innerGridId);
+
+    item.setAttribute('gs-no-move', 'true');
+    item.setAttribute('gs-no-resize', 'true');
+    item.setAttribute('gs-locked', 'true');
+
+    // Outer content wrapper
+    const content = document.createElement('div');
+    content.classList.add('grid-stack-item-content');
+
+    // Inner nested grid for fields
+    const innerGrid = document.createElement('div');
+    innerGrid.classList.add('grid-stack');
+    innerGrid.setAttribute('data-gs-nested', 'true');
+
+    // header item (fixed)
+    const sectionHeader = document.createElement('div');
+    sectionHeader.classList.add(
+      'grid-stack-item',
+      'field-grid-stack-fixed-header'
+    );
+    sectionHeader.innerHTML = ``;
+    sectionHeader.setAttribute('gs-x', '0');
+    sectionHeader.setAttribute('gs-y', '0');
+    sectionHeader.setAttribute('gs-w', (this.columnNum - 1).toString());
+    sectionHeader.setAttribute('gs-h', '1'); // give it height 1 so it's visible
+
+    // disable drag + resize
+    sectionHeader.setAttribute('gs-no-move', 'true');
+    sectionHeader.setAttribute('gs-no-resize', 'true');
+    sectionHeader.setAttribute('gs-locked', 'true');
+
+    const sectionHeaderContentItem = document.createElement('div');
+    sectionHeaderContentItem.classList.add('inner-grid-stack-item-content');
+    sectionHeaderContentItem.innerHTML = `<label>Form Footer</label>`;
+
+    sectionHeader.appendChild(sectionHeaderContentItem);
+    innerGrid.appendChild(sectionHeader);
+
+    content.appendChild(innerGrid);
+    item.appendChild(content); //for header
+
+    this.grid.el.appendChild(item);
+    this.grid.makeWidget(item);
+
+    // ✅ Force height update after adding the widget
+    (this.grid as any)._updateContainerHeight();
+
+    // Initialize the nested grid
+    const grid = GridStack.init(
+      {
+        column: this.columnNum,
+        cellHeight: 20,
+        margin: 5,
+        disableDrag: false,
+        disableResize: false,
+        removable: false,
+        acceptWidgets: (el) => {
+          return el.classList.contains('field-grid-stack-item');
+        },
+      },
+      innerGrid
+    );
+    this.innerGrids.set(innerGridId, grid);
+  }
+
+  removeFooter() {
+    this.removeSection('footer-grid');
+  }
+
+  repositionFooter() {
+    const footerEl = document.getElementById('footer-grid');
+    if (!footerEl || !this.grid) return;
+
+    const nodes = this.grid.engine.nodes.filter(
+      (n) => n.el?.id !== 'footer-grid'
+    );
+    const newY = nodes.reduce((max, node) => {
+      const y = (node.y ?? 0) + (node.h ?? 0);
+      return Math.max(max, y);
+    }, 0);
+
+    // Update the Y of the footer
+    this.grid.update(footerEl, {
+      y: newY,
+    });
+
+    // Optional: Force container height update
+    (this.grid as any)._updateContainerHeight?.();
   }
 }

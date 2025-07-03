@@ -3,8 +3,12 @@
     <div class="left-panel">
       <h4>Fields</h4>
       <div class="buttons-group">
-        <button class="field-btn" (click)="addItem()">Add Section</button>
-        <button class="field-btn" (click)="checkSettings()">test json</button>
+        <button class="field-btn" (click)="addSection()">Add Section</button>
+        <button class="field-btn" (click)="manageHeader()">
+          @if(!isHeaderExist) { Add Header } @else { Remove Header }
+        </button>
+        <button class="field-btn" (click)="manageFooter()">@if(!isFooterExist) { Add Footer } @else { Remove Footer }</button>
+        <button class="field-btn" (click)="previewJson()">test json</button>
       </div>
       <hr />
       <div class="buttons-group">
