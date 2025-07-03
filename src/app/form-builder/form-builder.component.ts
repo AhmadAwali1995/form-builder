@@ -765,7 +765,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
 
-    const input = tempDiv.querySelector('input, select, textarea') as
+    const input = tempDiv.querySelector('input, select, p') as
       | HTMLInputElement
       | HTMLSelectElement
       | HTMLTextAreaElement;
