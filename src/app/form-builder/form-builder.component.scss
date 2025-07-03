@@ -158,7 +158,7 @@
       overflow: auto;
       height: 100%;
       max-height: 100%;
-      padding: 16px;
+      padding: 12px;
       min-height: 0;
       scrollbar-width: thin;
       display: flex;
@@ -260,13 +260,22 @@
         .close-section {
           position: absolute;
           z-index: 10000;
-          right: 20px;
-          top: 20px;
+          right: 15px;
+          top: 15px;
           cursor: pointer;
 
           img {
-            width: 20px;
+            width: 10px;
           }
+        }
+
+        .grid-stack-header,
+        .grid-stack-footer {
+          border-radius: 12px;
+          padding: 12px;
+          font-weight: 500;
+          border: 2px dashed rgba(128, 128, 128, 0.7);
+          overflow: hidden;
         }
 
         .grid-stack-item-content {
@@ -274,7 +283,7 @@
           border-radius: 12px;
           padding: 12px;
           font-weight: 500;
-          border: 1px solid rgba(128, 128, 128, 0.4);
+          border: 2px solid rgba(128, 128, 128, 0.3);
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
           transition: box-shadow 0.2s ease;
           overflow: hidden;
@@ -297,6 +306,7 @@
         border: none;
         box-shadow: none;
 
+
         &.active,
         &:hover {
           background-color: #fafafa;
@@ -313,10 +323,11 @@
         }
 
         .inner-grid-stack-item-content {
-          padding: 12px;
+          padding: 10px;
           display: flex;
           flex-direction: column;
           gap: 10px;
+
 
           .inner-grid-label {
             width: fit-content;

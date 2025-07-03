@@ -1,7 +1,8 @@
 export enum ActionTypes {
+  label = 'label',
   shortText = 'shortText',
   dropDownList = 'dropDownList',
   checkbox = 'checkbox',
-  radioGroup = 'radioGroup',
+  radioGroup = 'radio',
   table = 'table',
 }

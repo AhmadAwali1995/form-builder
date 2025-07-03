@@ -4,14 +4,17 @@
       <h4>Fields</h4>
       <div class="buttons-group">
         <button class="field-btn" (click)="addItem()">Add Section</button>
-        <button class="field-btn" (click)="previewJson()">test json</button>
+        <button class="field-btn" (click)="checkSettings()">test json</button>
       </div>
       <hr />
-      <!-- <h4>Search Field</h4> -->
       <div class="buttons-group">
-        <!-- <div class="search-box">
-          <input type="text" placeholder="Search field..." />
-        </div> -->
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.label.toString())"
+        >
+          <img class="drag-icon" src="icons/text-label.png" alt="short-text" />
+          <p>Label</p>
+        </button>
         <button
           class="field-btn"
           (mousedown)="startGhostDrag($event, ActionTypes.shortText.toString())"

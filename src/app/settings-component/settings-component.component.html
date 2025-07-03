@@ -10,6 +10,8 @@
     />
   </div>
 
+  @if (fieldType !== actionTypes.label ){
+
   <div class="setting-item">
     <label for="field-size">Field Size</label>
     <select id="field-size" [(ngModel)]="fieldSize" (change)="emitUpdate()">
@@ -30,7 +32,7 @@
       (input)="emitUpdate()"
     />
   </div>
-  @if (fieldType === actionTypes.shortText ){
+  } @if (fieldType === actionTypes.shortText ){
   <div class="setting-item">
     <label for="default_value">Default Value</label>
     <input
@@ -74,7 +76,7 @@
       (input)="emitUpdate()"
     />
   </div>
-
+  @if (fieldType !== actionTypes.label ){
   <div class="setting-item-checkbox">
     <label for="required-field">Required Field</label>
     <input
@@ -84,6 +86,7 @@
       (change)="emitUpdate()"
     />
   </div>
+  }
 
   <!-- Dropdown Options -->
   <!-- Trigger Button -->

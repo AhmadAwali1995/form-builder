@@ -187,7 +187,7 @@ export class FormBuilderComponent implements AfterViewInit {
       {
         x: nextX,
         y: nextY,
-        w: fieldWidth,
+        w: actionType === ActionTypes.label ? fieldWidth * 2 : fieldWidth,
         h: 5,
         count: this.itemCount,
       },
@@ -277,7 +277,7 @@ export class FormBuilderComponent implements AfterViewInit {
       fieldType: type,
       fieldName: 'fieldName',
       fieldLabel: 'Field Label',
-      fieldSize: 'medium',
+      fieldSize: type === ActionTypes.label ? 'full' : 'medium',
       isRequired: false,
       cssClass: '',
     };
@@ -299,18 +299,17 @@ export class FormBuilderComponent implements AfterViewInit {
           ...base,
           options: [],
         };
-
+      case ActionTypes.radioGroup:
+        return {
+          ...base,
+        };
+      case ActionTypes.label:
+        return {
+          ...base,
+        };
       default:
         return {
-          fieldId,
-          fieldType: type,
-          fieldName: 'fieldName',
-          fieldLabel: 'Field Label',
-          fieldSize: 'medium',
-          cssClass: '',
-          isRequired: false,
-          defaultValue: '',
-          options: [],
+          ...base,
         };
     }
   }
@@ -469,6 +468,9 @@ export class FormBuilderComponent implements AfterViewInit {
             droppedInSection.sectionId,
             ActionTypes.checkbox
           );
+          break;
+        case ActionTypes.label.toString():
+          this.addFieldToSection(droppedInSection.sectionId, ActionTypes.label);
           break;
         case ActionTypes.table.toString():
           this.addFieldToSection(droppedInSection.sectionId, ActionTypes.table);
@@ -829,16 +831,27 @@ export class FormBuilderComponent implements AfterViewInit {
       | HTMLSelectElement
       | HTMLTextAreaElement;
     const label = tempDiv.querySelector('label');
+    const paragraph = tempDiv.querySelector('p');
 
+    const groupLabel =
+      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
+
+    // Support <p> as static label field
+    if (paragraph) {
+      return {
+        fieldType: 'label',
+        fieldLabel: groupLabel || '',
+        fieldName: '',
+        fieldId: paragraph.id,
+        fieldSize: 'full',
+      };
+    }
+
+    // Fallback to input/select/textarea parsing
     if (!input) return null;
 
     const typeAttr = input.getAttribute('type');
     const tagName = input.tagName.toLowerCase();
-
-    // const type = typeAttr || tagName;
-
-    const groupLabel =
-      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
 
     const json: FieldSettings = {
       fieldType:
