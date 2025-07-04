@@ -24,6 +24,12 @@
             grid-template-columns: repeat(12, 1fr);
             gap: 20px;
 
+            .inner-grid-form-label {
+                font-size: 28px;
+                font-weight: 600;
+                margin: 30px 0;
+            }
+
             .field-size-small {
                 grid-column: span 3;
             }
@@ -120,9 +126,9 @@
         }
 
         .section-divider {
-            margin: 36px 0;
+            margin: 26px 0;
             border: none;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-top: 1px solid rgba(0, 0, 0, 0.2);
         }
 
         .form-navigation {

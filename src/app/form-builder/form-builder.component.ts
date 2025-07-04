@@ -6,9 +6,7 @@ import { RouterModule } from '@angular/router';
 import { SettingsComponentComponent } from '../settings-component/settings-component.component';
 import { sectionCorners } from '../shared/interfaces/section-corners';
 import { ActionTypes } from '../shared/enums/action-types';
-import { FieldSettings } from '../shared/interfaces/field-settings';
-import { Fields, Sections } from '../shared/interfaces/sections';
-
+import { Fields, FieldSettings, Sections } from '../shared/interfaces/sections';
 
 @Component({
   selector: 'app-form-builder',
@@ -35,8 +33,7 @@ export class FormBuilderComponent implements AfterViewInit {
   readonly cellHeight = 20;
   readonly margin = 5;
 
-  sections:Sections[] = [];
-
+  sections: Sections[] = [];
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -80,7 +77,6 @@ export class FormBuilderComponent implements AfterViewInit {
           gridstackEl && ((gridstackEl as any).gridstack as GridStack);
 
         if (gridstack) gridstack.compact();
-
         // Step 1: Check if this item contains a field grid
         const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
         if (!innerGridEl) return;
@@ -90,6 +86,18 @@ export class FormBuilderComponent implements AfterViewInit {
           ?.closest('.grid-stack-item') as HTMLElement;
 
         this.resizeSection(innerGridEl.id);
+
+        const insideFieldItem = sectionItem.querySelectorAll(
+          '.field-grid-stack-item'
+        );
+        insideFieldItem.forEach((item) => {
+          const fieldItem = document
+            .getElementById(item.id)
+            ?.closest('.field-grid-stack-item') as HTMLElement;
+
+          this.snapToClosestAllowedWidth(fieldItem.id);
+          if (gridstack) gridstack.compact();
+        });
       });
 
       this.repositionFooter();
@@ -174,35 +182,7 @@ export class FormBuilderComponent implements AfterViewInit {
       const fieldType = fieldElement?.getAttribute('data-field-type') || '';
       this.fieldId = fieldElement!.id;
       this.fieldType = fieldType;
-      //defult values on the fields settings
-      if (fieldElement) {
-        this.selectedFieldSettings = {
-          fieldId: this.fieldId,
-          fieldType: fieldType,
-          fieldName: '',
-          fieldLabel: fieldElement.getAttribute('data-label') || '',
-          fieldSize: ((): 'medium' | 'small' | 'large' | 'full' | undefined => {
-            const size = fieldElement.getAttribute('data-size');
-            return size === 'medium' ||
-              size === 'small' ||
-              size === 'large' ||
-              size === 'full'
-              ? size
-              : 'medium';
-          })(),
-          placeholderText: fieldElement.getAttribute('data-placeholder') || '',
-          defaultValue: fieldElement.getAttribute('data-default') || '',
-          minRange: +fieldElement.getAttribute('data-min')! || undefined,
-          maxRange: +fieldElement.getAttribute('data-max')! || undefined,
-          cssClass: fieldElement.getAttribute('data-css') || '',
-          isRequired: fieldElement.getAttribute('data-required') === 'true',
-          options: JSON.parse(
-            fieldElement.getAttribute('data-options') || '[]'
-          ),
-        };
-      } else {
-        this.selectedFieldSettings = {};
-      }
+      this.addSettingsToField(fieldElement, fieldType);
     });
 
     innerGrid.el.appendChild(fieldItem);
@@ -210,6 +190,36 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.resizeField(fieldItem.id);
     this.resizeSection(innerGridId);
+  }
+
+  addSettingsToField(fieldElement: Element | null, fieldType: string) {
+    if (fieldElement) {
+      this.selectedFieldSettings = {
+        fieldId: this.fieldId,
+        fieldType: fieldType,
+        fieldName: '',
+        fieldLabel: fieldElement.getAttribute('data-label') || '',
+        fieldSize: ((): 'medium' | 'small' | 'large' | 'full' | undefined => {
+          const size = fieldElement.getAttribute('data-size');
+          return size === 'medium' ||
+            size === 'small' ||
+            size === 'large' ||
+            size === 'full'
+            ? size
+            : 'medium';
+        })(),
+        placeholderText: fieldElement.getAttribute('data-placeholder') || '',
+        defaultValue: fieldElement.getAttribute('data-default') || '',
+        minRange: +fieldElement.getAttribute('data-min')! || undefined,
+        maxRange: +fieldElement.getAttribute('data-max')! || undefined,
+        cssClass: fieldElement.getAttribute('data-css') || '',
+        isRequired: fieldElement.getAttribute('data-required') === 'true',
+        options: JSON.parse(fieldElement.getAttribute('data-options') || '[]'),
+        columns: JSON.parse(fieldElement.getAttribute('data-columns') || '[]'),
+      };
+    } else {
+      this.selectedFieldSettings = {};
+    }
   }
 
   //the defult values that get sent to the preview
@@ -244,6 +254,11 @@ export class FormBuilderComponent implements AfterViewInit {
       case ActionTypes.radioGroup:
         return {
           ...base,
+        };
+      case ActionTypes.table:
+        return {
+          ...base,
+          columns: ['Column A', 'Column B', 'Column C'],
         };
       case ActionTypes.label:
         return {
@@ -299,6 +314,10 @@ export class FormBuilderComponent implements AfterViewInit {
       merged.fieldType === ActionTypes.radioGroup
     ) {
       merged.options = field.options || [];
+    }
+
+    if (merged.fieldType === ActionTypes.table) {
+      merged.columns = field.columns || [];
     }
 
     return merged;
@@ -660,9 +679,79 @@ export class FormBuilderComponent implements AfterViewInit {
       const contentHeight = contentElement.offsetHeight;
       const cellHeight = innerGrid.getCellHeight(true);
       const newH = Math.ceil(contentHeight / cellHeight);
-
       innerGrid.update(fieldItem, { h: newH });
     }, 0);
+  }
+
+  resizeFieldWidth(fieldId: string) {
+    setTimeout(() => {
+      const fieldItem = document
+        .getElementById(fieldId)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!fieldItem) return;
+
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+      if (!contentElement) return;
+
+      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+      if (!innerGridEl) return;
+
+      // Get GridStack instance dynamically
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      if (!innerGrid) {
+        console.warn('GridStack instance not found for inner grid element');
+        return;
+      }
+
+      const contentHeight = contentElement.offsetHeight;
+      const cellHeight = innerGrid.getCellHeight(true);
+      const newH = Math.ceil(contentHeight / cellHeight);
+
+      const contentWidth = contentElement.offsetWidth;
+      const newW = Math.ceil(contentWidth / 26);
+      debugger;
+      innerGrid.update(fieldItem, { w: newW });
+    }, 0);
+  }
+
+  snapToClosestAllowedWidth(fieldId: string) {
+    const fieldItem = document
+      .getElementById(fieldId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
+
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
+
+    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
+
+    // Get GridStack instance dynamically
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    if (!innerGrid) {
+      console.warn('GridStack instance not found for inner grid element');
+      return;
+    }
+
+    const allowedWidths = [9, 18, 27, 36];
+    const contentWidth = contentElement.offsetWidth;
+    const currentWidth = Math.ceil(contentWidth / 26);
+
+    const closestWidth = allowedWidths.reduce((prev, curr) =>
+      Math.abs(curr - currentWidth) < Math.abs(prev - currentWidth)
+        ? curr
+        : prev
+    );
+    // debugger;
+
+    if (closestWidth !== currentWidth) {
+      innerGrid.update(fieldItem, { w: closestWidth });
+      // fieldItem.compact();
+    }
   }
 
   resizeSection(sectionId: string): void {
@@ -705,11 +794,7 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   previewJson() {
-    // const sections: {
-    //   id: string;
-    //   fields: { id: string; json: FieldSettings }[];
-    // }[] = [];
-const sections: Sections[] = [];
+    const sections: Sections[] = [];
     const outerNodes = this.grid.save();
     if (!Array.isArray(outerNodes)) return;
 
@@ -760,8 +845,8 @@ const sections: Sections[] = [];
         fields,
       });
     });
-this.sections = sections;
-    localStorage.setItem('form-sections', JSON.stringify(sections));
+    this.sections = sections;
+    localStorage.setItem('form-sections', JSON.stringify(this.sections));
     window.open('/preview', '_blank');
     console.log('sections', sections);
     console.log('this.sections', this.sections);
@@ -771,7 +856,7 @@ this.sections = sections;
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
 
-    const input = tempDiv.querySelector('input, select, p') as
+    const input = tempDiv.querySelector('input, select, p, table') as
       | HTMLInputElement
       | HTMLSelectElement
       | HTMLTextAreaElement;
@@ -886,6 +971,9 @@ this.sections = sections;
           JSON.stringify(updatedField.options || [])
         );
         break;
+      case ActionTypes.table:
+        el.setAttribute('columns', updatedField.maxRange?.toString() || '');
+        break;
 
       default:
         break;
@@ -900,10 +988,6 @@ this.sections = sections;
     if (this.selectedFieldSettings?.fieldId === event.fieldId) {
       this.selectedFieldSettings = updatedField;
     }
-  }
-
-  checkSettings() {
-    console.log('settings', this.fieldSettingsList);
   }
 
   removeField(innerGridId: string, fieldId: string) {

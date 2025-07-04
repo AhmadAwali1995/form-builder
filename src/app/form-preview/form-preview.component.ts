@@ -9,6 +9,7 @@ import {
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { FieldSettings } from '../shared/interfaces/field-settings';
+import { Sections } from '../shared/interfaces/sections';
 
 @Component({
   selector: 'app-form-preview',
@@ -21,8 +22,7 @@ import { FieldSettings } from '../shared/interfaces/field-settings';
 export class FormPreviewComponent implements OnInit {
   actionTypes = ActionTypes;
   form: FormGroup;
-  sections: { id: string; fields: { id: string; json: FieldSettings }[] }[] =
-    [];
+  sections: Sections[] = [];
   currentSectionIndex = 0;
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
@@ -33,7 +33,7 @@ export class FormPreviewComponent implements OnInit {
     if (raw) {
       this.sections = JSON.parse(raw);
       const allFields = this.sections.flatMap((s) =>
-        s.fields.map((f) => f.json)
+        s.fields.map((f) => f.fieldSettings)
       );
       this.buildForm(allFields);
     }

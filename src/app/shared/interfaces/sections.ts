@@ -1,12 +1,11 @@
-
-export interface Sections{
-    sectionId:string,
-    fields:Fields[]
+export interface Sections {
+  sectionId: string;
+  fields: Fields[];
 }
 
-export interface Fields{
-    fieldId:string,
-    fieldSettings:FieldSettings
+export interface Fields {
+  fieldId: string;
+  fieldSettings: FieldSettings;
 }
 
 export interface FieldSettings {
@@ -24,4 +23,5 @@ export interface FieldSettings {
   isRequired?: boolean;
   direction?: 'horizontal' | 'vertical';
   options?: { label: string; value: string }[];
+  columns?: string[];
 }

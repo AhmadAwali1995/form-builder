@@ -253,7 +253,7 @@
     .canvas {
       position: relative;
       background: #f2f2f4;
-      height: calc(100dvh - 60px);
+      height: calc(100dvh - 70px);
       overflow-y: auto;
 
       .grid-stack-item {
@@ -334,6 +334,11 @@
             font-size: 16px;
             font-weight: 600;
             color: #333;
+          }
+
+          .inner-grid-form-label {
+            font-size: 28px;
+            font-weight: 600;
           }
 
           .inner-grid-textbox {

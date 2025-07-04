@@ -169,7 +169,6 @@ export class FieldServicesService {
   createTable(parameters: fieldParameters) {
     const tableId = `dropdown-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
-    // const fieldOptionsBox = this.createFieldOptionsBox();
 
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');

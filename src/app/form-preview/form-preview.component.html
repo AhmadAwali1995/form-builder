@@ -4,76 +4,87 @@
     @for (section of sections; track $index) {
     <div class="form-row">
       @for (field of section.fields; track $index) {
-      <div [ngClass]="'field-size-' + (field.json.fieldSize || 'full')">
-        <div [ngSwitch]="field.json.fieldType">
+      <div
+        [ngClass]="'field-size-' + (field.fieldSettings.fieldSize || 'full')"
+      >
+        <div [ngSwitch]="field.fieldSettings.fieldType">
           <!-- Short Text Field -->
-          @if (field.json.fieldType === actionTypes.shortText) {
+          @if (field.fieldSettings.fieldType === actionTypes.shortText) {
           <label>
-            {{ field.json.fieldLabel }}
-            @if (field.json.isRequired) {
+            {{ field.fieldSettings.fieldLabel }}
+            @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
           <input
             type="text"
-            [formControlName]="field.json.fieldName"
-            [placeholder]="field.json.placeholderText || ''"
+            [formControlName]="field.fieldSettings.fieldName"
+            [placeholder]="field.fieldSettings.placeholderText || ''"
           />
-          @if (form.get(field.json.fieldName)?.touched &&
-          form.get(field.json.fieldName)?.errors) {
+          @if (form.get(field.fieldSettings.fieldName)?.touched &&
+          form.get(field.fieldSettings.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.fieldName)?.hasError('required')) {
+            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
+            {
             <div>This field is required.</div>
-            } @if (form.get(field.json.fieldName)?.hasError('email')) {
+            } @if (form.get(field.fieldSettings.fieldName)?.hasError('email')) {
             <div>Please enter a valid email address.</div>
-            } @if (form.get(field.json.fieldName)?.hasError('minlength')) {
-            <div>Minimum {{ field.json.minRange }} characters required.</div>
-            } @if (form.get(field.json.fieldName)?.hasError('maxlength')) {
-            <div>Maximum {{ field.json.maxRange }} characters allowed.</div>
+            } @if
+            (form.get(field.fieldSettings.fieldName)?.hasError('minlength')) {
+            <div>
+              Minimum {{ field.fieldSettings.minRange }} characters required.
+            </div>
+            } @if
+            (form.get(field.fieldSettings.fieldName)?.hasError('maxlength')) {
+            <div>
+              Maximum {{ field.fieldSettings.maxRange }} characters allowed.
+            </div>
             }
           </div>
           } }
 
           <!-- Dropdown -->
-          @if (field.json.fieldType === actionTypes.dropDownList) {
+          @if (field.fieldSettings.fieldType === actionTypes.dropDownList) {
           <label>
-            {{ field.json.fieldLabel }}
-            @if (field.json.isRequired) {
+            {{ field.fieldSettings.fieldLabel }}
+            @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
-          <select [formControlName]="field.json.fieldName">
+          <select [formControlName]="field.fieldSettings.fieldName">
             <option value="">-- Select --</option>
-            @for (opt of field.json.options; track $index) {
+            @for (opt of field.fieldSettings.options; track $index) {
             <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
-          @if (form.get(field.json.fieldName)?.touched &&
-          form.get(field.json.fieldName)?.errors) {
+          @if (form.get(field.fieldSettings.fieldName)?.touched &&
+          form.get(field.fieldSettings.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.fieldName)?.hasError('required')) {
+            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
+            {
             <div>This field is required.</div>
             }
           </div>
           } }
 
           <!-- Checkbox -->
-          @if (field.json.fieldType === actionTypes.checkbox) {
-          <label>{{ field.json.fieldLabel }}</label>
+          @if (field.fieldSettings.fieldType === actionTypes.checkbox) {
+          <label>{{ field.fieldSettings.fieldLabel }}</label>
           <div class="checkbox-vertical">
-            @for (option of field.json.options; track $index) {
+            @for (option of field.fieldSettings.options; track $index) {
             <label>
               <input
                 type="checkbox"
-                [formControlName]="field.json.fieldName"
+                [formControlName]="field.fieldSettings.fieldName"
                 [value]="option.value"
               />
               {{ option.label }}
             </label>
-            } @if (form.get(field.json.fieldName)?.touched &&
-            form.get(field.json.fieldName)?.errors) {
+            } @if (form.get(field.fieldSettings.fieldName)?.touched &&
+            form.get(field.fieldSettings.fieldName)?.errors) {
             <div class="error-msg">
-              @if (form.get(field.json.fieldName)?.hasError('required')) {
+              @if
+              (form.get(field.fieldSettings.fieldName)?.hasError('required')) {
               <div>This field is required.</div>
               }
             </div>
@@ -82,43 +93,61 @@
           }
 
           <!-- Radio Group -->
-          @if (field.json.fieldType === actionTypes.radioGroup) {
+          @if (field.fieldSettings.fieldType === actionTypes.radioGroup) {
           <label>
-            {{ field.json.fieldLabel }}
-            @if (field.json.isRequired) {
+            {{ field.fieldSettings.fieldLabel }}
+            @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
-          <div [ngClass]="['radio-group', field.json.direction || 'vertical']">
-            @for (opt of field.json.options; track $index) {
+          <div
+            [ngClass]="[
+              'radio-group',
+              field.fieldSettings.direction || 'vertical'
+            ]"
+          >
+            @for (opt of field.fieldSettings.options; track $index) {
             <label>
               <input
                 type="radio"
                 [value]="opt.value"
-                [formControlName]="field.json.fieldName"
+                [formControlName]="field.fieldSettings.fieldName"
               />
               {{ opt.label }}
             </label>
             }
           </div>
-          @if (form.get(field.json.fieldName)?.touched &&
-          form.get(field.json.fieldName)?.errors) {
+          @if (form.get(field.fieldSettings.fieldName)?.touched &&
+          form.get(field.fieldSettings.fieldName)?.errors) {
           <div class="error-msg">
-            @if (form.get(field.json.fieldName)?.hasError('required')) {
+            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
+            {
             <div>This field is required.</div>
             }
           </div>
           } }
 
+          <!-- Table -->
+          @if(field.fieldSettings.fieldType === actionTypes.table){
+          <p>
+            {{ field.fieldSettings.fieldLabel }}
+          </p>
+          }
+
           <!-- Label -->
-          @if (field.json.fieldType === actionTypes.label) {
-          <p class="static-label">{{ field.json.defaultValue }}</p>
+          @if (field.fieldSettings.fieldType === actionTypes.label) {
+          <p class="inner-grid-form-label">
+            {{ field.fieldSettings.fieldLabel }}
+          </p>
           }
         </div>
       </div>
       }
     </div>
-    }
+    @if($index != sections.length -1){
+
+    <div class="section-divider"></div>
+    } }
 
     <div class="form-actions">
       <button type="submit" class="submit-btn">Submit</button>
