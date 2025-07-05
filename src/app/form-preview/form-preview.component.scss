@@ -7,13 +7,6 @@
     border-radius: 16px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
 
-    h2 {
-        font-size: 26px;
-        margin-bottom: 24px;
-        text-align: center;
-        color: #222;
-    }
-
     form {
         display: flex;
         flex-direction: column;
@@ -23,6 +16,22 @@
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: 20px;
+
+            &.header-section {
+                background-color: #f0f8ff;
+                border: 2px solid #007bff;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+            }
+
+            &.footer-section {
+                background-color: #fff6f0;
+                border: 2px solid #ffa726;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(255, 87, 34, 0.1);
+            }
 
             .inner-grid-form-label {
                 font-size: 28px;
@@ -123,6 +132,92 @@
                 margin-top: 4px;
                 line-height: 1.4;
             }
+
+            .table-container {
+                overflow-x: auto;
+                padding: 1rem;
+
+                .custom-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-size: 14px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    border: 1px solid rgba(128, 128, 128, 0.4);
+
+                    thead {
+                        background-color: #f3f4f6;
+                        text-transform: uppercase;
+
+                        th {
+                            font-weight: 600;
+                            color: #333;
+                            text-align: center;
+                            padding: 12px 16px;
+                            border: 1px solid rgba(128, 128, 128, 0.3);
+                        }
+                    }
+
+                    tbody {
+                        tr {
+                            &:hover {
+                                background-color: #f9fafb;
+                            }
+
+                            td {
+                                color: #444;
+                                text-align: center;
+                                padding: 12px 16px;
+                                border: 1px solid rgba(128, 128, 128, 0.3);
+                            }
+                        }
+                    }
+                }
+
+                .avatar-img {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 1px solid #ddd;
+                }
+
+                .pagination {
+                    display: flex;
+                    justify-content: center;
+                    gap: 8px;
+                    margin-top: 12px;
+
+                    button {
+                        padding: 6px 12px;
+                        border: 1px solid rgba(128, 128, 128, 0.3);
+                        background-color: #fff;
+                        color: black;
+                        cursor: pointer;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        transition: background-color 0.2s ease;
+
+                        &:disabled {
+                            opacity: 0.5;
+                            cursor: not-allowed;
+                        }
+
+                        &:hover:not(:disabled) {
+                            background-color: #3b82f6;
+                            color: white;
+                        }
+                    }
+
+                    .active {
+                        background-color: #3b82f6;
+                        color: #fff;
+                        font-weight: 600;
+                        border-color: #3b82f6;
+                    }
+                }
+            }
         }
 
         .section-divider {
@@ -131,14 +226,12 @@
             border-top: 1px solid rgba(0, 0, 0, 0.2);
         }
 
-        .form-navigation {
+        .form-actions {
             display: flex;
-            justify-content: flex-start;
-            gap: 12px;
-            margin-top: 24px;
+            justify-content: center;
         }
 
-        button {
+        .submit-btn {
             padding: 10px 20px;
             font-size: 15px;
             font-weight: 600;
@@ -157,14 +250,6 @@
                 background-color: #ccc;
                 cursor: not-allowed;
             }
-
-            &.next-btn {
-                margin-left: auto;
-            }
         }
-
     }
-
-
-
 }

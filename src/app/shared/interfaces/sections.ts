@@ -23,5 +23,5 @@ export interface FieldSettings {
   isRequired?: boolean;
   direction?: 'horizontal' | 'vertical';
   options?: { label: string; value: string }[];
-  columns?: string[];
+  columns?: { selectedColumns: string[]; columnsData: string[] }[];
 }

@@ -86,10 +86,8 @@ export class FormBuilderComponent implements AfterViewInit {
           .getElementById(innerGridEl.id)
           ?.closest('.grid-stack-item') as HTMLElement;
 
-        
         this.resizeFieldWidth(item.id, item.w);
         this.resizeSection(innerGridEl.id);
-        
       });
 
       this.repositionFooter();
@@ -186,20 +184,15 @@ export class FormBuilderComponent implements AfterViewInit {
 
   addSettingsToField(fieldElement: Element | null, fieldType: string) {
     if (fieldElement) {
+      const columnsAttr = fieldElement.getAttribute('data-columns');
+      const parsedColumns = columnsAttr ? JSON.parse(columnsAttr) : [];
+
       this.selectedFieldSettings = {
         fieldId: this.fieldId,
-        fieldType: fieldType,
-        fieldName: '',
+        fieldType: fieldType as ActionTypes,
         fieldLabel: fieldElement.getAttribute('data-label') || '',
-        fieldSize: ((): 'medium' | 'small' | 'large' | 'full' | undefined => {
-          const size = fieldElement.getAttribute('data-size');
-          return size === 'medium' ||
-            size === 'small' ||
-            size === 'large' ||
-            size === 'full'
-            ? size
-            : 'medium';
-        })(),
+        fieldName: fieldElement.getAttribute('data-name') || '',
+        fieldSize: (fieldElement.getAttribute('data-size') as any) || 'medium',
         placeholderText: fieldElement.getAttribute('data-placeholder') || '',
         defaultValue: fieldElement.getAttribute('data-default') || '',
         minRange: +fieldElement.getAttribute('data-min')! || undefined,
@@ -207,21 +200,21 @@ export class FormBuilderComponent implements AfterViewInit {
         cssClass: fieldElement.getAttribute('data-css') || '',
         isRequired: fieldElement.getAttribute('data-required') === 'true',
         options: JSON.parse(fieldElement.getAttribute('data-options') || '[]'),
-        columns: JSON.parse(fieldElement.getAttribute('data-columns') || '[]'),
+        columns: parsedColumns,
       };
     } else {
       this.selectedFieldSettings = {};
     }
   }
 
-  //the defult values that get sent to the preview
   getDefaultSettingsByType(fieldId: string, type: ActionTypes): FieldSettings {
     const base: FieldSettings = {
       fieldId,
       fieldType: type,
-      fieldName: 'fieldName',
       fieldLabel: 'Field Label',
-      fieldSize: type === ActionTypes.label ? 'full' : 'medium',
+      fieldName: 'fieldName',
+      fieldSize:
+        type === (ActionTypes.label || ActionTypes.table) ? 'full' : 'medium',
       isRequired: false,
       cssClass: '',
     };
@@ -250,7 +243,7 @@ export class FormBuilderComponent implements AfterViewInit {
       case ActionTypes.table:
         return {
           ...base,
-          columns: ['Column A', 'Column B', 'Column C'],
+          columns: [],
         };
       case ActionTypes.label:
         return {
@@ -581,6 +574,19 @@ export class FormBuilderComponent implements AfterViewInit {
     this.resizeField(this.fieldId);
     const ids = this.getGridHierarchyByFieldId(this.fieldId);
     if (ids.sectionGridId) this.resizeSection(ids.sectionGridId);
+
+    const fieldSettings: Partial<FieldSettings> = {
+      fieldId: this.fieldId,
+      fieldType: ActionTypes.table,
+      columns: [
+        {
+          selectedColumns,
+          columnsData: this.tableData,
+        },
+      ],
+    };
+
+    this.onFieldUpdated(fieldSettings as FieldSettings);
   }
 
   createTableHeader(table: HTMLTableElement, selectedColumns: string[]) {
@@ -647,117 +653,115 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   resizeField(fieldId: string): void {
-    console.log('resizeField consumed');
+    // console.log('resizeField consumed');
     const fieldItem = document
-        .getElementById(fieldId)
-        ?.closest('.grid-stack-item') as HTMLElement;
-      if (!fieldItem) return;
+      .getElementById(fieldId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
 
-      const contentElement = fieldItem.querySelector(
-        '.inner-grid-stack-item-content'
-      ) as HTMLElement;
-      if (!contentElement) return;
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
 
-      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-      if (!innerGridEl) return;
+    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
 
-      // Get GridStack instance dynamically
-      const innerGrid = (innerGridEl as any).gridstack as GridStack;
-      if (!innerGrid) {
-        console.warn('GridStack instance not found for inner grid element');
-        return;
-      }
+    // Get GridStack instance dynamically
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    if (!innerGrid) {
+      console.warn('GridStack instance not found for inner grid element');
+      return;
+    }
 
-      const contentHeight = contentElement.offsetHeight;
-      const cellHeight = innerGrid.getCellHeight(true);
-      const newH = Math.ceil(contentHeight / cellHeight);
-      innerGrid.update(fieldItem, { h: newH, minH: newH, maxH: newH });
-      console.log(`h values h: ${newH}, minH: ${newH}, maxH: ${newH}`);
+    const contentHeight = contentElement.offsetHeight;
+    const cellHeight = innerGrid.getCellHeight(true);
+    const newH = Math.ceil(contentHeight / cellHeight);
+    innerGrid.update(fieldItem, { h: newH, minH: newH, maxH: newH });
+    // console.log(`h values h: ${newH}, minH: ${newH}, maxH: ${newH}`);
   }
 
   resizeFieldWidth(fieldId?: string, currentWidth?: number) {
-    console.log('resizeFieldWidth consumed');
+    // console.log('resizeFieldWidth consumed');
     const fieldItem = document
-        .getElementById(fieldId!)
-        ?.closest('.grid-stack-item') as HTMLElement;
-      if (!fieldItem) return;
+      .getElementById(fieldId!)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
 
-      const contentElement = fieldItem.querySelector(
-        '.inner-grid-stack-item-content'
-      ) as HTMLElement;
-      if (!contentElement) return;
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
 
-      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-      if (!innerGridEl) return;
+    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
 
-      // Get GridStack instance dynamically
-      const innerGrid = (innerGridEl as any).gridstack as GridStack;
-      if (!innerGrid) {
-        console.warn('GridStack instance not found for inner grid element');
-        return;
-      }
+    // Get GridStack instance dynamically
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    if (!innerGrid) {
+      console.warn('GridStack instance not found for inner grid element');
+      return;
+    }
 
-      const allowedWidths = [9, 18, 27, 36];
+    const allowedWidths = [9, 18, 27, 36];
 
-      let newW = 0;
-      const curW = currentWidth!;
-      if (curW <= 13) {
-        newW = allowedWidths[0];
-      } else if (curW >= 14 && curW <= 22) {
-        newW = allowedWidths[1];
-      } else if (curW >= 23 && curW <= 31) {
-        newW = allowedWidths[2];
-      } else if (curW >= 32) {
-        newW = allowedWidths[3];
-      }
-      
-      innerGrid.update(fieldItem, { w: newW });
-      debugger;
-      this.resizeField(fieldId!);
-      const sectionId = fieldItem.parentElement?.parentElement?.parentElement?.id
-      this.resizeSection(sectionId!);
-      console.log(`w values w: ${newW}`)
+    let newW = 0;
+    const curW = currentWidth!;
+    if (curW <= 13) {
+      newW = allowedWidths[0];
+    } else if (curW >= 14 && curW <= 22) {
+      newW = allowedWidths[1];
+    } else if (curW >= 23 && curW <= 31) {
+      newW = allowedWidths[2];
+    } else if (curW >= 32) {
+      newW = allowedWidths[3];
+    }
+
+    innerGrid.update(fieldItem, { w: newW });
+    // debugger;
+    this.resizeField(fieldId!);
+    const sectionId = fieldItem.parentElement?.parentElement?.parentElement?.id;
+    this.resizeSection(sectionId!);
+    // console.log(`w values w: ${newW}`);
   }
 
   resizeSection(sectionId: string): void {
-    console.log('resizeSection consumed');
+    // console.log('resizeSection consumed');
     const sectionItem = document
-        .getElementById(sectionId)
-        ?.closest('.grid-stack-item') as HTMLElement;
-      if (!sectionItem) return;
+      .getElementById(sectionId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!sectionItem) return;
 
-      const innerGridEl = sectionItem.querySelector(
-        '.grid-stack'
-      ) as HTMLElement;
-      if (!innerGridEl) return;
+    const innerGridEl = sectionItem.querySelector('.grid-stack') as HTMLElement;
+    if (!innerGridEl) return;
 
-      const innerGrid = (innerGridEl as any).gridstack as GridStack;
-      const outerGridEl = sectionItem.closest('.grid-stack') as HTMLElement;
-      const outerGrid =
-        outerGridEl && ((outerGridEl as any).gridstack as GridStack);
-      if (!innerGrid || !outerGrid) return;
+    const innerGrid = (innerGridEl as any).gridstack as GridStack;
+    const outerGridEl = sectionItem.closest('.grid-stack') as HTMLElement;
+    const outerGrid =
+      outerGridEl && ((outerGridEl as any).gridstack as GridStack);
+    if (!innerGrid || !outerGrid) return;
 
-      // Optional: get header height in rows
-      const headerEl = sectionItem.querySelector(
-        '.section-header'
-      ) as HTMLElement;
-      const headerPx = headerEl?.offsetHeight ?? 0;
-      const rowHeight = outerGrid.getCellHeight(true);
-      const headerRows = Math.ceil(headerPx / rowHeight);
+    // Optional: get header height in rows
+    const headerEl = sectionItem.querySelector(
+      '.section-header'
+    ) as HTMLElement;
+    const headerPx = headerEl?.offsetHeight ?? 0;
+    const rowHeight = outerGrid.getCellHeight(true);
+    const headerRows = Math.ceil(headerPx / rowHeight);
 
-      // Find bottom-most occupied row (y + h)
-      let maxBottom = 0;
-      for (const node of innerGrid.engine.nodes) {
-        const bottom = (node?.y ?? 0) + (node?.h ?? 0);
-        if (bottom > maxBottom) maxBottom = bottom;
-      }
+    // Find bottom-most occupied row (y + h)
+    let maxBottom = 0;
+    for (const node of innerGrid.engine.nodes) {
+      const bottom = (node?.y ?? 0) + (node?.h ?? 0);
+      if (bottom > maxBottom) maxBottom = bottom;
+    }
 
-      const newH = headerRows + maxBottom;
-      outerGrid.compact();
-      outerGrid.update(sectionItem, {
-        h: newH + 2
-      });
-      console.log(`h values h: ${newH + 2}newH + 2`)
+    const newH = headerRows + maxBottom;
+    outerGrid.compact();
+    outerGrid.update(sectionItem, {
+      h: newH + 2,
+    });
+    // console.log(`h values h: ${newH + 2}newH + 2`);
   }
 
   previewJson() {
@@ -939,7 +943,10 @@ export class FormBuilderComponent implements AfterViewInit {
         );
         break;
       case ActionTypes.table:
-        el.setAttribute('columns', updatedField.maxRange?.toString() || '');
+        el.setAttribute(
+          'data-columns',
+          JSON.stringify(updatedField.columns || [])
+        );
         break;
 
       default:

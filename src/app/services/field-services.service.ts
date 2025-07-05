@@ -48,7 +48,7 @@ export class FieldServicesService {
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
     fieldContentItem.innerHTML = `
-      <p id="${ddlId}" data-field-type="${ActionTypes.label}" class="inner-grid-form-label">Text Field</p>`;
+    <p id="${ddlId}" data-field-type="${ActionTypes.label}" class="inner-grid-form-label">Text Field</p>`;
 
     fieldItem.appendChild(fieldContentItem);
 
@@ -169,7 +169,7 @@ export class FieldServicesService {
   }
 
   createTable(parameters: fieldParameters) {
-    const tableId = `dropdown-${this.guid()}`;
+    const tableId = `table-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
 
     const fieldContentItem = document.createElement('div');
