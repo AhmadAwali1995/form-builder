@@ -9,7 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FieldSettings } from '../shared/interfaces/field-settings';
+import { FieldSettings } from '../shared/interfaces/sections';
 
 @Component({
   selector: 'app-settings-component',

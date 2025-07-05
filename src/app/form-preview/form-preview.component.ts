@@ -8,8 +8,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { FieldSettings } from '../shared/interfaces/field-settings';
-import { Sections } from '../shared/interfaces/sections';
+import { FieldSettings, Sections } from '../shared/interfaces/sections';
 
 @Component({
   selector: 'app-form-preview',
