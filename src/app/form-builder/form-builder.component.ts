@@ -70,6 +70,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.grid.on('change', (event, items) => {
       items.forEach((item) => {
+        if (item.id?.includes('inner-grid')) return;
         const el = item.el as HTMLElement;
 
         const gridstackEl = el.parentElement;
@@ -85,19 +86,10 @@ export class FormBuilderComponent implements AfterViewInit {
           .getElementById(innerGridEl.id)
           ?.closest('.grid-stack-item') as HTMLElement;
 
+        
+        this.resizeFieldWidth(item.id, item.w);
         this.resizeSection(innerGridEl.id);
-
-        const insideFieldItem = sectionItem.querySelectorAll(
-          '.field-grid-stack-item'
-        );
-        insideFieldItem.forEach((item) => {
-          const fieldItem = document
-            .getElementById(item.id)
-            ?.closest('.field-grid-stack-item') as HTMLElement;
-
-          this.snapToClosestAllowedWidth(fieldItem.id);
-          if (gridstack) gridstack.compact();
-        });
+        
       });
 
       this.repositionFooter();
@@ -655,108 +647,81 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   resizeField(fieldId: string): void {
-    setTimeout(() => {
-      const fieldItem = document
-        .getElementById(fieldId)
-        ?.closest('.grid-stack-item') as HTMLElement;
-      if (!fieldItem) return;
-
-      const contentElement = fieldItem.querySelector(
-        '.inner-grid-stack-item-content'
-      ) as HTMLElement;
-      if (!contentElement) return;
-
-      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-      if (!innerGridEl) return;
-
-      // Get GridStack instance dynamically
-      const innerGrid = (innerGridEl as any).gridstack as GridStack;
-      if (!innerGrid) {
-        console.warn('GridStack instance not found for inner grid element');
-        return;
-      }
-
-      const contentHeight = contentElement.offsetHeight;
-      const cellHeight = innerGrid.getCellHeight(true);
-      const newH = Math.ceil(contentHeight / cellHeight);
-      innerGrid.update(fieldItem, { h: newH });
-    }, 0);
-  }
-
-  resizeFieldWidth(fieldId: string) {
-    setTimeout(() => {
-      const fieldItem = document
-        .getElementById(fieldId)
-        ?.closest('.grid-stack-item') as HTMLElement;
-      if (!fieldItem) return;
-
-      const contentElement = fieldItem.querySelector(
-        '.inner-grid-stack-item-content'
-      ) as HTMLElement;
-      if (!contentElement) return;
-
-      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-      if (!innerGridEl) return;
-
-      // Get GridStack instance dynamically
-      const innerGrid = (innerGridEl as any).gridstack as GridStack;
-      if (!innerGrid) {
-        console.warn('GridStack instance not found for inner grid element');
-        return;
-      }
-
-      const contentHeight = contentElement.offsetHeight;
-      const cellHeight = innerGrid.getCellHeight(true);
-      const newH = Math.ceil(contentHeight / cellHeight);
-
-      const contentWidth = contentElement.offsetWidth;
-      const newW = Math.ceil(contentWidth / 26);
-      debugger;
-      innerGrid.update(fieldItem, { w: newW });
-    }, 0);
-  }
-
-  snapToClosestAllowedWidth(fieldId: string) {
+    console.log('resizeField consumed');
     const fieldItem = document
-      .getElementById(fieldId)
-      ?.closest('.grid-stack-item') as HTMLElement;
-    if (!fieldItem) return;
+        .getElementById(fieldId)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!fieldItem) return;
 
-    const contentElement = fieldItem.querySelector(
-      '.inner-grid-stack-item-content'
-    ) as HTMLElement;
-    if (!contentElement) return;
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+      if (!contentElement) return;
 
-    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-    if (!innerGridEl) return;
+      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+      if (!innerGridEl) return;
 
-    // Get GridStack instance dynamically
-    const innerGrid = (innerGridEl as any).gridstack as GridStack;
-    if (!innerGrid) {
-      console.warn('GridStack instance not found for inner grid element');
-      return;
-    }
+      // Get GridStack instance dynamically
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      if (!innerGrid) {
+        console.warn('GridStack instance not found for inner grid element');
+        return;
+      }
 
-    const allowedWidths = [9, 18, 27, 36];
-    const contentWidth = contentElement.offsetWidth;
-    const currentWidth = Math.ceil(contentWidth / 26);
+      const contentHeight = contentElement.offsetHeight;
+      const cellHeight = innerGrid.getCellHeight(true);
+      const newH = Math.ceil(contentHeight / cellHeight);
+      innerGrid.update(fieldItem, { h: newH, minH: newH, maxH: newH });
+      console.log(`h values h: ${newH}, minH: ${newH}, maxH: ${newH}`);
+  }
 
-    const closestWidth = allowedWidths.reduce((prev, curr) =>
-      Math.abs(curr - currentWidth) < Math.abs(prev - currentWidth)
-        ? curr
-        : prev
-    );
-    // debugger;
+  resizeFieldWidth(fieldId?: string, currentWidth?: number) {
+    console.log('resizeFieldWidth consumed');
+    const fieldItem = document
+        .getElementById(fieldId!)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!fieldItem) return;
 
-    if (closestWidth !== currentWidth) {
-      innerGrid.update(fieldItem, { w: closestWidth });
-      // fieldItem.compact();
-    }
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+      if (!contentElement) return;
+
+      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+      if (!innerGridEl) return;
+
+      // Get GridStack instance dynamically
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      if (!innerGrid) {
+        console.warn('GridStack instance not found for inner grid element');
+        return;
+      }
+
+      const allowedWidths = [9, 18, 27, 36];
+
+      let newW = 0;
+      const curW = currentWidth!;
+      if (curW <= 13) {
+        newW = allowedWidths[0];
+      } else if (curW >= 14 && curW <= 22) {
+        newW = allowedWidths[1];
+      } else if (curW >= 23 && curW <= 31) {
+        newW = allowedWidths[2];
+      } else if (curW >= 32) {
+        newW = allowedWidths[3];
+      }
+      
+      innerGrid.update(fieldItem, { w: newW });
+      debugger;
+      this.resizeField(fieldId!);
+      const sectionId = fieldItem.parentElement?.parentElement?.parentElement?.id
+      this.resizeSection(sectionId!);
+      console.log(`w values w: ${newW}`)
   }
 
   resizeSection(sectionId: string): void {
-    setTimeout(() => {
-      const sectionItem = document
+    console.log('resizeSection consumed');
+    const sectionItem = document
         .getElementById(sectionId)
         ?.closest('.grid-stack-item') as HTMLElement;
       if (!sectionItem) return;
@@ -789,8 +754,10 @@ export class FormBuilderComponent implements AfterViewInit {
 
       const newH = headerRows + maxBottom;
       outerGrid.compact();
-      outerGrid.update(sectionItem, { h: newH + 2 });
-    }, 0);
+      outerGrid.update(sectionItem, {
+        h: newH + 2
+      });
+      console.log(`h values h: ${newH + 2}newH + 2`)
   }
 
   previewJson() {
