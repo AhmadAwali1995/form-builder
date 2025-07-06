@@ -161,7 +161,8 @@ export class FormBuilderComponent implements AfterViewInit {
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn"><img class="delete-icon" src="/icons/delete.png" alt="delete" /></p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      this.grid.removeWidget(fieldItem);
+      debugger;
+      this.removeField(innerGridId, fieldId!);
     });
     fieldItem.appendChild(box);
 
@@ -767,8 +768,9 @@ export class FormBuilderComponent implements AfterViewInit {
 
     const newH = headerRows + maxBottom;
     outerGrid.compact();
+    debugger;
     outerGrid.update(sectionItem, {
-      h: newH + 2,
+      h: newH + 3,
     });
     // console.log(`h values h: ${newH + 2}newH + 2`);
   }
@@ -1277,6 +1279,7 @@ export class FormBuilderComponent implements AfterViewInit {
     if (!sectionItem) return;
 
     this.grid.removeWidget(sectionItem);
+    this.repositionFooter();
   }
 
   getGridHierarchyByFieldId(fieldId: string): {
