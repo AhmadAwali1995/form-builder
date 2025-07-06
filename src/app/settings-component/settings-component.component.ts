@@ -22,7 +22,19 @@ export class SettingsComponentComponent implements OnInit {
   @Input() fieldSettings: any;
   @Input() fieldId!: string;
   @Input() fieldType!: string;
+  @Input() ddlURL!: string;
+  @Input() tableURL!: string;
+  @Input() tableKeys: string[] = [];
+
+  @Input() testDDLURL!: () => void;
+  @Input() testTableURL!: () => void;
+  // @Input() previewData!: () => void;
+  @Input() saveDDL!: () => void;
+  @Input() saveTable!: () => void;
+
   @Output() fieldUpdated = new EventEmitter<any>();
+  @Output() previewClicked = new EventEmitter<void>();
+
   options: { label: string; value: string }[] = [];
 
   actionTypes = ActionTypes;

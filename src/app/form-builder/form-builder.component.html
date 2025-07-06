@@ -73,20 +73,17 @@
     <div class="outer-box">
       <div class="header">
         <div class="build-section">
-          <button class="white-btn">
+          <button [disabled]="true" class="white-btn">
             <p>build</p>
           </button>
-          <button class="white-btn">
+          <button [disabled]="true" class="white-btn">
             <p>Template</p>
           </button>
           <hr class="vertical-line" />
           <div class="share-link">
             <p class="gray-text">Link :</p>
-            <a
-              class="link-text"
-              href="https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0"
-              >https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0</a
-            >
+            <!-- href="https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0" -->
+            <a class="link-text">Published Link</a>
           </div>
         </div>
         <div class="buttons-section">
@@ -121,9 +118,9 @@
             <div class="setting-item">
               <label for="field-name">Source URL</label>
               <input
-                [(ngModel)]="ddlURL"
+                [(ngModel)]="ddlURLs[fieldId]"
                 type="text"
-                id="source-url"
+                [id]="fieldId"
                 placeholder="Enter field name"
               />
             </div>
@@ -136,15 +133,14 @@
             </div>
             <div class="settings-items-row">
               <div class="setting-item">
-                <label for="ddl-keys">Key</label>
-                <select id="ddl-keys"></select>
+                <label [for]="'ddl-keys-' + fieldId">Key</label>
+                <select [id]="'ddl-keys-' + fieldId"></select>
               </div>
               <div class="setting-item">
-                <label for="ddl-values">Value</label>
-                <select id="ddl-values"></select>
+                <label [for]="'ddl-values-' + fieldId">Value</label>
+                <select [id]="'ddl-values-' + fieldId"></select>
               </div>
             </div>
-
             <div class="settings-items-row">
               <div class="setting-item">
                 <button class="colored-btn" (click)="previewData()">
@@ -153,8 +149,8 @@
               </div>
             </div>
             <div class="setting-item">
-              <label for="ddl-preview">test</label>
-              <select id="ddl-preview"></select>
+              <label [for]="'ddl-preview-' + fieldId">Preview</label>
+              <select [id]="'ddl-preview-' + fieldId"></select>
             </div>
             <div class="settings-items-row">
               <div class="setting-item">
@@ -167,11 +163,11 @@
 
             @if(this.fieldType == ActionTypes.table.toString()){
             <div class="setting-item">
-              <label for="field-name">Source URL</label>
+              <label for="source-url-{{ fieldId }}">Source URL</label>
               <input
                 [(ngModel)]="tableURL"
                 type="text"
-                id="source-url"
+                id="source-url-{{ fieldId }}"
                 placeholder="Enter field name"
               />
             </div>
@@ -182,7 +178,7 @@
                 </button>
               </div>
             </div>
-            <div class="table-grid">
+            <div id="table-columns-container" class="table-grid">
               @for (key of tableKeys; let i = $index; track key) {
               <div class="setting-item">
                 <label for="table-ddl-column-{{ i + 1 }}"
@@ -196,13 +192,14 @@
               </div>
               }
             </div>
+            @if (tableKeys.length !== 0) {
 
             <div class="settings-items-row">
               <div class="setting-item">
                 <button class="colored-btn" (click)="saveTable()">Save</button>
               </div>
             </div>
-            }
+            } }
             <!-- end of settings -->
 
             } @if (fieldId) {

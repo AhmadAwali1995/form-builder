@@ -59,6 +59,9 @@ export class FormBuilderComponent implements AfterViewInit {
           );
           activeItems.forEach((item) => item.classList.remove('active'));
           this.fieldId = '';
+          this.ddlURLs = {};
+          this.ddlDataMap = {};
+          this.keyValueMap = {};
         }
       });
     }
@@ -122,7 +125,7 @@ export class FormBuilderComponent implements AfterViewInit {
     });
   }
 
-  getFormSections(){
+  getFormSections() {
     const sections: Sections[] = [];
     const outerNodes = this.grid.save();
     if (!Array.isArray(outerNodes)) return;
@@ -175,41 +178,40 @@ export class FormBuilderComponent implements AfterViewInit {
       });
     });
     return sections;
-
   }
 
   saveForm() {
     this.formSaved = true;
-    
+
     const sections = this.getFormSections();
-    if(sections){
+    if (sections) {
       this.sections = sections;
       localStorage.setItem('form-sections', JSON.stringify(this.sections));
       return;
     }
-    console.error('there is no sections data')
+    console.error('there is no sections data');
   }
 
   previewJson() {
     window.open('/preview', '_blank');
   }
 
-  downloadJSON(){
+  downloadJSON() {
     const sections = this.getFormSections();
     if (sections) {
-    const dataStr = JSON.stringify(sections, null, 2); // pretty format
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+      const dataStr = JSON.stringify(sections, null, 2); // pretty format
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'form-structure.json';
-    document.body.appendChild(a);
-    a.click();
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'form-structure.json';
+      document.body.appendChild(a);
+      a.click();
 
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
@@ -283,13 +285,14 @@ export class FormBuilderComponent implements AfterViewInit {
     fieldItem.addEventListener('click', (event) => {
       event.stopPropagation();
 
+      this.emptyKeysDDL();
+      this.emptyKeysTable();
       const allItems = this.grid.el.querySelectorAll(
         '.field-grid-stack-item.active'
       );
       allItems.forEach((item) => item.classList.remove('active'));
 
       fieldItem.classList.add('active');
-
       const fieldType = fieldElement?.getAttribute('data-field-type') || '';
       this.fieldId = fieldElement!.id;
       this.fieldType = fieldType;
@@ -567,55 +570,61 @@ export class FormBuilderComponent implements AfterViewInit {
       .catch((err) => console.error('Error:', err));
   }
 
-  ddlData: any = [];
-  keyValue: { key: string; value: string } = { key: '', value: '' };
+  ddlURLs: { [key: string]: string } = {};
+  ddlDataMap: { [key: string]: any[] } = {};
+  keyValueMap: { [key: string]: { key: string; value: string } } = {};
+
   testDDLURL() {
-    fetch(this.ddlURL)
+    const url = this.ddlURLs[this.fieldId];
+    if (!url) return;
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         const keys: string[] = Object.keys(data[0]);
+
         const ddlKeys = document.getElementById(
-          'ddl-keys'
+          `ddl-keys-${this.fieldId}`
         ) as HTMLSelectElement;
         const ddlValues = document.getElementById(
-          'ddl-values'
+          `ddl-values-${this.fieldId}`
         ) as HTMLSelectElement;
+
+        if (!ddlKeys || !ddlValues) return;
+
+        // Reset dropdowns
         ddlKeys.innerHTML = '';
         ddlValues.innerHTML = '';
-        ddlKeys.appendChild(
-          Object.assign(document.createElement('option'), {
-            text: 'select key',
-            disabled: true,
-            selected: true,
-          })
-        );
-        ddlValues.appendChild(
-          Object.assign(document.createElement('option'), {
-            text: 'select value',
-            disabled: true,
-            selected: true,
-          })
-        );
-        keys.forEach((item: string) => {
-          const option1 = document.createElement('option');
-          const option2 = document.createElement('option');
-          option1.value = item;
-          option1.text = item;
-          option2.value = item;
-          option2.text = item;
-          ddlKeys.appendChild(option1);
-          ddlValues.appendChild(option2);
-          this.ddlData = data;
+
+        // Default placeholder
+        ddlKeys.appendChild(new Option('Select key', '', true, true));
+        ddlValues.appendChild(new Option('Select value', '', true, true));
+
+        // Append real options
+        keys.forEach((key) => {
+          ddlKeys.appendChild(new Option(key, key));
+          ddlValues.appendChild(new Option(key, key));
         });
 
+        // Store the full data for this fieldId
+        this.ddlDataMap[this.fieldId] = data;
+
+        // Initialize key-value entry if needed
+        if (!this.keyValueMap[this.fieldId]) {
+          this.keyValueMap[this.fieldId] = { key: '', value: '' };
+        }
+
+        // Set selected values on change
         ddlKeys.onchange = (e) => {
-          const selectedKey = (e.target as HTMLSelectElement).value;
-          this.keyValue.key = selectedKey;
+          this.keyValueMap[this.fieldId].key = (
+            e.target as HTMLSelectElement
+          ).value;
         };
 
         ddlValues.onchange = (e) => {
-          const selectedValue = (e.target as HTMLSelectElement).value;
-          this.keyValue.value = selectedValue;
+          this.keyValueMap[this.fieldId].value = (
+            e.target as HTMLSelectElement
+          ).value;
         };
       })
       .catch((err) => console.error('Error:', err));
@@ -635,31 +644,36 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   previewData() {
-    const ddl = document.getElementById('ddl-preview') as HTMLSelectElement;
-    if (ddl) {
-      ddl.innerHTML = '';
-      this.ddlData.forEach((item: any) => {
-        const option = document.createElement('option');
-        option.value = item[this.keyValue.key.toString()];
-        option.text = item[this.keyValue.value.toString()];
-        ddl.appendChild(option);
-      });
-    }
+    const previewDDL = document.getElementById(
+      `ddl-preview-${this.fieldId}`
+    ) as HTMLSelectElement;
+    const data = this.ddlDataMap[this.fieldId] || [];
+    const keys = this.keyValueMap[this.fieldId];
+
+    if (!previewDDL || !data || !keys?.key || !keys?.value) return;
+
+    previewDDL.innerHTML = '';
+    data.forEach((item) => {
+      const option = document.createElement('option');
+      option.value = item[keys.key];
+      option.text = item[keys.value];
+      previewDDL.appendChild(option);
+    });
   }
 
   saveDDL() {
+    const data = this.ddlDataMap[this.fieldId] || [];
+    const keys = this.keyValueMap[this.fieldId];
+
+    const options = data.map((item) => ({
+      value: item[keys.key],
+      label: item[keys.value],
+    }));
+
     const ddl = document.getElementById(this.fieldId) as HTMLSelectElement;
-
-    const options = this.ddlData.map((item: any) => {
-      return {
-        value: item[this.keyValue.key.toString()],
-        label: item[this.keyValue.value.toString()],
-      };
-    });
-
     if (ddl) {
       ddl.innerHTML = '';
-      options.forEach((opt: { value: string; label: string }) => {
+      options.forEach((opt) => {
         const option = document.createElement('option');
         option.value = opt.value;
         option.text = opt.label;
@@ -670,7 +684,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const fieldSettings: Partial<FieldSettings> = {
       fieldId: this.fieldId,
       fieldType: ActionTypes.dropDownList,
-      options: options, // now properly attached
+      options,
     };
 
     this.onFieldUpdated(fieldSettings as FieldSettings);
@@ -1686,5 +1700,20 @@ export class FormBuilderComponent implements AfterViewInit {
 
     // Optional: Force container height update
     (this.grid as any)._updateContainerHeight?.();
+  }
+
+  emptyKeysDDL() {
+    const ddlKeySelects = document.querySelectorAll(
+      'select[id^="ddl-keys-dropdown"], select[id^="ddl-values-dropdown"], select[id^="ddl-preview-dropdown"]'
+    ) as NodeListOf<HTMLSelectElement>;
+
+    ddlKeySelects.forEach((select) => {
+      select.innerHTML = '';
+    });
+  }
+
+  emptyKeysTable() {
+    this.tableKeys = [];
+    this.tableURL = '';
   }
 }
