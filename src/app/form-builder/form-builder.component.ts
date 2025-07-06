@@ -70,7 +70,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.grid.on('change', (event, items) => {
       items.forEach((item) => {
-        if (item.id?.includes('inner-grid')) return;
+        if (item.id?.includes('inner-grid') || item.id?.includes('header') || item.id?.includes('footer')) return;
         const el = item.el as HTMLElement;
 
         const gridstackEl = el.parentElement;
