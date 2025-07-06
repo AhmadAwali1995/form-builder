@@ -74,7 +74,12 @@ export class FormBuilderComponent implements AfterViewInit {
 
     this.grid.on('change', (event, items) => {
       items.forEach((item) => {
-        if (item.id?.includes('inner-grid') || item.id?.includes('header') || item.id?.includes('footer')) return;
+        if (
+          item.id?.includes('inner-grid') ||
+          item.id?.includes('header') ||
+          item.id?.includes('footer')
+        )
+          return;
         const el = item.el as HTMLElement;
 
         const gridstackEl = el.parentElement;
@@ -161,7 +166,7 @@ export class FormBuilderComponent implements AfterViewInit {
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn"><img class="delete-icon" src="/icons/delete.png" alt="delete" /></p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      debugger;
+      // debugger;
       this.removeField(innerGridId, fieldId!);
     });
     fieldItem.appendChild(box);
@@ -536,15 +541,31 @@ export class FormBuilderComponent implements AfterViewInit {
 
   saveDDL() {
     const ddl = document.getElementById(this.fieldId) as HTMLSelectElement;
+
+    const options = this.ddlData.map((item: any) => {
+      return {
+        value: item[this.keyValue.key.toString()],
+        label: item[this.keyValue.value.toString()],
+      };
+    });
+
     if (ddl) {
       ddl.innerHTML = '';
-      this.ddlData.forEach((item: any) => {
+      options.forEach((opt: { value: string; label: string }) => {
         const option = document.createElement('option');
-        option.value = item[this.keyValue.key.toString()];
-        option.text = item[this.keyValue.value.toString()];
+        option.value = opt.value;
+        option.text = opt.label;
         ddl.appendChild(option);
       });
     }
+
+    const fieldSettings: Partial<FieldSettings> = {
+      fieldId: this.fieldId,
+      fieldType: ActionTypes.dropDownList,
+      options: options, // now properly attached
+    };
+
+    this.onFieldUpdated(fieldSettings as FieldSettings);
   }
 
   saveTable() {
@@ -768,7 +789,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     const newH = headerRows + maxBottom;
     outerGrid.compact();
-    debugger;
+    // debugger;
     outerGrid.update(sectionItem, {
       h: newH + 3,
     });
