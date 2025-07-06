@@ -35,8 +35,94 @@ export class FormBuilderComponent implements AfterViewInit {
   sections: Sections[] = [];
   formSaved: boolean = false;
 
+  getFormSections(){
+    const sections: Sections[] = [];
+    const outerNodes = this.grid.save();
+    if (!Array.isArray(outerNodes)) return;
+
+    outerNodes.forEach((outerNode) => {
+      const sectionId = outerNode.id;
+      if (!sectionId) return;
+
+      const sectionEl = document.querySelector(`[gs-id="${sectionId}"]`);
+      if (!sectionEl) return;
+
+      const sectionGridEl = sectionEl.querySelector('.grid-stack');
+      if (!sectionGridEl) return;
+
+      const innerGrid = this.innerGrids.get(sectionId);
+      if (!innerGrid) return;
+
+      const fields: Fields[] = [];
+
+      const innerNodes = innerGrid.save();
+      if (Array.isArray(innerNodes)) {
+        innerNodes.forEach((node) => {
+          const fieldId = node.id;
+          if (!fieldId) return;
+
+          const fieldEl = sectionGridEl.querySelector(`[gs-id="${fieldId}"]`);
+          if (!fieldEl) return;
+
+          const parsed = this.parseFieldHtml(fieldEl.innerHTML.trim());
+
+          const settings = this.fieldSettingsList.find(
+            (f) => f.fieldId === parsed?.fieldId
+          );
+
+          const fullSettings = this.getCompleteFieldSettings({
+            ...parsed,
+            ...(settings || {}),
+          });
+
+          fields.push({
+            fieldId: fieldId,
+            fieldSettings: fullSettings,
+          });
+        });
+      }
+
+      sections.push({
+        sectionId: sectionId,
+        fields,
+      });
+    });
+    return sections;
+
+  }
+
   saveForm() {
     this.formSaved = true;
+    
+    const sections = this.getFormSections();
+    if(sections){
+      this.sections = sections;
+      localStorage.setItem('form-sections', JSON.stringify(this.sections));
+      return;
+    }
+    console.error('there is no sections data')
+  }
+
+  previewJson() {
+    window.open('/preview', '_blank');
+  }
+
+  downloadJSON(){
+    const sections = this.getFormSections();
+    if (sections) {
+    const dataStr = JSON.stringify(sections, null, 2); // pretty format
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'form-structure.json';
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
   }
 
   constructor(private fieldService: FieldServicesService) {}
@@ -166,7 +252,6 @@ export class FormBuilderComponent implements AfterViewInit {
     box.classList.add('field-options-box', 'data-gs-cancel');
     box.innerHTML = `<p class="delete-btn"><img class="delete-icon" src="/icons/delete.png" alt="delete" /></p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
-      // debugger;
       this.removeField(innerGridId, fieldId!);
     });
     fieldItem.appendChild(box);
@@ -749,7 +834,6 @@ export class FormBuilderComponent implements AfterViewInit {
     }
 
     innerGrid.update(fieldItem, { w: newW });
-    // debugger;
     this.resizeField(fieldId!);
     const sectionId = fieldItem.parentElement?.parentElement?.parentElement?.id;
     this.resizeSection(sectionId!);
@@ -789,70 +873,9 @@ export class FormBuilderComponent implements AfterViewInit {
 
     const newH = headerRows + maxBottom;
     outerGrid.compact();
-    // debugger;
     outerGrid.update(sectionItem, {
       h: newH + 3,
     });
-    // console.log(`h values h: ${newH + 2}newH + 2`);
-  }
-
-  previewJson() {
-    const sections: Sections[] = [];
-    const outerNodes = this.grid.save();
-    if (!Array.isArray(outerNodes)) return;
-
-    outerNodes.forEach((outerNode) => {
-      const sectionId = outerNode.id;
-      if (!sectionId) return;
-
-      const sectionEl = document.querySelector(`[gs-id="${sectionId}"]`);
-      if (!sectionEl) return;
-
-      const sectionGridEl = sectionEl.querySelector('.grid-stack');
-      if (!sectionGridEl) return;
-
-      const innerGrid = this.innerGrids.get(sectionId);
-      if (!innerGrid) return;
-
-      const fields: Fields[] = [];
-
-      const innerNodes = innerGrid.save();
-      if (Array.isArray(innerNodes)) {
-        innerNodes.forEach((node) => {
-          const fieldId = node.id;
-          if (!fieldId) return;
-
-          const fieldEl = sectionGridEl.querySelector(`[gs-id="${fieldId}"]`);
-          if (!fieldEl) return;
-
-          const parsed = this.parseFieldHtml(fieldEl.innerHTML.trim());
-
-          const settings = this.fieldSettingsList.find(
-            (f) => f.fieldId === parsed?.fieldId
-          );
-
-          const fullSettings = this.getCompleteFieldSettings({
-            ...parsed,
-            ...(settings || {}),
-          });
-
-          fields.push({
-            fieldId: fieldId,
-            fieldSettings: fullSettings,
-          });
-        });
-      }
-
-      sections.push({
-        sectionId: sectionId,
-        fields,
-      });
-    });
-    this.sections = sections;
-    localStorage.setItem('form-sections', JSON.stringify(this.sections));
-    window.open('/preview', '_blank');
-    // console.log('sections', sections);
-    // console.log('this.sections', this.sections);
   }
 
   parseFieldHtml(html: string): FieldSettings | null {
@@ -1354,7 +1377,7 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('id', innerGridId);
     item.setAttribute('gs-id', innerGridId);
     item.innerHTML = `<div class="close-section">
-        <img src="/icons/close.png" class="btn-close-section" alt="close" />
+        <img src="/icons/delete.png" class="btn-close-section" alt="close" />
       </div>`;
 
     item.querySelector('.btn-close-section')?.addEventListener('click', () => {
