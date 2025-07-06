@@ -155,12 +155,6 @@ export class SettingsComponentComponent implements OnInit {
         this.fieldUpdated.emit(baseUpdate);
         break;
     }
-
-    if (this.minRange! > this.maxRange!) {
-      setTimeout(() => {
-        this.minRange = this.maxRange;
-      });
-    }
   }
 
   parseDropdownOptions(): string[] {
