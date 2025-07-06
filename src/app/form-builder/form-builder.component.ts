@@ -35,6 +35,93 @@ export class FormBuilderComponent implements AfterViewInit {
   sections: Sections[] = [];
   formSaved: boolean = false;
 
+  constructor(private fieldService: FieldServicesService) {}
+  ngAfterViewInit(): void {
+    this.grid = GridStack.init({
+      column: this.columnNum,
+      cellHeight: this.cellHeight,
+      margin: this.margin,
+      float: false,
+    });
+
+    const canvas = document.querySelector('.canvas');
+
+    if (canvas) {
+      canvas.addEventListener('click', (event) => {
+        const mouseEvent = event as MouseEvent;
+        const target = mouseEvent.target as HTMLElement;
+
+        const isInsideFieldItem = target.closest('.field-grid-stack-item');
+
+        if (!isInsideFieldItem) {
+          const activeItems = canvas.querySelectorAll(
+            '.field-grid-stack-item.active'
+          );
+          activeItems.forEach((item) => item.classList.remove('active'));
+          this.fieldId = '';
+        }
+      });
+    }
+
+    this.grid.on('added', (event, items) => {
+      items.forEach((item) => {
+        if (
+          item.id?.includes('inner-grid') ||
+          item.id?.includes('header') ||
+          item.id?.includes('footer')
+        )
+          return;
+        const el = item.el as HTMLElement;
+
+        const gridstackEl = el.parentElement;
+        const gridstack =
+          gridstackEl && ((gridstackEl as any).gridstack as GridStack);
+
+        if (gridstack) gridstack.compact();
+        // Step 1: Check if this item contains a field grid
+        const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
+        if (!innerGridEl) return;
+
+        const sectionItem = document
+          .getElementById(innerGridEl.id)
+          ?.closest('.grid-stack-item') as HTMLElement;
+
+        this.resizeSection(innerGridEl.id);
+      });
+      this.repositionFooter();
+    });
+
+    this.grid.on('change', (event, items) => {
+      items.forEach((item) => {
+        if (
+          item.id?.includes('inner-grid') ||
+          item.id?.includes('header') ||
+          item.id?.includes('footer')
+        )
+          return;
+        const el = item.el as HTMLElement;
+
+        const gridstackEl = el.parentElement;
+        const gridstack =
+          gridstackEl && ((gridstackEl as any).gridstack as GridStack);
+
+        if (gridstack) gridstack.compact();
+        // Step 1: Check if this item contains a field grid
+        const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
+        if (!innerGridEl) return;
+
+        const sectionItem = document
+          .getElementById(innerGridEl.id)
+          ?.closest('.grid-stack-item') as HTMLElement;
+
+        this.resizeFieldWidth(item.id, item.w);
+        this.resizeSection(innerGridEl.id);
+      });
+
+      this.repositionFooter();
+    });
+  }
+
   getFormSections(){
     const sections: Sections[] = [];
     const outerNodes = this.grid.save();
@@ -123,70 +210,6 @@ export class FormBuilderComponent implements AfterViewInit {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-  }
-
-  constructor(private fieldService: FieldServicesService) {}
-  ngAfterViewInit(): void {
-    this.grid = GridStack.init({
-      column: this.columnNum,
-      cellHeight: this.cellHeight,
-      margin: this.margin,
-      float: false,
-    });
-
-    const canvas = document.querySelector('.canvas');
-
-    if (canvas) {
-      canvas.addEventListener('click', (event) => {
-        const mouseEvent = event as MouseEvent;
-        const target = mouseEvent.target as HTMLElement;
-
-        const isInsideFieldItem = target.closest('.field-grid-stack-item');
-
-        if (!isInsideFieldItem) {
-          const activeItems = canvas.querySelectorAll(
-            '.field-grid-stack-item.active'
-          );
-          activeItems.forEach((item) => item.classList.remove('active'));
-          this.fieldId = '';
-        }
-      });
-    }
-
-    this.grid.on('added', (event, items) => {
-      // Triggered when a new widget is added
-      this.repositionFooter();
-    });
-
-    this.grid.on('change', (event, items) => {
-      items.forEach((item) => {
-        if (
-          item.id?.includes('inner-grid') ||
-          item.id?.includes('header') ||
-          item.id?.includes('footer')
-        )
-          return;
-        const el = item.el as HTMLElement;
-
-        const gridstackEl = el.parentElement;
-        const gridstack =
-          gridstackEl && ((gridstackEl as any).gridstack as GridStack);
-
-        if (gridstack) gridstack.compact();
-        // Step 1: Check if this item contains a field grid
-        const innerGridEl = el.parentElement?.parentElement?.parentElement; // child field grid inside section
-        if (!innerGridEl) return;
-
-        const sectionItem = document
-          .getElementById(innerGridEl.id)
-          ?.closest('.grid-stack-item') as HTMLElement;
-
-        this.resizeFieldWidth(item.id, item.w);
-        this.resizeSection(innerGridEl.id);
-      });
-
-      this.repositionFooter();
-    });
   }
 
   addFieldToSection(innerGridId: string, actionType: ActionTypes): void {
@@ -1373,6 +1396,8 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-x', '0');
     item.setAttribute('gs-y', lastY.toString());
     item.setAttribute('gs-w', w.toString());
+    item.setAttribute('gs-min-w', w.toString());
+    item.setAttribute('gs-max-w', w.toString());
     item.setAttribute('gs-h', h.toString());
     item.setAttribute('id', innerGridId);
     item.setAttribute('gs-id', innerGridId);
