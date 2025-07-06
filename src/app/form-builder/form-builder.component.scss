@@ -264,7 +264,7 @@
       overflow-y: auto;
 
       .delete-icon {
-        width: 20px;
+        width: 15px;
       }
 
       .grid-stack-item {
@@ -306,10 +306,19 @@
       }
 
       .field-grid-stack-fixed-header {
-        position: relative;
-        background-color: transparent;
+        background-color: #8080807a;
         border: none;
+        color: #1f2937;
         box-shadow: none;
+        width: 10dvw !important;
+        display: flex;
+        height: 35px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0 0 10px 0;
+        position: absolute;
+        top: -15px;
+        left: -25px;
       }
 
       .field-grid-stack-item {
