@@ -44,7 +44,6 @@ export class FieldServicesService {
   createLabel(parameters: fieldParameters) {
     const ddlId = `label-${this.guid()}`;
     const fieldItem = this.createFieldContainer(parameters);
-
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
     fieldContentItem.innerHTML = `

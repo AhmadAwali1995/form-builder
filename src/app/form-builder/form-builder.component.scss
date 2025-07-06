@@ -327,13 +327,19 @@
         box-shadow: none;
         margin: 10px 0;
 
-        &.active,
-        &:hover {
+        &.active {
           background-color: #fafafa;
           border-radius: 10px;
           border: 1px solid rgba(128, 128, 128, 0.4);
           box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
           z-index: 1000;
+        }
+
+        &:hover {
+          background-color: #fafafa;
+          border-radius: 10px;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+
         }
 
         &.active {
