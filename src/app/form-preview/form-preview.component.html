@@ -1,7 +1,7 @@
 <div class="app-form-preview">
   @if (sections.length > 0) {
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    @for (section of sections; track $index) {
+    @for (section of sections; track $index) { @if(section.fields.length !== 0){
     <div
       class="form-row"
       [ngClass]="{
@@ -133,7 +133,7 @@
           <!-- Radio Group -->
           @if (field.fieldSettings.fieldType === actionTypes.radioGroup) {
           <label>
-            {{ field.fieldSettings.fieldLabel }}
+            {{ field.fieldSettings.fieldLabel || "Field Label" }}
             @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
@@ -196,28 +196,39 @@
             <table class="custom-table">
               <thead>
                 <tr>
-                  @for (key of field.fieldSettings.columns?.[0]?.selectedColumns
-                  ?? []; track $index) {
+                  @for (key of
+                  (field.fieldSettings.columns?.[0]?.selectedColumns?.length ?
+                  field.fieldSettings.columns?.[0]?.selectedColumns :
+                  ['Column1', 'Column2', 'Column3']); track $index) {
                   <th>{{ key | titlecase }}</th>
                   }
                 </tr>
               </thead>
               <tbody>
-                @for (row of getPaginatedData(field.fieldSettings.fieldId);
+                @if (field.fieldSettings.columns?.[0]?.selectedColumns?.length)
+                { @for (row of getPaginatedData(field.fieldSettings.fieldId);
                 track $index) {
                 <tr>
-                  @for (key of field.fieldSettings.columns?.[0]?.selectedColumns
-                  ?? []; track $index) {
-                  <td>
-                    {{ row[key] }}
-                  </td>
+                  @for (key of
+                  field.fieldSettings.columns?.[0]?.selectedColumns; track
+                  $index) {
+                  <td>{{ row[key] }}</td>
                   }
                 </tr>
-                }
+                } } @else { @for (dummy of [1,]; track $index) {
+                <tr>
+                  <td>Sample 1</td>
+                  <td>Sample 2</td>
+                  <td>Sample 3</td>
+                </tr>
+                } }
               </tbody>
             </table>
 
-            <div class="pagination">
+            <div
+              class="pagination"
+              *ngIf="field.fieldSettings.columns?.[0]?.selectedColumns?.length"
+            >
               @for (page of
               [].constructor(getTotalPages(field.fieldSettings.fieldId)); track
               $index) {
@@ -249,7 +260,7 @@
     @if($index != sections.length -1){
 
     <div class="section-divider"></div>
-    } }
+    } }}
 
     <div class="form-actions">
       <button type="submit" class="submit-btn">Submit</button>

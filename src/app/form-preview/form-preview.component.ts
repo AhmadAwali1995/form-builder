@@ -135,6 +135,8 @@ export class FormPreviewComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log(this.sections);
+
     if (this.form.valid) {
       console.log('✅ Form Submitted:', this.form.value);
     } else {

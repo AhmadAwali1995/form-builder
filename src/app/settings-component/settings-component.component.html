@@ -106,13 +106,14 @@
     <div class="options-modal-backdrop" (click)="closeOptionsModal()"></div>
     <div class="options-modal-content" (click)="$event.stopPropagation()">
       <h3 class="modal-title">Edit Field Options</h3>
-
-      <div class="option-row" *ngFor="let opt of options; let i = index">
-        <input type="text" [(ngModel)]="opt.label" placeholder="Label" />
-        <input type="text" [(ngModel)]="opt.value" placeholder="Value" />
-        <button type="button" class="delete-btn" (click)="removeOption(i)">
-          ✖
-        </button>
+      <div class="option-row-container">
+        <div class="option-row" *ngFor="let opt of options; let i = index">
+          <input type="text" [(ngModel)]="opt.label" placeholder="Label" />
+          <input type="text" [(ngModel)]="opt.value" placeholder="Value" />
+          <button type="button" class="delete-btn" (click)="removeOption(i)">
+            ✖
+          </button>
+        </div>
       </div>
 
       <button type="button" class="add-btn" (click)="addOption()">

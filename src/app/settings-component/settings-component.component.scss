@@ -104,10 +104,14 @@
       background: #ffffff;
       border-radius: 12px;
       padding: 28px 24px;
-      width: 95%;
-      max-width: 480px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
       animation: fadeIn 0.25s ease-in-out;
+
+      .option-row-container {
+        height: 70dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
 
       .modal-title {
         font-size: 20px;
