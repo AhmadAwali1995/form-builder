@@ -104,6 +104,13 @@
             p {
               margin: 0;
             }
+
+            &:disabled {
+              &:hover {
+                background-color: #f3f4f6;
+                border-color: rgba(128, 128, 128, 0.4);
+              }
+            }
           }
 
           .colored-btn {
@@ -256,6 +263,10 @@
       height: calc(100dvh - 70px);
       overflow-y: auto;
 
+      .delete-icon {
+        width: 20px;
+      }
+
       .grid-stack-item {
         .close-section {
           position: absolute;
@@ -353,7 +364,7 @@
 
         .field-options-box {
           position: absolute;
-          right: 10px;
+          right: 30px;
           bottom: -20px;
           z-index: 10000;
           display: none;
@@ -375,7 +386,6 @@
         .custom-table {
           width: 100%;
           border-collapse: collapse;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           font-size: 14px;
           background-color: #fff;
         }

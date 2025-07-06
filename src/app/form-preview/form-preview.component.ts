@@ -122,12 +122,6 @@ export class FormPreviewComponent implements OnInit {
     }
   }
 
-  isImageUrl(value: any): boolean {
-    return (
-      typeof value === 'string' && !!value.match(/\.(jpeg|jpg|png|webp)$/i)
-    );
-  }
-
   nextSection() {
     if (this.currentSectionIndex < this.sections.length - 1) {
       this.currentSectionIndex++;

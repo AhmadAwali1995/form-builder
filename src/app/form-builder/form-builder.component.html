@@ -7,7 +7,9 @@
         <button class="field-btn" (click)="manageHeader()">
           @if(!isHeaderExist) { Add Header } @else { Remove Header }
         </button>
-        <button class="field-btn" (click)="manageFooter()">@if(!isFooterExist) { Add Footer } @else { Remove Footer }</button>
+        <button class="field-btn" (click)="manageFooter()">
+          @if(!isFooterExist) { Add Footer } @else { Remove Footer }
+        </button>
         <button class="field-btn" (click)="previewJson()">test json</button>
       </div>
       <hr />
@@ -86,11 +88,16 @@
           </div>
         </div>
         <div class="buttons-section">
-          <a (click)="previewJson()" class="white-btn">
+          <button
+            [disabled]="!formSaved"
+            (click)="previewJson()"
+            class="white-btn"
+          >
             <img class="drag-icon" src="icons/preview.png" alt="preview" />
             <p>Preview</p>
-          </a>
-          <button class="colored-btn">
+          </button>
+
+          <button (click)="saveForm()" class="colored-btn">
             <p>Save & Publish</p>
           </button>
         </div>
@@ -194,7 +201,6 @@
               </div>
             </div>
             }
-
             <!-- end of settings -->
 
             } @if (fieldId) {

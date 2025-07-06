@@ -32,8 +32,12 @@ export class FormBuilderComponent implements AfterViewInit {
   isFooterExist: boolean = false;
   readonly cellHeight = 20;
   readonly margin = 5;
-
   sections: Sections[] = [];
+  formSaved: boolean = false;
+
+  saveForm() {
+    this.formSaved = true;
+  }
 
   constructor(private fieldService: FieldServicesService) {}
   ngAfterViewInit(): void {
@@ -127,7 +131,10 @@ export class FormBuilderComponent implements AfterViewInit {
       {
         x: nextX,
         y: nextY,
-        w: actionType === ActionTypes.label ? fieldWidth * 2 : fieldWidth,
+        w:
+          actionType === ActionTypes.label || actionType === ActionTypes.table
+            ? fieldWidth * 2
+            : fieldWidth,
         h: 5,
         count: this.itemCount,
       },
@@ -152,7 +159,7 @@ export class FormBuilderComponent implements AfterViewInit {
     // Add settings box
     const box = document.createElement('div');
     box.classList.add('field-options-box', 'data-gs-cancel');
-    box.innerHTML = `<p class="delete-btn">X</p><p>X</p><p>X</p><p>X</p>`;
+    box.innerHTML = `<p class="delete-btn"><img class="delete-icon" src="/icons/delete.png" alt="delete" /></p>`;
     box.querySelector('.delete-btn')?.addEventListener('click', () => {
       this.grid.removeWidget(fieldItem);
     });
@@ -192,7 +199,11 @@ export class FormBuilderComponent implements AfterViewInit {
         fieldType: fieldType as ActionTypes,
         fieldLabel: fieldElement.getAttribute('data-label') || '',
         fieldName: fieldElement.getAttribute('data-name') || '',
-        fieldSize: (fieldElement.getAttribute('data-size') as any) || 'medium',
+        fieldSize:
+          (fieldElement.getAttribute('data-size') as any) ||
+          (fieldType === ActionTypes.label || fieldType === ActionTypes.table
+            ? 'full'
+            : 'medium'),
         placeholderText: fieldElement.getAttribute('data-placeholder') || '',
         defaultValue: fieldElement.getAttribute('data-default') || '',
         minRange: +fieldElement.getAttribute('data-min')! || undefined,
@@ -212,9 +223,11 @@ export class FormBuilderComponent implements AfterViewInit {
       fieldId,
       fieldType: type,
       fieldLabel: 'Field Label',
-      fieldName: 'fieldName',
+      fieldName: fieldId,
       fieldSize:
-        type === (ActionTypes.label || ActionTypes.table) ? 'full' : 'medium',
+        type === ActionTypes.label || type === ActionTypes.table
+          ? 'full'
+          : 'medium',
       isRequired: false,
       cssClass: '',
     };
@@ -235,10 +248,6 @@ export class FormBuilderComponent implements AfterViewInit {
         return {
           ...base,
           options: [],
-        };
-      case ActionTypes.radioGroup:
-        return {
-          ...base,
         };
       case ActionTypes.table:
         return {
@@ -819,80 +828,102 @@ export class FormBuilderComponent implements AfterViewInit {
     this.sections = sections;
     localStorage.setItem('form-sections', JSON.stringify(this.sections));
     window.open('/preview', '_blank');
-    console.log('sections', sections);
-    console.log('this.sections', this.sections);
+    // console.log('sections', sections);
+    // console.log('this.sections', this.sections);
   }
 
-  parseFieldHtml(html: string): any {
+  parseFieldHtml(html: string): FieldSettings | null {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
 
-    const input = tempDiv.querySelector('input, select, p, table') as
-      | HTMLInputElement
-      | HTMLSelectElement
-      | HTMLTextAreaElement;
-    const label = tempDiv.querySelector('label');
-
+    const input = tempDiv.querySelector(
+      'input, select, p, table, div[data-field-type]'
+    ) as HTMLElement;
     if (!input) return null;
 
-    const typeAttr = input.getAttribute('type');
+    const label = tempDiv.querySelector('label');
+    const fieldTypeAttr = input.getAttribute('data-field-type');
     const tagName = input.tagName.toLowerCase();
+    const inputType = input.getAttribute('type');
 
-    // const type = typeAttr || tagName;
+    const getFieldType = (): ActionTypes => {
+      if (fieldTypeAttr && fieldTypeAttr in ActionTypes) {
+        return fieldTypeAttr as ActionTypes;
+      }
 
-    const groupLabel =
-      tempDiv.querySelector('.inner-grid-label')?.textContent?.trim() || '';
-
-    const json: FieldSettings = {
-      fieldType:
-        tagName === 'select'
-          ? 'select'
-          : typeAttr === 'radio'
-          ? 'radio'
-          : typeAttr === 'checkbox'
-          ? 'checkbox'
-          : 'text',
-      fieldLabel: groupLabel || '',
-      fieldName: label?.textContent?.trim() || '',
-      fieldId: input.id,
-      isRequired: input.hasAttribute('required'),
-      fieldSize: 'medium',
-      placeholderText: input.getAttribute('placeholder') || '',
-      defaultValue: (input as HTMLInputElement).value || '',
+      switch (tagName) {
+        case 'select':
+          return ActionTypes.dropDownList;
+        case 'p':
+          return ActionTypes.label;
+        case 'table':
+          return ActionTypes.table;
+        case 'input':
+          if (inputType === 'checkbox') return ActionTypes.checkbox;
+          if (inputType === 'radio') return ActionTypes.radioGroup;
+          return ActionTypes.shortText;
+        default:
+          return ActionTypes.shortText;
+      }
     };
 
-    if (json.fieldType === 'text') {
-      const minAttr = input.getAttribute('min');
-      const maxAttr = input.getAttribute('max');
+    const fieldType = getFieldType();
+    const fieldId = input.id || `field-${crypto.randomUUID()}`;
+    const fieldLabel =
+      tempDiv.querySelector('.inner-grid-label, label')?.textContent?.trim() ||
+      '';
+    const placeholder = (input as HTMLInputElement).placeholder || '';
+    const defaultValue = (input as HTMLInputElement).value || '';
 
-      json.minRange = minAttr ? Number(minAttr) : undefined;
-      json.maxRange = maxAttr ? Number(maxAttr) : undefined;
+    const json: FieldSettings = {
+      fieldType,
+      fieldLabel,
+      fieldName: fieldLabel.replace(/\s+/g, '_').toLowerCase() || fieldId,
+      fieldId,
+      isRequired: input.hasAttribute('required'),
+      fieldSize: 'medium',
+      placeholderText: placeholder,
+      defaultValue,
+    };
+
+    if (fieldType === ActionTypes.shortText) {
+      json.minRange = input.getAttribute('min')
+        ? +input.getAttribute('min')!
+        : undefined;
+      json.maxRange = input.getAttribute('max')
+        ? +input.getAttribute('max')!
+        : undefined;
     }
 
-    if (json.fieldType === 'select') {
+    if (fieldType === ActionTypes.dropDownList) {
+      json.options = Array.from(tempDiv.querySelectorAll('option')).map(
+        (opt) => ({
+          value: (opt as HTMLOptionElement).value,
+          label: opt.textContent?.trim() || '',
+        })
+      );
+    }
+
+    if (
+      fieldType === ActionTypes.checkbox ||
+      fieldType === ActionTypes.radioGroup
+    ) {
       json.options = [];
-      tempDiv.querySelectorAll('option').forEach((opt) => {
-        const option = opt as HTMLOptionElement;
-        (json.options ??= []).push({
-          value: option.value,
-          label: option.textContent?.trim() || '',
+      const inputs = tempDiv.querySelectorAll(
+        'input[type="checkbox"], input[type="radio"]'
+      );
+      inputs.forEach((input) => {
+        const id = input.id;
+        const optLabel = tempDiv.querySelector(`label[for="${id}"]`);
+        json.options!.push({
+          value: (input as HTMLInputElement).value || id,
+          label: optLabel?.textContent?.trim() || '',
         });
       });
-    }
 
-    if (json.fieldType === 'radio' || json.fieldType === 'checkbox') {
-      json.options = [];
-      tempDiv
-        .querySelectorAll('input[type="radio"], input[type="checkbox"]')
-        .forEach((opt) => {
-          const input = opt as HTMLInputElement;
-          const optLabel = tempDiv.querySelector(`label[for="${input.id}"]`);
-          (json.options ??= []).push({
-            value: input.value || input.id,
-            label: optLabel?.textContent?.trim() || '',
-          });
-        });
-      if (json.fieldType === 'radio') json.direction = 'vertical';
+      if (fieldType === ActionTypes.radioGroup) {
+        json.direction = 'vertical';
+      }
     }
 
     return json;
@@ -900,10 +931,10 @@ export class FormBuilderComponent implements AfterViewInit {
 
   selectedFieldSettings: Partial<FieldSettings> = {};
   fieldSettingsList: FieldSettings[] = [];
+
   onFieldUpdated(event: FieldSettings) {
     const el = document.getElementById(event.fieldId);
     if (!el) return;
-
     // Find current settings (if exist)
     const currentIndex = this.fieldSettingsList.findIndex(
       (f) => f.fieldId === event.fieldId
@@ -919,6 +950,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     // Update DOM attributes
     el.setAttribute('data-label', updatedField.fieldLabel ?? 'Field Label');
+    el.setAttribute('data-name', updatedField.fieldName ?? event.fieldId);
     el.setAttribute('data-size', updatedField.fieldSize ?? '');
     el.setAttribute('data-css', updatedField.cssClass ?? '');
     el.setAttribute(
@@ -929,7 +961,10 @@ export class FormBuilderComponent implements AfterViewInit {
     switch (updatedField.fieldType) {
       case ActionTypes.shortText:
         el.setAttribute('data-default', updatedField.defaultValue ?? '');
-        el.setAttribute('data-placeholder', updatedField.placeholderText ?? '');
+        el.setAttribute(
+          'data-placeholder',
+          updatedField.placeholderText ?? 'placeholder'
+        );
         el.setAttribute('data-min', updatedField.minRange?.toString() || '');
         el.setAttribute('data-max', updatedField.maxRange?.toString() || '');
         break;
@@ -961,6 +996,250 @@ export class FormBuilderComponent implements AfterViewInit {
 
     if (this.selectedFieldSettings?.fieldId === event.fieldId) {
       this.selectedFieldSettings = updatedField;
+    }
+    this.updateBuilderField(event.fieldId, updatedField.fieldType);
+
+    switch (this.selectedFieldSettings?.fieldSize) {
+      case 'small':
+        this.resizeFieldWidth(event.fieldId, 9);
+        break;
+      case 'medium':
+        this.resizeFieldWidth(event.fieldId, 18);
+        break;
+      case 'large':
+        this.resizeFieldWidth(event.fieldId, 27);
+        break;
+      case 'full':
+        this.resizeFieldWidth(event.fieldId, 36);
+        break;
+      default:
+        break;
+    }
+  }
+
+  updateBuilderField(fieldId: string, fieldType: string) {
+    const fieldItem = document
+      .getElementById(fieldId)
+      ?.closest('.grid-stack-item') as HTMLElement;
+    if (!fieldItem) return;
+
+    const contentElement = fieldItem.querySelector(
+      '.inner-grid-stack-item-content'
+    ) as HTMLElement;
+    if (!contentElement) return;
+
+    switch (fieldType) {
+      case ActionTypes.label: {
+        const labelElement = contentElement.querySelector(
+          'p[data-field-type="label"]'
+        ) as HTMLParagraphElement;
+        if (labelElement) {
+          let dataLabel = labelElement.getAttribute('data-label')?.trim() || '';
+
+          if (!dataLabel) {
+            dataLabel = 'Label';
+          }
+
+          labelElement.textContent = dataLabel;
+        }
+        break;
+      }
+
+      case ActionTypes.shortText: {
+        const inputElement = contentElement.querySelector(
+          'input[data-field-type="shortText"]'
+        ) as HTMLInputElement;
+
+        const labelElement = contentElement.querySelector(
+          'label.inner-grid-label'
+        ) as HTMLLabelElement;
+
+        if (inputElement) {
+          let placeholder =
+            inputElement.getAttribute('data-placeholder')?.trim() || '';
+          if (!placeholder) {
+            placeholder = 'Enter text';
+          }
+          inputElement.placeholder = placeholder;
+        }
+
+        if (labelElement && inputElement) {
+          let labelText = inputElement.getAttribute('data-label')?.trim() || '';
+          if (!labelText) {
+            labelText = 'Text Field';
+          }
+          labelElement.textContent = labelText;
+        }
+
+        break;
+      }
+
+      case ActionTypes.dropDownList: {
+        const selectElement = contentElement.querySelector(
+          'select[data-field-type="dropDownList"]'
+        ) as HTMLSelectElement;
+
+        const labelElement = contentElement.querySelector(
+          'label.inner-grid-label'
+        ) as HTMLLabelElement;
+
+        if (selectElement) {
+          let labelText =
+            selectElement.getAttribute('data-label')?.trim() || '';
+          if (!labelText) {
+            labelText = 'Dropdown';
+          }
+          if (labelElement) {
+            labelElement.textContent = labelText;
+          }
+
+          const rawOptions = selectElement.getAttribute('data-options') || '[]';
+          let options: { label: string; value: string }[] = [];
+
+          try {
+            options = JSON.parse(rawOptions);
+            if (!Array.isArray(options)) throw new Error(); // force fallback if not array
+          } catch {
+            options = [
+              { label: 'Option 1', value: 'option1' },
+              { label: 'Option 2', value: 'option2' },
+            ];
+          }
+
+          selectElement.innerHTML = '';
+
+          options.forEach((option) => {
+            const opt = document.createElement('option');
+            opt.value = option.value;
+            opt.textContent = option.label;
+            selectElement.appendChild(opt);
+          });
+        }
+
+        break;
+      }
+      case ActionTypes.checkbox: {
+        const checkboxGroup = contentElement.querySelector(
+          'div[data-field-type="checkbox"]'
+        ) as HTMLElement;
+
+        if (!checkboxGroup) break;
+
+        const groupLabelElement = checkboxGroup.querySelector(
+          'p.inner-grid-label'
+        ) as HTMLElement;
+        let groupLabel = checkboxGroup.getAttribute('data-label')?.trim() || '';
+        if (!groupLabel) {
+          groupLabel = 'Select Options';
+        }
+        if (groupLabelElement) {
+          groupLabelElement.textContent = groupLabel;
+        }
+
+        const rawOptions = checkboxGroup.getAttribute('data-options') || '[]';
+        let options: { label: string; value: string }[] = [];
+
+        try {
+          options = JSON.parse(rawOptions);
+          if (!Array.isArray(options)) throw new Error();
+        } catch {
+          options = [
+            { label: 'Option A', value: '1' },
+            { label: 'Option B', value: '2' },
+          ];
+        }
+
+        const existingWrappers =
+          checkboxGroup.querySelectorAll('.checkbox-wrapper');
+        existingWrappers.forEach((wrapper) => wrapper.remove());
+
+        options.forEach((option, index) => {
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('checkbox-wrapper');
+
+          const input = document.createElement('input');
+          input.type = 'checkbox';
+          input.id = `checkbox-${fieldId}-${index}`;
+          input.classList.add('styled-checkbox');
+          input.value = option.value;
+
+          const label = document.createElement('label');
+          label.setAttribute('for', input.id);
+          label.classList.add('inner-grid-label');
+          label.textContent = option.label;
+
+          wrapper.appendChild(input);
+          wrapper.appendChild(label);
+          checkboxGroup.appendChild(wrapper);
+        });
+
+        break;
+      }
+      case ActionTypes.radioGroup: {
+        const radioGroupWrapper = contentElement.querySelector(
+          'div[data-field-type="radio"]'
+        ) as HTMLElement;
+
+        const groupLabelElement = contentElement.querySelector(
+          'label.inner-grid-label'
+        ) as HTMLLabelElement;
+
+        if (!radioGroupWrapper) break;
+
+        let groupLabel =
+          radioGroupWrapper.getAttribute('data-label')?.trim() || '';
+        if (!groupLabel) {
+          groupLabel = 'Select an Option';
+        }
+        if (groupLabelElement) {
+          groupLabelElement.textContent = groupLabel;
+        }
+
+        const rawOptions =
+          radioGroupWrapper.getAttribute('data-options') || '[]';
+        let options: { label: string; value: string }[] = [];
+
+        try {
+          options = JSON.parse(rawOptions);
+          if (!Array.isArray(options)) throw new Error();
+        } catch {
+          options = [
+            { label: 'Option 1', value: '1' },
+            { label: 'Option 2', value: '2' },
+          ];
+        }
+
+        const existingOptions =
+          radioGroupWrapper.querySelectorAll('.radio-option');
+        existingOptions.forEach((el) => el.remove());
+
+        options.forEach((option, index) => {
+          const radioId = `radio-${fieldId}-${index}`;
+
+          const wrapper = document.createElement('div');
+          wrapper.classList.add('radio-option');
+
+          const input = document.createElement('input');
+          input.type = 'radio';
+          input.id = radioId;
+          input.name = fieldId;
+          input.classList.add('styled-radio');
+          input.value = option.value;
+
+          const label = document.createElement('label');
+          label.setAttribute('for', radioId);
+          label.textContent = option.label;
+
+          wrapper.appendChild(input);
+          wrapper.appendChild(label);
+          radioGroupWrapper.appendChild(wrapper);
+        });
+
+        break;
+      }
+
+      default:
+        break;
     }
   }
 

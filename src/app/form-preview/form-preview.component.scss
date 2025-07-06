@@ -18,20 +18,55 @@
             gap: 20px;
 
             &.header-section {
-                background-color: #f0f8ff;
-                border: 2px solid #007bff;
-                padding: 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+                background: rgba(33, 150, 243, 0.1); // light transparent blue
+                backdrop-filter: blur(6px);
+                border-left: 6px solid #2196f3;
+                padding: 24px 28px;
+                border-radius: 20px;
+                box-shadow: 0 4px 20px rgba(33, 150, 243, 0.08);
+                position: relative;
+                margin-bottom: 24px;
+
+                &::before {
+                    content: '📘 Header';
+                    position: absolute;
+                    top: -12px;
+                    left: 20px;
+                    background: #2196f3;
+                    color: #fff;
+                    padding: 4px 12px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                }
             }
 
             &.footer-section {
-                background-color: #fff6f0;
-                border: 2px solid #ffa726;
-                padding: 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(255, 87, 34, 0.1);
+                background: rgba(255, 152, 0, 0.08); // light transparent orange
+                backdrop-filter: blur(6px);
+                border-left: 6px solid #fb8c00;
+                padding: 24px 28px;
+                border-radius: 20px;
+                box-shadow: 0 4px 20px rgba(255, 152, 0, 0.08);
+                position: relative;
+                margin-top: 24px;
+
+                &::before {
+                    content: '📙 Footer';
+                    position: absolute;
+                    top: -12px;
+                    left: 20px;
+                    background: #fb8c00;
+                    color: #fff;
+                    padding: 4px 12px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                }
             }
+
 
             .inner-grid-form-label {
                 font-size: 28px;

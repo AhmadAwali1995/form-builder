@@ -28,6 +28,7 @@ export class SettingsComponentComponent implements OnInit {
   actionTypes = ActionTypes;
 
   fieldLabel?: string;
+  fieldName?: string;
   fieldSize = 'medium';
   placeholderText?: string;
   defaultValue?: string;
@@ -79,51 +80,56 @@ export class SettingsComponentComponent implements OnInit {
     // This will only fire if form is valid
     this.emitUpdate();
   }
+
   loadSettingsFromField(settings: FieldSettings) {
-    this.fieldLabel = settings.fieldLabel || '';
-    this.fieldSize = settings.fieldSize || 'medium';
-    this.cssClass = settings.cssClass || '';
-    this.isRequired = settings.isRequired || false;
+    this.fieldLabel = settings.fieldLabel ?? this.fieldLabel ?? '';
+    this.fieldName = settings.fieldName ?? this.fieldName ?? '';
+    this.fieldSize = settings.fieldSize ?? this.fieldSize ?? 'medium';
+    this.cssClass = settings.cssClass ?? this.cssClass ?? '';
+    this.isRequired = settings.isRequired ?? this.isRequired ?? false;
+
     if (settings.fieldType === ActionTypes.label) {
       this.fieldSize = 'full';
     }
+
     switch (settings.fieldType) {
       case ActionTypes.shortText:
-        this.defaultValue = settings.defaultValue || '';
-        this.placeholderText = settings.placeholderText || '';
-        this.minRange = settings.minRange;
-        this.maxRange = settings.maxRange;
+        this.defaultValue = settings.defaultValue ?? this.defaultValue ?? '';
+        this.placeholderText =
+          settings.placeholderText ?? this.placeholderText ?? '';
+        this.minRange = settings.minRange ?? this.minRange;
+        this.maxRange = settings.maxRange ?? this.maxRange;
         break;
 
       case ActionTypes.dropDownList:
       case ActionTypes.checkbox:
       case ActionTypes.radioGroup:
-        this.options = settings.options || [];
-        break;
-
-      default:
+        this.options = [...(settings.options ?? this.options)];
         break;
     }
   }
 
   emitUpdate() {
-    const baseUpdate = {
+    const baseUpdate: FieldSettings = {
       fieldId: this.fieldId,
-      fieldLabel: this.fieldLabel,
-      fieldType: this.fieldType,
-      fieldSize: this.fieldSize,
-      cssClass: this.cssClass,
-      isRequired: this.isRequired,
+      fieldName: this.fieldName || '',
+      fieldType: this.fieldType as ActionTypes,
+      fieldLabel: this.fieldLabel || this.fieldSettings?.fieldLabel || '',
+      fieldSize: this.fieldSize || this.fieldSettings?.fieldSize || 'medium',
+      cssClass: this.cssClass || this.fieldSettings?.cssClass || '',
+      isRequired: this.isRequired ?? this.fieldSettings?.isRequired ?? false,
     };
 
     switch (this.fieldType) {
       case ActionTypes.shortText:
         this.fieldUpdated.emit({
           ...baseUpdate,
-          defaultValue: this.defaultValue,
-          placeholderText: this.placeholderText,
-          minRange: this.minRange,
-          maxRange: this.maxRange,
+          defaultValue:
+            this.defaultValue ?? this.fieldSettings?.defaultValue ?? '',
+          placeholderText:
+            this.placeholderText ?? this.fieldSettings?.placeholderText ?? '',
+          minRange: this.minRange ?? this.fieldSettings?.minRange,
+          maxRange: this.maxRange ?? this.fieldSettings?.maxRange,
         });
         break;
 
@@ -132,18 +138,21 @@ export class SettingsComponentComponent implements OnInit {
       case ActionTypes.radioGroup:
         this.fieldUpdated.emit({
           ...baseUpdate,
-          options: this.options,
+          options: this.options.length
+            ? this.options
+            : this.fieldSettings?.options ?? [],
+        });
+        break;
+
+      case ActionTypes.table:
+        this.fieldUpdated.emit({
+          ...baseUpdate,
+          columns: this.fieldSettings?.columns ?? [],
         });
         break;
 
       default:
-        this.fieldUpdated.emit({
-          ...baseUpdate,
-          placeholderText: '',
-          minRange: undefined,
-          maxRange: undefined,
-          options: [],
-        });
+        this.fieldUpdated.emit(baseUpdate);
         break;
     }
   }

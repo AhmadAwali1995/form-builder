@@ -101,7 +101,8 @@
   }
 
   <!-- Popup Modal -->
-  <div class="options-modal" *ngIf="showOptionsModal">
+  @if(showOptionsModal){
+  <div class="options-modal">
     <div class="options-modal-backdrop" (click)="closeOptionsModal()"></div>
     <div class="options-modal-content" (click)="$event.stopPropagation()">
       <h3 class="modal-title">Edit Field Options</h3>
@@ -115,7 +116,8 @@
       </div>
 
       <button type="button" class="add-btn" (click)="addOption()">
-        ➕ Add Option
+        <span class="icon">➕</span>
+        <span>Add Option</span>
       </button>
 
       <div class="modal-actions">
@@ -125,4 +127,5 @@
       </div>
     </div>
   </div>
+  }
 </div>
