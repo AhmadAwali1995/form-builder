@@ -1,13 +1,13 @@
-import { ActionTypes } from './../shared/enums/action-types';
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  ReactiveFormsModule,
   FormBuilder,
   FormGroup,
+  ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ActionTypes } from './../shared/enums/action-types';
 import { FieldSettings, Sections } from '../shared/interfaces/sections';
 
 @Component({
@@ -15,7 +15,7 @@ import { FieldSettings, Sections } from '../shared/interfaces/sections';
   standalone: true,
   imports: [RouterModule, CommonModule, ReactiveFormsModule],
   templateUrl: './form-preview.component.html',
-  styleUrl: './form-preview.component.scss',
+  styleUrls: ['./form-preview.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class FormPreviewComponent implements OnInit {
@@ -23,6 +23,10 @@ export class FormPreviewComponent implements OnInit {
   form: FormGroup;
   sections: Sections[] = [];
   currentSectionIndex = 0;
+
+  currentPageMap: Record<string, number> = {};
+  pageSize = 5;
+
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
@@ -34,6 +38,13 @@ export class FormPreviewComponent implements OnInit {
       const allFields = this.sections.flatMap((s) =>
         s.fields.map((f) => f.fieldSettings)
       );
+
+      for (const field of allFields) {
+        if (field.fieldType === ActionTypes.table && field.columns) {
+          this.currentPageMap[field.fieldId] = 1;
+        }
+      }
+
       this.buildForm(allFields);
     }
   }
@@ -70,6 +81,45 @@ export class FormPreviewComponent implements OnInit {
     }
 
     this.form = this.fb.group(controls);
+  }
+
+  getPaginatedData(fieldId: string): any[] {
+    const columnSet = this.getTableColumnSet(fieldId);
+    if (!columnSet) return [];
+
+    const data = columnSet.columnsData ?? [];
+    const currentPage = this.currentPageMap[fieldId] ?? 1;
+    const start = (currentPage - 1) * this.pageSize;
+    return data.slice(start, start + this.pageSize);
+  }
+
+  getTableColumnSet(fieldId: string) {
+    const field = this.sections
+      .flatMap((s) => s.fields)
+      .find((f) => f.fieldSettings.fieldId === fieldId);
+    return field?.fieldSettings.columns?.[0]; // assumes first column set
+  }
+
+  getTotalPages(fieldId: string): number {
+    const columnSet = this.getTableColumnSet(fieldId);
+    const data = columnSet?.columnsData ?? [];
+    return Math.ceil(data.length / this.pageSize);
+  }
+
+  setPage(fieldId: string, pageNumber: number): void {
+    this.currentPageMap[fieldId] = pageNumber;
+  }
+
+  prevPage(fieldId: string): void {
+    if (this.currentPageMap[fieldId] > 1) {
+      this.currentPageMap[fieldId]--;
+    }
+  }
+
+  nextPage(fieldId: string): void {
+    if (this.currentPageMap[fieldId] < this.getTotalPages(fieldId)) {
+      this.currentPageMap[fieldId]++;
+    }
   }
 
   nextSection() {

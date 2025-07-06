@@ -2,7 +2,13 @@
   @if (sections.length > 0) {
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
     @for (section of sections; track $index) {
-    <div class="form-row">
+    <div
+      class="form-row"
+      [ngClass]="{
+        'header-section': section.sectionId === 'header-grid',
+        'footer-section': section.sectionId === 'footer-grid'
+      }"
+    >
       @for (field of section.fields; track $index) {
       <div
         [ngClass]="'field-size-' + (field.fieldSettings.fieldSize || 'full')"
@@ -11,7 +17,7 @@
           <!-- Short Text Field -->
           @if (field.fieldSettings.fieldType === actionTypes.shortText) {
           <label>
-            {{ field.fieldSettings.fieldLabel }}
+            {{ field.fieldSettings.fieldLabel || "Field Label" }}
             @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
@@ -19,7 +25,9 @@
           <input
             type="text"
             [formControlName]="field.fieldSettings.fieldName"
-            [placeholder]="field.fieldSettings.placeholderText || ''"
+            [placeholder]="
+              field.fieldSettings.placeholderText || 'placeholderText'
+            "
           />
           @if (form.get(field.fieldSettings.fieldName)?.touched &&
           form.get(field.fieldSettings.fieldName)?.errors) {
@@ -46,14 +54,19 @@
           <!-- Dropdown -->
           @if (field.fieldSettings.fieldType === actionTypes.dropDownList) {
           <label>
-            {{ field.fieldSettings.fieldLabel }}
+            {{ field.fieldSettings.fieldLabel || "Field Label" }}
             @if (field.fieldSettings.isRequired) {
             <span class="required-star">*</span>
             }
           </label>
           <select [formControlName]="field.fieldSettings.fieldName">
             <option value="">-- Select --</option>
-            @for (opt of field.fieldSettings.options; track $index) {
+            @if (field.fieldSettings.options?.length === 0) {
+            <option value="optionA">option A</option>
+            <option value="optionB">option B</option>
+            <option value="optionC">option C</option>
+
+            } @for (opt of field.fieldSettings.options; track $index) {
             <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
@@ -69,9 +82,34 @@
 
           <!-- Checkbox -->
           @if (field.fieldSettings.fieldType === actionTypes.checkbox) {
-          <label>{{ field.fieldSettings.fieldLabel }}</label>
+          <label>{{ field.fieldSettings.fieldLabel || "Field Label" }}</label>
           <div class="checkbox-vertical">
-            @for (option of field.fieldSettings.options; track $index) {
+            @if (field.fieldSettings.options?.length === 0) {
+            <label>
+              <input
+                type="checkbox"
+                [formControlName]="field.fieldSettings.fieldName"
+                value="optionA"
+              />
+              option A
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [formControlName]="field.fieldSettings.fieldName"
+                value="optionB"
+              />
+              option B
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                [formControlName]="field.fieldSettings.fieldName"
+                value="optionC"
+              />
+              option C
+            </label>
+            } @for (option of field.fieldSettings.options; track $index) {
             <label>
               <input
                 type="checkbox"
@@ -106,7 +144,32 @@
               field.fieldSettings.direction || 'vertical'
             ]"
           >
-            @for (opt of field.fieldSettings.options; track $index) {
+            @if (field.fieldSettings.options?.length === 0) {
+            <label>
+              <input
+                type="radio"
+                value="optionA"
+                [formControlName]="field.fieldSettings.fieldName"
+              />
+              Option A
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="optionB"
+                [formControlName]="field.fieldSettings.fieldName"
+              />
+              Option B
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="optionC"
+                [formControlName]="field.fieldSettings.fieldName"
+              />
+              Option C
+            </label>
+            } @for (opt of field.fieldSettings.options; track $index) {
             <label>
               <input
                 type="radio"
@@ -128,16 +191,55 @@
           } }
 
           <!-- Table -->
-          @if(field.fieldSettings.fieldType === actionTypes.table){
-          <p>
-            {{ field.fieldSettings.fieldLabel }}
-          </p>
+          @if (field.fieldSettings.fieldType === actionTypes.table) {
+          <div class="table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  @for (key of field.fieldSettings.columns?.[0]?.selectedColumns
+                  ?? []; track $index) {
+                  <th>{{ key | titlecase }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of getPaginatedData(field.fieldSettings.fieldId);
+                track $index) {
+                <tr>
+                  @for (key of field.fieldSettings.columns?.[0]?.selectedColumns
+                  ?? []; track $index) {
+                  <td>
+                    {{ row[key] }}
+                  </td>
+                  }
+                </tr>
+                }
+              </tbody>
+            </table>
+
+            <div class="pagination">
+              @for (page of
+              [].constructor(getTotalPages(field.fieldSettings.fieldId)); track
+              $index) {
+              <button
+                (click)="setPage(field.fieldSettings.fieldId, $index + 1)"
+                [ngClass]="
+                  $index + 1 === currentPageMap[field.fieldSettings.fieldId]
+                    ? 'active'
+                    : ''
+                "
+              >
+                {{ $index + 1 }}
+              </button>
+              }
+            </div>
+          </div>
           }
 
           <!-- Label -->
           @if (field.fieldSettings.fieldType === actionTypes.label) {
           <p class="inner-grid-form-label">
-            {{ field.fieldSettings.fieldLabel }}
+            {{ field.fieldSettings.fieldLabel || "Field Label" }}
           </p>
           }
         </div>
