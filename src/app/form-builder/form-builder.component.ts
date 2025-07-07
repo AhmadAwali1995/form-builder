@@ -327,7 +327,13 @@ export class FormBuilderComponent implements AfterViewInit {
         maxRange: +fieldElement.getAttribute('data-max')! || undefined,
         cssClass: fieldElement.getAttribute('data-css') || '',
         isRequired: fieldElement.getAttribute('data-required') === 'true',
-        options: JSON.parse(fieldElement.getAttribute('data-options') || '[]'),
+        options: JSON.parse(
+          fieldElement.getAttribute('data-options') ||
+            JSON.stringify([
+              { label: 'Option 1', value: 'option_1' },
+              { label: 'Option 2', value: 'option_2' },
+            ])
+        ),
         columns: parsedColumns,
       };
     } else {
@@ -364,7 +370,10 @@ export class FormBuilderComponent implements AfterViewInit {
       case ActionTypes.radioGroup:
         return {
           ...base,
-          options: [],
+          options: [
+            { label: 'Option 1', value: 'option_1' },
+            { label: 'Option 2', value: 'option_2' },
+          ],
         };
       case ActionTypes.table:
         return {
@@ -402,9 +411,6 @@ export class FormBuilderComponent implements AfterViewInit {
       isRequired: field.isRequired ?? false,
       defaultValue: '',
       placeholderText: '',
-      minRange: undefined,
-      maxRange: undefined,
-      options: [],
     };
 
     // Merge and override defaults with passed field
@@ -424,7 +430,10 @@ export class FormBuilderComponent implements AfterViewInit {
       merged.fieldType === ActionTypes.checkbox ||
       merged.fieldType === ActionTypes.radioGroup
     ) {
-      merged.options = field.options || [];
+      merged.options = field.options || [
+        { label: 'Option 1', value: 'option_1' },
+        { label: 'Option 2', value: 'option_2' },
+      ];
     }
 
     if (merged.fieldType === ActionTypes.table) {
@@ -1057,7 +1066,12 @@ export class FormBuilderComponent implements AfterViewInit {
       case ActionTypes.radioGroup:
         el.setAttribute(
           'data-options',
-          JSON.stringify(updatedField.options || [])
+          JSON.stringify(
+            updatedField.options || [
+              { key: 'Option 1', value: 'option_1' },
+              { key: 'Option 2', value: 'option_2' },
+            ]
+          )
         );
         break;
       case ActionTypes.table:
@@ -1176,7 +1190,12 @@ export class FormBuilderComponent implements AfterViewInit {
             labelElement.textContent = labelText;
           }
 
-          const rawOptions = selectElement.getAttribute('data-options') || '[]';
+          const rawOptions =
+            selectElement.getAttribute('data-options') ||
+            JSON.stringify([
+              { label: 'Option 1', value: 'option_1' },
+              { label: 'Option 2', value: 'option_2' },
+            ]);
           let options: { label: string; value: string }[] = [];
 
           try {
@@ -1219,7 +1238,12 @@ export class FormBuilderComponent implements AfterViewInit {
           groupLabelElement.textContent = groupLabel;
         }
 
-        const rawOptions = checkboxGroup.getAttribute('data-options') || '[]';
+        const rawOptions =
+          checkboxGroup.getAttribute('data-options') ||
+          JSON.stringify([
+            { label: 'Option 1', value: 'option_1' },
+            { label: 'Option 2', value: 'option_2' },
+          ]);
         let options: { label: string; value: string }[] = [];
 
         try {
@@ -1279,7 +1303,11 @@ export class FormBuilderComponent implements AfterViewInit {
         }
 
         const rawOptions =
-          radioGroupWrapper.getAttribute('data-options') || '[]';
+          radioGroupWrapper.getAttribute('data-options') ||
+          JSON.stringify([
+            { label: 'Option 1', value: 'option_1' },
+            { label: 'Option 2', value: 'option_2' },
+          ]);
         let options: { label: string; value: string }[] = [];
 
         try {

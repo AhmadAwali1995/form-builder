@@ -55,6 +55,7 @@ export class SettingsComponentComponent implements OnInit {
       this.loadSettingsFromField(this.fieldSettings);
     }
   }
+
   openOptionsModal() {
     this.showOptionsModal = true;
   }
@@ -154,7 +155,10 @@ export class SettingsComponentComponent implements OnInit {
           ...baseUpdate,
           options: this.options.length
             ? this.options
-            : this.fieldSettings?.options ?? [],
+            : this.fieldSettings?.options ?? [
+                { label: 'Option 1', value: 'option_1' },
+                { label: 'Option 2', value: 'option_2' },
+              ],
         });
         break;
 

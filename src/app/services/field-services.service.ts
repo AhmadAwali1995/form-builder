@@ -83,9 +83,8 @@ export class FieldServicesService {
       <select data-field-type="` +
       ActionTypes.dropDownList +
       `" id="${ddlId}" class="inner-grid-textbox">
-        <option value="test1">test1</option>
-        <option value="test2">test2</option>
-        <option value="test3">test3</option>
+        <option value="option1">Option 1</option>
+        <option value="option2">Option 2</option>
       </select>
     `;
 
@@ -108,7 +107,7 @@ export class FieldServicesService {
       <div id="${ddlId}" data-field-type="${
       ActionTypes.radioGroup
     }" class="radio-group-wrapper">
-        ${['Option 1', 'Option 2', 'Option 3']
+        ${['Option 1', 'Option 2']
           .map(
             (label, i) => `
           <div class="radio-option">
@@ -136,7 +135,7 @@ export class FieldServicesService {
     const fieldContentItem = document.createElement('div');
     fieldContentItem.classList.add('inner-grid-stack-item-content');
 
-    const staticOptions = ['Option A', 'Option B', 'Option C'];
+    const staticOptions = ['Option 1', 'Option 2'];
 
     const checkboxGroup = document.createElement('div');
     checkboxGroup.classList.add('checkbox-group-wrapper');
