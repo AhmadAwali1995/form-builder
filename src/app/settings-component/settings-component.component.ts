@@ -6,6 +6,7 @@ import {
   EventEmitter,
   OnInit,
   SimpleChanges,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -26,11 +27,7 @@ export class SettingsComponentComponent implements OnInit {
   @Input() tableURL!: string;
   @Input() tableKeys: string[] = [];
 
-  @Input() testDDLURL!: () => void;
-  @Input() testTableURL!: () => void;
-  // @Input() previewData!: () => void;
-  @Input() saveDDL!: () => void;
-  @Input() saveTable!: () => void;
+  // @Output() emptyMinMax = new EventEmitter<void>();
 
   @Output() fieldUpdated = new EventEmitter<any>();
   @Output() previewClicked = new EventEmitter<void>();
@@ -51,9 +48,7 @@ export class SettingsComponentComponent implements OnInit {
   dropdownOptions = '';
   showOptionsModal = false;
 
-  ngOnInit(): void {
-    // Here you can load existing settings if needed
-  }
+  ngOnInit(): void {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['fieldSettings'] && this.fieldSettings) {
@@ -109,8 +104,8 @@ export class SettingsComponentComponent implements OnInit {
         this.defaultValue = settings.defaultValue ?? this.defaultValue ?? '';
         this.placeholderText =
           settings.placeholderText ?? this.placeholderText ?? '';
-        this.minRange = settings.minRange ?? this.minRange;
-        this.maxRange = settings.maxRange ?? this.maxRange;
+        this.minRange = settings.minRange ?? undefined;
+        this.maxRange = settings.maxRange ?? undefined;
         break;
 
       case ActionTypes.dropDownList:
@@ -120,11 +115,18 @@ export class SettingsComponentComponent implements OnInit {
         break;
     }
   }
-
   emitUpdate() {
+    if (
+      this.minRange != null &&
+      this.maxRange != null &&
+      this.maxRange < this.minRange
+    ) {
+      this.maxRange = this.minRange;
+    }
+
     const baseUpdate: FieldSettings = {
       fieldId: this.fieldId,
-      fieldName: this.fieldName || '',
+      fieldName: this.fieldId,
       fieldType: this.fieldType as ActionTypes,
       fieldLabel: this.fieldLabel || this.fieldSettings?.fieldLabel || '',
       fieldSize: this.fieldSize || this.fieldSettings?.fieldSize || 'medium',

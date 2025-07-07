@@ -315,7 +315,7 @@ export class FormBuilderComponent implements AfterViewInit {
         fieldId: this.fieldId,
         fieldType: fieldType as ActionTypes,
         fieldLabel: fieldElement.getAttribute('data-label') || '',
-        fieldName: fieldElement.getAttribute('data-name') || '',
+        fieldName: this.fieldId,
         fieldSize:
           (fieldElement.getAttribute('data-size') as any) ||
           (fieldType === ActionTypes.label || fieldType === ActionTypes.table
@@ -395,7 +395,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const defaults: FieldSettings = {
       fieldId: field.fieldId || 'unknown-id',
       fieldLabel: field.fieldLabel || 'Field Label',
-      fieldName: this.generateFieldName(field.fieldLabel || 'fieldName'),
+      fieldName: field.fieldId || 'unknown-id',
       fieldType: field.fieldType || ActionTypes.shortText,
       fieldSize: field.fieldSize || 'medium',
       cssClass: field.cssClass || '',
@@ -961,7 +961,7 @@ export class FormBuilderComponent implements AfterViewInit {
     const json: FieldSettings = {
       fieldType,
       fieldLabel,
-      fieldName: fieldLabel.replace(/\s+/g, '_').toLowerCase() || fieldId,
+      fieldName: fieldId,
       fieldId,
       isRequired: input.hasAttribute('required'),
       fieldSize: 'medium',
@@ -1033,7 +1033,7 @@ export class FormBuilderComponent implements AfterViewInit {
 
     // Update DOM attributes
     el.setAttribute('data-label', updatedField.fieldLabel ?? 'Field Label');
-    el.setAttribute('data-name', updatedField.fieldName ?? event.fieldId);
+    el.setAttribute('data-name', event.fieldId);
     el.setAttribute('data-size', updatedField.fieldSize ?? '');
     el.setAttribute('data-css', updatedField.cssClass ?? '');
     el.setAttribute(

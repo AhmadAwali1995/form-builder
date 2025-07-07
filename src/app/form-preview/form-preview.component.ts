@@ -44,7 +44,7 @@ export class FormPreviewComponent implements OnInit {
           this.currentPageMap[field.fieldId] = 1;
         }
       }
-
+      console.log('allFields', allFields);
       this.buildForm(allFields);
     }
   }

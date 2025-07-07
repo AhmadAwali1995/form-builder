@@ -24,7 +24,7 @@
           </label>
           <input
             type="text"
-            [formControlName]="field.fieldSettings.fieldName"
+            [formControlName]="field.fieldSettings.fieldId"
             [placeholder]="
               field.fieldSettings.placeholderText || 'placeholderText'
             "
@@ -59,7 +59,7 @@
             <span class="required-star">*</span>
             }
           </label>
-          <select [formControlName]="field.fieldSettings.fieldName">
+          <select [formControlName]="field.fieldSettings.fieldId">
             <option value="">-- Select --</option>
             @if (field.fieldSettings.options?.length === 0) {
             <option value="optionA">option A</option>
@@ -88,7 +88,7 @@
             <label>
               <input
                 type="checkbox"
-                [formControlName]="field.fieldSettings.fieldName"
+                [formControlName]="field.fieldSettings.fieldId"
                 value="optionA"
               />
               option A
@@ -149,7 +149,7 @@
               <input
                 type="radio"
                 value="optionA"
-                [formControlName]="field.fieldSettings.fieldName"
+                [formControlName]="field.fieldSettings.fieldId"
               />
               Option A
             </label>

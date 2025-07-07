@@ -100,6 +100,7 @@
 
     .options-modal-content {
       position: relative;
+      min-width: 30dvw;
       z-index: 1001;
       background: #ffffff;
       border-radius: 12px;
@@ -108,7 +109,7 @@
       animation: fadeIn 0.25s ease-in-out;
 
       .option-row-container {
-        height: 70dvh;
+        max-height: 50dvh;
         overflow-y: auto;
         overflow-x: hidden;
       }
