@@ -76,7 +76,8 @@
       (input)="emitUpdate()"
     />
   </div>
-  @if (fieldType !== actionTypes.label ){
+  <!-- @if (fieldType !== actionTypes.label && fieldType !== actionTypes.table ){ -->
+  @if (fieldType === actionTypes.shortText ){
   <div class="setting-item-checkbox">
     <label for="required-field">Required Field</label>
     <input
