@@ -123,6 +123,29 @@ export class FormBuilderComponent implements AfterViewInit {
 
       this.repositionFooter();
     });
+
+    this.grid.on('removed', (event, items) => {
+      items.forEach((item) => {
+        const el = item.el as HTMLElement;
+
+        const gridstackEl = el.parentElement;
+        const gridstack =
+          gridstackEl && ((gridstackEl as any).gridstack as GridStack);
+
+        if (gridstack) gridstack.compact();
+
+        const innerGridEl = el.parentElement?.parentElement?.parentElement;
+        if (!innerGridEl) return;
+
+        const sectionItem = document
+          .getElementById(innerGridEl.id)
+          ?.closest('.grid-stack-item') as HTMLElement;
+
+        this.resizeSection(innerGridEl.id);
+      });
+
+      this.repositionFooter();
+    });
   }
 
   getFormSections() {
