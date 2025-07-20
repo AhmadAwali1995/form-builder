@@ -910,6 +910,7 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   resizeSection(sectionId: string): void {
+    return;
     // console.log('resizeSection consumed');
     const sectionItem = document
       .getElementById(sectionId)
@@ -1463,8 +1464,8 @@ export class FormBuilderComponent implements AfterViewInit {
     item.setAttribute('gs-x', '0');
     item.setAttribute('gs-y', lastY.toString());
     item.setAttribute('gs-w', w.toString());
-    item.setAttribute('gs-min-w', w.toString());
-    item.setAttribute('gs-max-w', w.toString());
+    // item.setAttribute('gs-min-w', w.toString());
+    // item.setAttribute('gs-max-w', w.toString());
     item.setAttribute('gs-h', h.toString());
     item.setAttribute('id', innerGridId);
     item.setAttribute('gs-id', innerGridId);
