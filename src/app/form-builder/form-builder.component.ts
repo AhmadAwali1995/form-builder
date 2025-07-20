@@ -1378,30 +1378,32 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   removeField(innerGridId: string, fieldId: string) {
-    const fieldItem = document
-      .getElementById(fieldId)
-      ?.closest('.grid-stack-item') as HTMLElement;
-    if (!fieldItem) return;
+    setTimeout(() => {
+      const fieldItem = document
+        .getElementById(fieldId)
+        ?.closest('.grid-stack-item') as HTMLElement;
+      if (!fieldItem) return;
 
-    const contentElement = fieldItem.querySelector(
-      '.inner-grid-stack-item-content'
-    ) as HTMLElement;
-    if (!contentElement) return;
+      const contentElement = fieldItem.querySelector(
+        '.inner-grid-stack-item-content'
+      ) as HTMLElement;
+      if (!contentElement) return;
 
-    const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
-    if (!innerGridEl) return;
+      const innerGridEl = fieldItem.closest('.grid-stack') as HTMLElement;
+      if (!innerGridEl) return;
 
-    // Get GridStack instance dynamically
-    const innerGrid = (innerGridEl as any).gridstack as GridStack;
-    if (!innerGrid) {
-      console.warn('GridStack instance not found for inner grid element');
-      return;
-    }
+      // Get GridStack instance dynamically
+      const innerGrid = (innerGridEl as any).gridstack as GridStack;
+      if (!innerGrid) {
+        console.warn('GridStack instance not found for inner grid element');
+        return;
+      }
 
-    // Remove widget and compact layout
-    innerGrid.removeWidget(fieldItem);
-    innerGrid.compact();
-    this.resizeSection(innerGridId);
+      // Remove widget and compact layout
+      innerGrid.removeWidget(fieldItem);
+      innerGrid.compact();
+      this.resizeSection(innerGridId);
+    });
   }
 
   removeSection(sectionId: string) {
