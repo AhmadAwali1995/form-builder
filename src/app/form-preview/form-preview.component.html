@@ -1,266 +1,255 @@
 <div class="app-form-preview">
   @if (sections.length > 0) {
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    @for (section of sections; track $index) { @if(section.fields.length !== 0){
-    <div
-      class="form-row"
-      [ngClass]="{
-        'header-section': section.sectionId === 'header-grid',
-        'footer-section': section.sectionId === 'footer-grid'
-      }"
-    >
-      @for (field of section.fields; track $index) {
+    @for (section of sections; track $index) { @if (section.fields.length !== 0)
+    {
+    <div class="section-wrapper">
+      @if ( section.sectionId !== 'header-grid' && section.sectionId !==
+      'footer-grid' ) {
+      <h2 class="section-label-title">
+        {{ section.sectionLabel || "Untitled Section" }}
+      </h2>
+      }
+
       <div
-        [ngClass]="'field-size-' + (field.fieldSettings.fieldSize || 'full')"
+        class="form-row"
+        [ngClass]="{
+          'header-section': section.sectionId === 'header-grid',
+          'footer-section': section.sectionId === 'footer-grid'
+        }"
       >
-        <div [ngSwitch]="field.fieldSettings.fieldType">
-          <!-- Short Text Field -->
-          @if (field.fieldSettings.fieldType === actionTypes.shortText) {
-          <label>
-            {{ field.fieldSettings.fieldLabel || "Field Label" }}
-            @if (field.fieldSettings.isRequired) {
-            <span class="required-star">*</span>
-            }
-          </label>
-          <input
-            type="text"
-            [formControlName]="field.fieldSettings.fieldId"
-            [placeholder]="
-              field.fieldSettings.placeholderText || 'placeholderText'
-            "
-          />
-          @if (form.get(field.fieldSettings.fieldName)?.touched &&
-          form.get(field.fieldSettings.fieldName)?.errors) {
-          <div class="error-msg">
-            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
-            {
-            <div>This field is required.</div>
-            } @if (form.get(field.fieldSettings.fieldName)?.hasError('email')) {
-            <div>Please enter a valid email address.</div>
-            } @if
-            (form.get(field.fieldSettings.fieldName)?.hasError('minlength')) {
-            <div>
-              Minimum {{ field.fieldSettings.minRange }} characters required.
+        @for (field of section.fields; track $index) {
+        <div
+          [ngClass]="'field-size-' + (field.fieldSettings.fieldSize || 'full')"
+        >
+          <div [ngSwitch]="field.fieldSettings.fieldType">
+            <!-- Short Text -->
+            @if (field.fieldSettings.fieldType === actionTypes.shortText) {
+            <label>
+              {{ field.fieldSettings.fieldLabel || "Field Label" }}
+              @if (field.fieldSettings.isRequired) {
+              <span class="required-star">*</span>
+              }
+            </label>
+            <input
+              type="text"
+              [formControlName]="field.fieldSettings.fieldId"
+              [placeholder]="
+                field.fieldSettings.placeholderText || 'placeholderText'
+              "
+            />
+            @if ( form.get(field.fieldSettings.fieldName)?.touched &&
+            form.get(field.fieldSettings.fieldName)?.errors ) {
+            <div class="error-msg">
+              @if
+              (form.get(field.fieldSettings.fieldName)?.hasError('required')) {
+              <div>This field is required.</div>
+              } @if (form.get(field.fieldSettings.fieldName)?.hasError('email'))
+              {
+              <div>Please enter a valid email address.</div>
+              } @if
+              (form.get(field.fieldSettings.fieldName)?.hasError('minlength')) {
+              <div>
+                Minimum {{ field.fieldSettings.minRange }} characters required.
+              </div>
+              } @if
+              (form.get(field.fieldSettings.fieldName)?.hasError('maxlength')) {
+              <div>
+                Maximum {{ field.fieldSettings.maxRange }} characters allowed.
+              </div>
+              }
             </div>
-            } @if
-            (form.get(field.fieldSettings.fieldName)?.hasError('maxlength')) {
-            <div>
-              Maximum {{ field.fieldSettings.maxRange }} characters allowed.
-            </div>
-            }
-          </div>
-          } }
+            } }
 
-          <!-- Dropdown -->
-          @if (field.fieldSettings.fieldType === actionTypes.dropDownList) {
-          <label>
-            {{ field.fieldSettings.fieldLabel || "Field Label" }}
-            @if (field.fieldSettings.isRequired) {
-            <span class="required-star">*</span>
-            }
-          </label>
-          <select [formControlName]="field.fieldSettings.fieldId">
-            <option value="">-- Select --</option>
-            @if (field.fieldSettings.options?.length === 0) {
-            <option value="optionA">option A</option>
-            <option value="optionB">option B</option>
-            <option value="optionC">option C</option>
-
-            } @for (opt of field.fieldSettings.options; track $index) {
-            <option [value]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
-          @if (form.get(field.fieldSettings.fieldName)?.touched &&
-          form.get(field.fieldSettings.fieldName)?.errors) {
-          <div class="error-msg">
-            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
-            {
-            <div>This field is required.</div>
-            }
-          </div>
-          } }
-
-          <!-- Checkbox -->
-          @if (field.fieldSettings.fieldType === actionTypes.checkbox) {
-          <label>{{ field.fieldSettings.fieldLabel || "Field Label" }}</label>
-          <div class="checkbox-vertical">
-            @if (field.fieldSettings.options?.length === 0) {
+            <!-- Dropdown -->
+            @if (field.fieldSettings.fieldType === actionTypes.dropDownList) {
             <label>
-              <input
-                type="checkbox"
-                [formControlName]="field.fieldSettings.fieldId"
-                value="optionA"
-              />
-              option A
+              {{ field.fieldSettings.fieldLabel || "Field Label" }}
+              @if (field.fieldSettings.isRequired) {
+              <span class="required-star">*</span>
+              }
             </label>
-            <label>
-              <input
-                type="checkbox"
-                [formControlName]="field.fieldSettings.fieldName"
-                value="optionB"
-              />
-              option B
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                [formControlName]="field.fieldSettings.fieldName"
-                value="optionC"
-              />
-              option C
-            </label>
-            } @for (option of field.fieldSettings.options; track $index) {
-            <label>
-              <input
-                type="checkbox"
-                [formControlName]="field.fieldSettings.fieldName"
-                [value]="option.value"
-              />
-              {{ option.label }}
-            </label>
-            } @if (form.get(field.fieldSettings.fieldName)?.touched &&
-            form.get(field.fieldSettings.fieldName)?.errors) {
+            <select [formControlName]="field.fieldSettings.fieldId">
+              <option value="">-- Select --</option>
+              @if (field.fieldSettings.options?.length === 0) {
+              <option value="optionA">option A</option>
+              <option value="optionB">option B</option>
+              <option value="optionC">option C</option>
+              } @for (opt of field.fieldSettings.options; track $index) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+              }
+            </select>
+            @if ( form.get(field.fieldSettings.fieldName)?.touched &&
+            form.get(field.fieldSettings.fieldName)?.errors ) {
             <div class="error-msg">
               @if
               (form.get(field.fieldSettings.fieldName)?.hasError('required')) {
               <div>This field is required.</div>
               }
             </div>
-            }
-          </div>
-          }
+            } }
 
-          <!-- Radio Group -->
-          @if (field.fieldSettings.fieldType === actionTypes.radioGroup) {
-          <label>
-            {{ field.fieldSettings.fieldLabel || "Field Label" }}
-            @if (field.fieldSettings.isRequired) {
-            <span class="required-star">*</span>
-            }
-          </label>
-          <div
-            [ngClass]="[
-              'radio-group',
-              field.fieldSettings.direction || 'vertical'
-            ]"
-          >
-            @if (field.fieldSettings.options?.length === 0) {
-            <label>
-              <input
-                type="radio"
-                value="optionA"
-                [formControlName]="field.fieldSettings.fieldId"
-              />
-              Option A
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="optionB"
-                [formControlName]="field.fieldSettings.fieldName"
-              />
-              Option B
-            </label>
-            <label>
-              <input
-                type="radio"
-                value="optionC"
-                [formControlName]="field.fieldSettings.fieldName"
-              />
-              Option C
-            </label>
-            } @for (opt of field.fieldSettings.options; track $index) {
-            <label>
-              <input
-                type="radio"
-                [value]="opt.value"
-                [formControlName]="field.fieldSettings.fieldName"
-              />
-              {{ opt.label }}
-            </label>
-            }
-          </div>
-          @if (form.get(field.fieldSettings.fieldName)?.touched &&
-          form.get(field.fieldSettings.fieldName)?.errors) {
-          <div class="error-msg">
-            @if (form.get(field.fieldSettings.fieldName)?.hasError('required'))
-            {
-            <div>This field is required.</div>
-            }
-          </div>
-          } }
-
-          <!-- Table -->
-          @if (field.fieldSettings.fieldType === actionTypes.table) {
-          <div class="table-container">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  @for (key of
-                  (field.fieldSettings.columns?.[0]?.selectedColumns?.length ?
-                  field.fieldSettings.columns?.[0]?.selectedColumns :
-                  ['Column1', 'Column2', 'Column3']); track $index) {
-                  <th>{{ key | titlecase }}</th>
-                  }
-                </tr>
-              </thead>
-              <tbody>
-                @if (field.fieldSettings.columns?.[0]?.selectedColumns?.length)
-                { @for (row of getPaginatedData(field.fieldSettings.fieldId);
-                track $index) {
-                <tr>
-                  @for (key of
-                  field.fieldSettings.columns?.[0]?.selectedColumns; track
-                  $index) {
-                  <td>{{ row[key] }}</td>
-                  }
-                </tr>
-                } } @else { @for (dummy of [1]; track $index) {
-                <tr>
-                  <td>Sample 1</td>
-                  <td>Sample 2</td>
-                  <td>Sample 3</td>
-                </tr>
-                } }
-              </tbody>
-            </table>
-
-            <div
-              class="pagination"
-              *ngIf="field.fieldSettings.columns?.[0]?.selectedColumns?.length"
-            >
-              @for (page of
-              [].constructor(getTotalPages(field.fieldSettings.fieldId)); track
-              $index) {
-              <button
-                (click)="setPage(field.fieldSettings.fieldId, $index + 1)"
-                [ngClass]="
-                  $index + 1 === currentPageMap[field.fieldSettings.fieldId]
-                    ? 'active'
-                    : ''
-                "
-              >
-                {{ $index + 1 }}
-              </button>
+            <!-- Checkbox -->
+            @if (field.fieldSettings.fieldType === actionTypes.checkbox) {
+            <label>{{ field.fieldSettings.fieldLabel || "Field Label" }}</label>
+            <div class="checkbox-vertical">
+              @if (field.fieldSettings.options?.length === 0) {
+              <label>
+                <input
+                  type="checkbox"
+                  [formControlName]="field.fieldSettings.fieldId"
+                  value="optionA"
+                />
+                option A
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  [formControlName]="field.fieldSettings.fieldName"
+                  value="optionB"
+                />
+                option B
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  [formControlName]="field.fieldSettings.fieldName"
+                  value="optionC"
+                />
+                option C
+              </label>
+              } @for (option of field.fieldSettings.options; track $index) {
+              <label>
+                <input
+                  type="checkbox"
+                  [formControlName]="field.fieldSettings.fieldName"
+                  [value]="option.value"
+                />
+                {{ option.label }}
+              </label>
               }
             </div>
-          </div>
-          }
+            }
 
-          <!-- Label -->
-          @if (field.fieldSettings.fieldType === actionTypes.label) {
-          <p class="inner-grid-form-label">
-            {{ field.fieldSettings.fieldLabel || "Field Label" }}
-          </p>
-          }
+            <!-- Radio -->
+            @if (field.fieldSettings.fieldType === actionTypes.radioGroup) {
+            <label>
+              {{ field.fieldSettings.fieldLabel || "Field Label" }}
+              @if (field.fieldSettings.isRequired) {
+              <span class="required-star">*</span>
+              }
+            </label>
+            <div
+              [ngClass]="[
+                'radio-group',
+                field.fieldSettings.direction || 'vertical'
+              ]"
+            >
+              @if (field.fieldSettings.options?.length === 0) {
+              <label>
+                <input
+                  type="radio"
+                  value="optionA"
+                  [formControlName]="field.fieldSettings.fieldId"
+                />
+                Option A
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="optionB"
+                  [formControlName]="field.fieldSettings.fieldName"
+                />
+                Option B
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="optionC"
+                  [formControlName]="field.fieldSettings.fieldName"
+                />
+                Option C
+              </label>
+              } @for (opt of field.fieldSettings.options; track $index) {
+              <label>
+                <input
+                  type="radio"
+                  [value]="opt.value"
+                  [formControlName]="field.fieldSettings.fieldName"
+                />
+                {{ opt.label }}
+              </label>
+              }
+            </div>
+            }
+
+            <!-- Table -->
+            @if (field.fieldSettings.fieldType === actionTypes.table) {
+            <div class="table-container">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    @for ( key of
+                    (field.fieldSettings.columns?.[0]?.selectedColumns?.length ?
+                    field.fieldSettings.columns?.[0]?.selectedColumns :
+                    ['Column1', 'Column2', 'Column3']); track $index ) {
+                    <th>{{ key | titlecase }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @if
+                  (field.fieldSettings.columns?.[0]?.selectedColumns?.length) {
+                  @for ( row of getPaginatedData(field.fieldSettings.fieldId);
+                  track $index ) {
+                  <tr>
+                    @for ( key of
+                    field.fieldSettings.columns?.[0]?.selectedColumns; track
+                    $index ) {
+                    <td>{{ row[key] }}</td>
+                    }
+                  </tr>
+                  } } @else {
+                  <tr>
+                    <td colspan="3">No data</td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <div class="pagination">
+                @for ( page of [].constructor(
+                getTotalPages(field.fieldSettings.fieldId) ); track $index ) {
+                <button
+                  (click)="setPage(field.fieldSettings.fieldId, $index + 1)"
+                  [ngClass]="
+                    $index + 1 === currentPageMap[field.fieldSettings.fieldId]
+                      ? 'active'
+                      : ''
+                  "
+                >
+                  {{ $index + 1 }}
+                </button>
+                }
+              </div>
+            </div>
+            }
+
+            <!-- Label only -->
+            @if (field.fieldSettings.fieldType === actionTypes.label) {
+            <p class="inner-grid-form-label">
+              {{ field.fieldSettings.fieldLabel || "Field Label" }}
+            </p>
+            }
+          </div>
         </div>
+        }
       </div>
+
+      @if ($index != sections.length - 1) {
+      <div class="section-divider"></div>
       }
     </div>
-    @if($index != sections.length -1){
-
-    <div class="section-divider"></div>
-    } }}
+    } }
 
     <div class="form-actions">
       <button type="submit" class="submit-btn">Submit</button>

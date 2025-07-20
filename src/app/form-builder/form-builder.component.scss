@@ -310,7 +310,7 @@
         border: none;
         color: #1f2937;
         box-shadow: none;
-        width: 10dvw !important;
+        max-width: 15dvw !important;
         display: flex;
         height: 35px;
         align-items: center;
@@ -319,6 +319,18 @@
         position: absolute;
         top: -15px;
         left: -25px;
+      }
+
+      .section-label-input {
+        border: none;
+        border-bottom: 1px solid transparent;
+        background-color: transparent;
+        outline: none;
+        transition: border-bottom 0.2s ease-in-out;
+      }
+
+      .section-label-input:focus {
+        border-bottom: 1px solid #000;
       }
 
       .field-grid-stack-item {

@@ -1,5 +1,6 @@
 export interface Sections {
   sectionId: string;
+  sectionLabel: string;
   fields: Fields[];
 }
 

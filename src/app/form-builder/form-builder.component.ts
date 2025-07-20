@@ -160,6 +160,11 @@ export class FormBuilderComponent implements AfterViewInit {
       const sectionEl = document.querySelector(`[gs-id="${sectionId}"]`);
       if (!sectionEl) return;
 
+      const labelInput: HTMLInputElement | null = sectionEl.querySelector(
+        '.section-label-input'
+      );
+      const sectionLabel = labelInput?.value ?? 'Section';
+
       const sectionGridEl = sectionEl.querySelector('.grid-stack');
       if (!sectionGridEl) return;
 
@@ -197,9 +202,11 @@ export class FormBuilderComponent implements AfterViewInit {
 
       sections.push({
         sectionId: sectionId,
+        sectionLabel: sectionLabel,
         fields,
       });
     });
+
     return sections;
   }
 
@@ -210,6 +217,7 @@ export class FormBuilderComponent implements AfterViewInit {
     if (sections) {
       this.sections = sections;
       localStorage.setItem('form-sections', JSON.stringify(this.sections));
+
       return;
     }
     console.error('there is no sections data');
@@ -1505,8 +1513,10 @@ export class FormBuilderComponent implements AfterViewInit {
 
     const sectionHeaderContentItem = document.createElement('div');
     sectionHeaderContentItem.classList.add('inner-grid-stack-item-content');
-    sectionHeaderContentItem.innerHTML = `<label>Section</label>`;
-
+    // sectionHeaderContentItem.innerHTML = `<label>Section</label>`;
+    sectionHeaderContentItem.innerHTML = `
+  <input type="text" class="section-label-input" value="Section" placeholder="Section Label" />
+`;
     sectionHeader.appendChild(sectionHeaderContentItem);
     innerGrid.appendChild(sectionHeader);
 
