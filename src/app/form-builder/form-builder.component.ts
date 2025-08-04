@@ -918,7 +918,6 @@ export class FormBuilderComponent implements AfterViewInit {
   }
 
   resizeSection(sectionId: string): void {
-    return;
     // console.log('resizeSection consumed');
     const sectionItem = document
       .getElementById(sectionId)
