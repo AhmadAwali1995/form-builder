@@ -1,0 +1,133 @@
+<div class="app-settings-component">
+  <div class="setting-item">
+    <label for="field-name">Field Label</label>
+    <input
+      type="text"
+      id="field-name"
+      placeholder="Enter field label"
+      [(ngModel)]="fieldLabel"
+      (input)="emitUpdate()"
+    />
+  </div>
+
+  @if (fieldType !== actionTypes.label ){
+
+  <div class="setting-item">
+    <label for="field-size">Field Size</label>
+    <select id="field-size" [(ngModel)]="fieldSize" (change)="emitUpdate()">
+      <option value="small">Small</option>
+      <option value="medium">Medium</option>
+      <option value="large">Large</option>
+      <option value="full">Full</option>
+    </select>
+  </div>
+
+  } @if (fieldType === actionTypes.shortText ){
+  <div class="setting-item">
+    <label for="placeholder_text">Placeholder Text</label>
+    <input
+      type="text"
+      id="placeholder_text"
+      placeholder="Enter placeholder text"
+      [(ngModel)]="placeholderText"
+      (input)="emitUpdate()"
+    />
+  </div>
+  <div class="setting-item">
+    <label for="default_value">Default Value</label>
+    <input
+      type="text"
+      id="default_value"
+      placeholder="Enter default value"
+      [(ngModel)]="defaultValue"
+      (input)="emitUpdate()"
+    />
+  </div>
+
+  <div class="setting-item">
+    <label for="min_range">Min & Max Range Characters</label>
+    <div class="settings-items-row">
+      <input
+        type="number"
+        id="min_range"
+        [(ngModel)]="minRange"
+        (input)="emitUpdate()"
+        placeholder="Min"
+      />
+      -
+      <input
+        type="number"
+        id="max_range"
+        [(ngModel)]="maxRange"
+        (input)="emitUpdate()"
+        placeholder="Max"
+      />
+    </div>
+  </div>
+  }
+
+  <div class="setting-item">
+    <label for="custom_css">Custom CSS Class</label>
+    <input
+      type="text"
+      id="custom_css"
+      placeholder="Enter custom CSS class"
+      [(ngModel)]="cssClass"
+      (input)="emitUpdate()"
+    />
+  </div>
+  <!-- @if (fieldType !== actionTypes.label && fieldType !== actionTypes.table ){ -->
+  @if (fieldType === actionTypes.shortText ){
+  <div class="setting-item-checkbox">
+    <label for="required-field">Required Field</label>
+    <input
+      type="checkbox"
+      id="required-field"
+      [(ngModel)]="isRequired"
+      (change)="emitUpdate()"
+    />
+  </div>
+  }
+
+  <!-- Dropdown Options -->
+  <!-- Trigger Button -->
+  @if (fieldType === actionTypes.dropDownList || fieldType ===
+  actionTypes.radioGroup || fieldType === actionTypes.checkbox) {
+  <div class="setting-item">
+    <label>Options</label>
+    <button type="button" class="open-options-btn" (click)="openOptionsModal()">
+      Edit Options
+    </button>
+  </div>
+  }
+
+  <!-- Popup Modal -->
+  @if(showOptionsModal){
+  <div class="options-modal">
+    <div class="options-modal-backdrop" (click)="closeOptionsModal()"></div>
+    <div class="options-modal-content" (click)="$event.stopPropagation()">
+      <h3 class="modal-title">Edit Field Options</h3>
+      <div class="option-row-container">
+        <div class="option-row" *ngFor="let opt of options; let i = index">
+          <input type="text" [(ngModel)]="opt.label" placeholder="Label" />
+          <input type="text" [(ngModel)]="opt.value" placeholder="Value" />
+          <button type="button" class="delete-btn" (click)="removeOption(i)">
+            ✖
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="add-btn" (click)="addOption()">
+        <span class="icon">➕</span>
+        <span>Add Option</span>
+      </button>
+
+      <div class="modal-actions">
+        <button type="button" class="save-btn" (click)="saveOptions()">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+</div>

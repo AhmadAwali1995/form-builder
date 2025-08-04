@@ -1,0 +1,125 @@
+{
+    "title": "User Application Form",
+    "fields": [
+        {
+            "type": "text",
+            "label": "First Name",
+            "name": "firstName",
+            "required": true,
+            "size": "small"
+        },
+        {
+            "type": "text",
+            "label": "Last Name",
+            "name": "lastName",
+            "required": true,
+            "size": "small"
+        },
+        {
+            "type": "text",
+            "label": "Email Address",
+            "name": "email",
+            "required": true,
+            "size": "small"
+        },
+        {
+            "type": "text",
+            "label": "Phone Number",
+            "name": "phone",
+            "required": true,
+            "size": "small"
+        },
+        {
+            "type": "select",
+            "label": "Country",
+            "name": "country",
+            "required": true,
+            "options": [
+                "Saudi Arabia",
+                "Jordan",
+                "Egypt"
+            ],
+            "size": "medium"
+        },
+        {
+            "type": "text",
+            "label": "City",
+            "name": "city",
+            "required": false,
+            "size": "medium"
+        },
+        {
+            "type": "radio",
+            "label": "Gender",
+            "name": "gender",
+            "direction": "horizontal",
+            "required": true,
+            "options": [
+                "Male",
+                "Female"
+            ],
+            "size": "medium"
+        },
+        {
+            "type": "text",
+            "label": "Nationality",
+            "name": "nationality",
+            "required": false,
+            "size": "medium"
+        },
+        {
+            "type": "text",
+            "label": "LinkedIn Profile",
+            "name": "linkedin",
+            "required": false,
+            "size": "full"
+        },
+        {
+            "type": "text",
+            "label": "Current Job Title",
+            "name": "jobTitle",
+            "required": false,
+            "size": "medium"
+        },
+        {
+            "type": "text",
+            "label": "Years of Experience",
+            "name": "experience",
+            "required": false,
+            "size": "small"
+        },
+        {
+            "type": "select",
+            "label": "Preferred Language",
+            "name": "language",
+            "required": true,
+            "options": [
+                "Arabic",
+                "English",
+                "French"
+            ],
+            "size": "small"
+        },
+        {
+            "type": "text",
+            "label": "Expected Salary",
+            "name": "salary",
+            "required": false,
+            "size": "small"
+        },
+        {
+            "type": "checkbox",
+            "label": "Open to Relocation",
+            "name": "relocate",
+            "required": false,
+            "size": "small"
+        },
+        {
+            "type": "checkbox",
+            "label": "I agree to the Terms and Conditions",
+            "name": "agree",
+            "required": true,
+            "size": "full"
+        }
+    ]
+}

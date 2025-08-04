@@ -3,121 +3,100 @@
     <div class="left-panel">
       <h4>Fields</h4>
       <div class="buttons-group">
-        <button class="field-btn" (click)="addItem()">Add Section1</button>
-      </div>
-      <h4>Search Field</h4>
-      <div class="buttons-group">
-        <div class="search-box">
-          <input type="text" placeholder="Search field..." />
-        </div>
-      </div>
-      <h4>Text & Input</h4>
-      <div class="buttons-group">
-        <button
-          class="field-btn"
-          (mousedown)="startGhostDrag($event, 'ShortText')"
-        >
-          <p>X</p>
-          <p>Short Text</p>
+        <button class="field-btn" (click)="addSection()">Add Section</button>
+        <button class="field-btn" (click)="manageHeader()">
+          @if(!isHeaderExist) { Add Header } @else { Remove Header }
         </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Paragraph</p>
+        <button class="field-btn" (click)="manageFooter()">
+          @if(!isFooterExist) { Add Footer } @else { Remove Footer }
         </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Numeric Input</p>
-        </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Date Picker</p>
-        </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Image Upload</p>
-        </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Attachment</p>
+        <button class="field-btn" (click)="downloadJSON()">
+          Download json
         </button>
       </div>
       <hr />
-      <h4>Selection & Choices</h4>
       <div class="buttons-group">
-        <button class="field-btn">
-          <p>X</p>
-          <p>Toggle Switch</p>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.label.toString())"
+        >
+          <img class="drag-icon" src="icons/text-label.png" alt="short-text" />
+          <p>Label</p>
         </button>
         <button
           class="field-btn"
-          (mousedown)="startGhostDrag($event, 'Dropdown')"
+          (mousedown)="startGhostDrag($event, ActionTypes.shortText.toString())"
         >
-          <p>X</p>
+          <img class="drag-icon" src="icons/short-text.png" alt="short-text" />
+          <p>Short Text</p>
+        </button>
+        <button
+          class="field-btn"
+          (mousedown)="
+            startGhostDrag($event, ActionTypes.dropDownList.toString())
+          "
+        >
+          <img class="drag-icon" src="icons/dropdown.png" alt="dropdown" />
           <p>Dropdown Menu</p>
         </button>
         <button
           class="field-btn"
-          (mousedown)="startGhostDrag($event, 'Checkbox')"
+          (mousedown)="startGhostDrag($event, ActionTypes.checkbox.toString())"
         >
-          <p>X</p>
+          <img class="drag-icon" src="icons/check-box.png" alt="check-box" />
+
           <p>Single Checkbox</p>
         </button>
-        <button class="field-btn" (mousedown)="startGhostDrag($event, 'Radio')">
-          <p>X</p>
+        <button
+          class="field-btn"
+          (mousedown)="
+            startGhostDrag($event, ActionTypes.radioGroup.toString())
+          "
+        >
+          <img
+            class="drag-icon"
+            src="icons/radio-button.png"
+            alt="radio-button"
+          />
+
           <p>Radio Group</p>
         </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Checklist Group</p>
-        </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Range Slider</p>
-        </button>
-      </div>
-      <hr />
-
-      <h4>Layout & Structure</h4>
-      <div class="buttons-group">
-        <button class="field-btn">
-          <p>X</p>
-          <p>Section Break</p>
-        </button>
-        <button class="field-btn">
-          <p>X</p>
-          <p>Data Table</p>
+        <button
+          class="field-btn"
+          (mousedown)="startGhostDrag($event, ActionTypes.table.toString())"
+        >
+          <img class="drag-icon" src="icons/table.png" alt="table" />
+          <p>Table</p>
         </button>
       </div>
     </div>
     <div class="outer-box">
       <div class="header">
         <div class="build-section">
-          <button class="white-btn">
+          <button [disabled]="true" class="white-btn">
             <p>build</p>
           </button>
-          <button class="white-btn">
+          <button [disabled]="true" class="white-btn">
             <p>Template</p>
           </button>
           <hr class="vertical-line" />
           <div class="share-link">
             <p class="gray-text">Link :</p>
-            <a
-              class="link-text"
-              href="https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0"
-              >https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0</a
-            >
+            <!-- href="https://www.figma.com/board/UizkgaYTEzJcIVoazpQ2pc/Abyan?node-id=0-1&p=f&t=QcjV7Vd5Ydy5zpMF-0" -->
+            <a class="link-text">Published Link</a>
           </div>
         </div>
         <div class="buttons-section">
-          <button class="white-btn">
-            <p>X</p>
-            <p>Edit</p>
-          </button>
-          <a class="white-btn">
-            <p>X</p>
+          <button
+            [disabled]="!formSaved"
+            (click)="previewJson()"
+            class="white-btn"
+          >
+            <img class="drag-icon" src="icons/preview.png" alt="preview" />
             <p>Preview</p>
-          </a>
-          <button class="colored-btn">
+          </button>
+
+          <button (click)="saveForm()" class="colored-btn">
             <p>Save & Publish</p>
           </button>
         </div>
@@ -131,88 +110,107 @@
           <!-- Field Settings -->
           <h4>Field Settings</h4>
           <div class="setting-group">
+            @if(fieldId){
+
+            <!-- dropDownList datasource settings -->
+
+            @if(this.fieldType == ActionTypes.dropDownList.toString()){
             <div class="setting-item">
-              <label for="field-name">Field Name</label>
+              <label for="field-name">Source URL</label>
               <input
+                [(ngModel)]="ddlURLs[fieldId]"
                 type="text"
-                id="field-name"
+                [id]="fieldId"
                 placeholder="Enter field name"
               />
             </div>
             <div class="settings-items-row">
               <div class="setting-item">
-                <label for="field-type">Field Type</label>
-                <select id="field-type">
-                  <option value="text">Text</option>
-                  <option value="number">Number</option>
-                  <option value="date">Date</option>
-                  <option value="image">Image Upload</option>
-                  <option value="attachment">Attachment</option>
-                </select>
+                <button class="colored-btn" (click)="testDDLURL()">
+                  Test URL
+                </button>
+              </div>
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <label [for]="'ddl-keys-' + fieldId">Key</label>
+                <select [id]="'ddl-keys-' + fieldId"></select>
               </div>
               <div class="setting-item">
-                <label for="field-size">Field Size</label>
-                <select id="field-size">
-                  <option value="small">Small</option>
-                  <option value="normal">Normal</option>
-                  <option value="large">Large</option>
-                  <option value="extra">Extra Large</option>
+                <label [for]="'ddl-values-' + fieldId">Value</label>
+                <select [id]="'ddl-values-' + fieldId"></select>
+              </div>
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="previewData()">
+                  Preview
+                </button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <label [for]="'ddl-preview-' + fieldId">Preview</label>
+              <select [id]="'ddl-preview-' + fieldId"></select>
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="saveDDL()">Save</button>
+              </div>
+            </div>
+            }
+
+            <!-- table datasource settings -->
+
+            @if(this.fieldType == ActionTypes.table.toString()){
+            <div class="setting-item">
+              <label for="source-url-{{ fieldId }}">Source URL</label>
+              <input
+                [(ngModel)]="tableURL"
+                type="text"
+                id="source-url-{{ fieldId }}"
+                placeholder="Enter field name"
+              />
+            </div>
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="testTableURL()">
+                  Test URL
+                </button>
+              </div>
+            </div>
+            <div id="table-columns-container" class="table-grid">
+              @for (key of tableKeys; let i = $index; track key) {
+              <div class="setting-item">
+                <label for="table-ddl-column-{{ i + 1 }}"
+                  >column{{ i + 1 }}</label
+                >
+                <select id="table-ddl-column-{{ i + 1 }}">
+                  @for (key of tableKeys; track key) {
+                  <option value="{{ key }}">{{ key }}</option>
+                  }
                 </select>
               </div>
+              }
             </div>
-            <div class="setting-item">
-              <label for="description">Description</label>
-              <input
-                type="text"
-                id="description"
-                placeholder="Add a brief description"
-              />
-            </div>
-            <div class="setting-item">
-              <label for="placeholder_text">Placeholder Text</label>
-              <input
-                type="text"
-                id="placeholder_text"
-                placeholder="Enter Placeholder Text"
-              />
-            </div>
+            @if (tableKeys.length !== 0) {
 
-            <div class="setting-item">
-              <label for="default_value">Default Value</label>
-              <input
-                type="text"
-                id="default_value"
-                placeholder="Enter Default Value"
-              />
-            </div>
-
-            <div class="setting-item">
-              <label for="min_range">Min & Max Range Characters</label>
-              <div class="settings-items-row">
-                <input type="number" id="min_range" placeholder="Min" />
-                -
-                <input type="number" id="max_range" placeholder="Max" />
+            <div class="settings-items-row">
+              <div class="setting-item">
+                <button class="colored-btn" (click)="saveTable()">Save</button>
               </div>
             </div>
+            } }
+            <!-- end of settings -->
 
-            <div class="setting-item">
-              <label for="help_text">Help Text</label>
-              <input type="text" id="help_text" placeholder="Enter Help Text" />
-            </div>
+            } @if (fieldId) {
+            <app-settings-component
+              [fieldId]="fieldId"
+              [fieldType]="fieldType"
+              [fieldSettings]="selectedFieldSettings"
+              (fieldUpdated)="onFieldUpdated($event)"
+            ></app-settings-component>
 
-            <div class="setting-item">
-              <label for="custom_css">Custom CSS Class</label>
-              <input
-                type="text"
-                id="custom_css"
-                placeholder="Enter Custom CSS Class"
-              />
-            </div>
-
-            <div class="setting-item">
-              <label for="required-field">Required Field</label>
-              <input type="checkbox" id="required-field" />
-            </div>
+            }
           </div>
         </div>
       </div>
